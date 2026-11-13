@@ -1,6 +1,6 @@
 // 이 사이트가 쓸 모델들. 프레임워크에 `default`가 하나 내장되어 있습니다: 환경 변수 LLM_BASE_URL / LLM_API_KEY / LLM_MODEL이 지정하는 모델.
 // 여기에는 이름 있는 모델(각각 자기 주소와 키 환경 변수 사용)과 각 단계에서 기본으로 쓰는 모델을 나열합니다; 쓰지 않은 단계는 default를 씁니다.
-// 배포 시에는 환경 변수(PREFILTER_MODEL, SCORE_MODEL…) 또는 백그라운드 “모델与 평가” 페이지에서 단계별로 바꿔 고를 수 있습니다.
+// 배포 시에는 환경 변수(PREFILTER_MODEL, SCORE_MODEL…) 또는 백그라운드 “모델과 평가” 페이지에서 단계별로 바꿔 고를 수 있습니다.
 
 import type { ModelPreset } from "@aihot/contracts/site-config";
 export type { ModelPreset } from "@aihot/contracts/site-config";

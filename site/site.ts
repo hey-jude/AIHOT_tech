@@ -19,145 +19,145 @@ export const EDITION_WHEN = {
 };
 
 export const SITE = {
-  /** 站名：导航、页面标题、分享图、RSS、MCP、后台都用它。 */
+  /** 사이트명: 내비게이션, 페이지 제목, 공유 이미지, RSS, MCP, 관리자에서 모두 사용합니다. */
   name: "AIHOT Tech Korea",
   /**
-   * 行业词：拼进默认说法里，比如“AI 日报”“AI 动态”。
-   * 改成“法律”“HR”“黄金”之类，页面上就会变成“法律日报”“法律动态”。
+   * 업종명: 기본 문구에 붙습니다. 예를 들어 “AI 일간”, “AI 동향”처럼 표시됩니다.
+   * “법률”, “HR”, “금” 등으로 바꾸면 페이지에 “법률 일간”, “법률 동향”으로 표시됩니다.
    */
   subject: "AI",
-  /** 首页的完整标题（浏览器标签、搜索结果）。 */
+  /** 홈의 전체 제목(브라우저 탭, 검색 결과). */
   homeTitle: "AIHOT Tech Korea — AI 업계 동향과 엄선 뉴스",
-  /** 主题目录页（/topics）的标题。 */
+  /** 주제 목록 페이지(/topics)의 제목. */
   topicsTitle: "AI 주제별 최신 동향: 기업·모델·기술·콘텐츠",
-  /** 反馈表单输入框里的示例。 */
+  /** 피드백 양식 입력란의 예시. */
   feedbackExample: "예: 특정 키워드를 검색할 때 이런 문제가 있었어요…",
-  /** 反馈页标题下面的一句话。 */
+  /** 피드백 페이지 제목 아래에 표시할 한 줄. */
   feedbackLead: "오류, 필요한 기능, 불편한 점을 알려주세요.",
-  /** 反馈表单邮箱框里的提示。 */
+  /** 피드백 양식 이메일 입력란의 안내 문구. */
   feedbackEmailHint: "답변을 받을 이메일 주소를 남겨 주세요",
-  /** 一句话介绍：搜索引擎、分享卡片、RSS、llms.txt 会用。 */
+  /** 한 줄 소개: 검색 엔진, 공유 카드, RSS, llms.txt에서 사용합니다. */
   description: `AI 업계 신호원에서 주목할 동향을 골라 같은 사건의 보도를 묶고, ${EDITION_WHEN.daily} 일간 리포트를 발행합니다.`,
-  /** llms.txt 里一句话介绍下面的一段详细介绍（选填）。 */
+  /** llms.txt에서 한 줄 소개 아래에 표시할 상세 설명(선택 사항). */
   llmsIntro: null as string | null,
-  /** 一行小字：分享图、海报下方。 */
+  /** 공유 이미지와 포스터 아래에 표시할 짧은 문구. */
   tagline: "주목할 AI 동향",
-  /** 搜索引擎读到的关键词（首页结构化数据）。 */
+  /** 검색 엔진에 전달할 키워드(홈 구조화 데이터). */
   keywords: ["AI 소식", "AI 뉴스", "AI 일간 리포트", "AI 업계 동향"] as string[],
   /**
-   * 搜索引擎站长平台的网站验证（选填）：meta 名 → 平台给的验证码，放在首页的 head 里。
-   * 比如 "baidu-site-verification": "codeva-…"、"msvalidate.01": "…"。验证通过后也要留着，平台会定期复查。
+   * 검색 엔진 웹마스터 도구의 사이트 인증(선택 사항): meta 이름 → 도구에서 받은 인증 코드를 홈의 head에 넣습니다.
+   * 예: "baidu-site-verification": "codeva-…", "msvalidate.01": "…". 인증 후에도 도구가 정기적으로 확인하므로 그대로 두세요.
    */
   siteVerification: {} as Record<string, string>,
-  /** 网站开始收录的年份（结构化数据的时间范围，选填）。 */
+  /** 사이트가 색인되기 시작한 연도(구조화 데이터의 기간, 선택 사항). */
   since: null as string | null,
-  /** 界面语言（HTML lang、og:locale）。 */
+  /** 인터페이스 언어(HTML lang, og:locale). */
   locale: "ko-KR",
-  /** 默认域名，只在没设置 SITE_URL 时使用。 */
+  /** 기본 도메인. SITE_URL이 설정되지 않았을 때만 사용합니다. */
   defaultUrl: "http://localhost:3000",
-  /** 标准图标（favicon.ico、icon.png、icon-192.png、apple-icon.png、logo.svg）以外也放在网站根目录的图标，site/brand/ 里的文件名（选填）；manifest.webmanifest 或外站引用了它们时用。 */
+  /** 기본 아이콘(favicon.ico, icon.png, icon-192.png, apple-icon.png, logo.svg) 외에 사이트 루트에 둘 아이콘의 site/brand/ 내 파일명(선택 사항). manifest.webmanifest나 외부 사이트에서 참조할 때 사용합니다. */
   rootIcons: [] as string[],
   /**
    * MCP 도구 이름의 접두사(소문자·숫자·밑줄)입니다. 사용자가 연동한 뒤에는 변경하지 마세요.
    */
   mcpPrefix: "aihottechkorea",
   /**
-   * 公开接口（MCP、OpenAPI、llms.txt）的版本号，只升不降。
-   * 改了接口里已有的字段或含义时升主版本，并在部署说明里写清。
+   * 공개 인터페이스(MCP, OpenAPI, llms.txt)의 버전입니다. 숫자는 올리기만 합니다.
+   * 인터페이스의 기존 필드나 의미를 바꾸면 주 버전을 올리고 배포 안내에 변경 사항을 명시하세요.
    */
   interfaceVersion: "4.0.0",
-  /** 对外联系邮箱（选填）：llms.txt 和给 Agent 的使用说明里会写。 */
+  /** 외부 연락처 이메일(선택 사항): llms.txt와 Agent 사용 안내에 표시합니다. */
   contactEmail: null as string | null,
-  /** 关于页底部的一行小字（选填）。 */
+  /** 어바웃 페이지 하단에 표시할 짧은 문구(선택 사항). */
   footerNote: "AIHOT Tech Korea",
-  /** 中国大陆网站的 ICP 备案号（选填），填了就显示在侧栏底部和“我的”页底部，并链接到工信部备案系统。 */
+  /** 중국 본토 사이트의 ICP 비안호(선택 사항). 입력하면 사이드바와 마이 페이지 하단에 표시하고 공업정보화부 비안 시스템으로 연결합니다. */
   icp: null as string | null,
-  /** 中国大陆网站的公安备案信息（选填），填了显示在侧栏底部和“我的”页底部。 */
+  /** 중국 본토 사이트의 공안 비안 정보(선택 사항). 입력하면 사이드바와 마이 페이지 하단에 표시합니다. */
   psb: null as string | null,
-  /** 源码的 GitHub 仓库地址（选填），填了就在侧栏底部和“我的”页底部显示“GitHub 开源”。 */
+  /** 소스 코드의 GitHub 저장소 주소(선택 사항). 입력하면 사이드바와 마이 페이지 하단에 “GitHub 오픈소스”를 표시합니다. */
   github: null as string | null,
-  /** 页脚的“由 X 驱动”（选填）：填了就在侧栏底部和“我的”页底部显示，链到它的网址。默认链回上游 AIHOT，不想要就写 null。 */
+  /** 푸터의 “X 제공”(선택 사항). 입력하면 사이드바와 마이 페이지 하단에 표시하고 해당 URL로 연결합니다. 기본값은 상위 AIHOT으로 연결하며, 표시하지 않으려면 null로 설정하세요. */
   poweredBy: null as { name: string; url: string } | null,
-  /** 结构化数据里的网站运营者（搜索引擎用）。 */
+  /** 구조화 데이터에 넣을 사이트 운영자(검색 엔진용). */
   organization: {
     name: "AIHOT Tech Korea",
-    /** 创始人（选填）。 */
+    /** 창립자(선택 사항). */
     founder: null as Founder | null,
   },
-  /** 抓取信源时报上的名字和版本（User-Agent 里用），不要冒用别的站。 */
+  /** 출처를 수집할 때 보고할 이름과 버전(User-Agent에 사용). 다른 사이트의 이름을 도용하지 마세요. */
   crawlerName: "AIHOTTechKoreaBot/1.0",
 } as const;
 
-/** 使用规则和隐私说明两页（正文在 pages/ 里）。 */
+/** 이용 규칙 및 개인정보 처리방침 페이지(본문은 pages/에 있습니다). */
 export const POLICY = {
   terms: {
-    /** 页面名：导航、页脚、页面标题都用它。 */
+    /** 페이지 이름: 내비게이션, 푸터, 페이지 제목에 사용합니다. */
     name: "이용 규칙",
     description: "본 사이트 웹페이지·RSS·공개 API·MCP의 이용 규칙.",
-    /** llms.txt 里对这一页的一句说明（选填）。 */
+    /** llms.txt에 이 페이지를 한 줄로 설명할 문구(선택 사항). */
     covers: null as string | null,
-    /** Agent 接入页的 RSS、API 两栏各自提醒的使用规则（选填）。 */
+    /** Agent 연동 페이지의 RSS, API 항목에 각각 표시할 이용 규칙 안내(선택 사항). */
     notes: null as null | { rss: string; api: string },
     /**
-     * 讲清哪些用途要先取得授权的话（选填）：llms 接在 llms.txt“使用说明”的版权说明后面，
-     * agent 写在给 Agent 的使用说明“使用规则”一节的开头。
+     * 사전 허가가 필요한 이용 목적을 설명하는 문구(선택 사항): llms는 llms.txt의 “사용 안내”에서 저작권 설명 뒤에,
+     * agent는 Agent 사용 안내의 “이용 규칙” 절 첫머리에 표시합니다.
      */
     license: null as null | { llms: string; agent: string },
     /**
-     * 公开 API、RSS 和 OpenAPI 文件声明使用规则的响应头（选填）：原样附上，再加一个指向这一页的
-     * Link 头（rel="terms-of-service"）；浏览器里的调用方也读得到它们。
+     * 공개 API, RSS, OpenAPI 파일에 이용 규칙을 선언하는 응답 헤더(선택 사항): 입력한 내용을 그대로 첨부하고 이 페이지를 가리키는
+     * Link 헤더(rel="terms-of-service")를 추가합니다. 브라우저의 호출자도 확인할 수 있습니다.
      */
     headers: null as null | Record<string, string>,
   },
   privacy: {
     description: "본 사이트의 브라우저 로컬 데이터·피드백 자료·접속 로그 처리 방식.",
-    /** llms.txt 里对这一页的一句说明（选填）。 */
+    /** llms.txt에 이 페이지를 한 줄로 설명할 문구(선택 사항). */
     covers: null as string | null,
   },
   /**
-   * X 帖子本身的文字和图片算不算全文：算的话，只在这篇允许站内全文时显示（信源允许全文、正文也取到了）；
-   * 不算的话总是显示，和标题、摘要一样。
+   * X 게시물의 글과 이미지를 전문으로 간주할지 여부: 전문으로 간주하면 사이트 내 전문 표시가 허용된 경우에만 표시합니다(출처에서 전문을 허용하고 본문도 가져온 경우).
+   * 전문으로 간주하지 않으면 제목, 요약과 마찬가지로 항상 표시합니다.
    */
   xPostIsFullText: true,
 } as const;
 
-/** 导航（电脑侧栏、手机底栏、“我的”页）。 */
+/** 내비게이션(데스크톱 사이드바, 모바일 하단 바, 마이 페이지). */
 export const NAV = {
   /**
-   * 不放进导航的引擎入口，目前只支持热点榜（"/hot"）和主题（"/topics"）。页面照样能打开；原来回到它的返回按钮和链接改回精选，
-   * 写 "/hot" 时首页也不放当前热点。
+   * 내비게이션에서 숨길 기능 페이지. 현재 핫 이슈("/hot")와 주제("/topics")만 지원합니다. 페이지는 계속 열 수 있지만, 해당 페이지로 돌아가는 뒤로 가기 버튼과 링크는 엄선 페이지로 연결됩니다.
+   * "/hot"을 지정하면 홈에서도 현재 핫 이슈를 제외합니다.
    */
   hidden: [] as Array<"/hot" | "/topics">,
 };
 
-/** 条目卡片和详情页上的几处说法和显示。 */
+/** 항목 카드와 상세 페이지에 표시할 문구와 설정. */
 export const ITEM_COPY = {
-  /** 模型写的那句理由叫什么：卡片、详情页、Markdown 导出、给 Agent 的回答和群推送都用它。 */
+  /** 모델이 작성한 추천 이유의 이름: 카드, 상세 페이지, Markdown 내보내기, Agent 답변, 그룹 알림에서 사용합니다. */
   reasonLabel: "추천 이유",
-  /** 读者在网页和分享图上看不看得到 AI 评分。只管显示：公开 API 和 MCP 的数据照样带 score，后台照常显示。 */
+  /** 웹페이지와 공유 이미지에서 독자에게 AI 점수를 표시할지 여부. 표시만 제어하며 공개 API와 MCP 데이터에는 계속 score가 포함되고 관리자 화면에도 표시됩니다. */
   showScore: true,
 };
 
-/** 关于页的一张二维码卡片。 */
+/** 어바웃 페이지의 QR 코드 카드. */
 interface ContactCard {
   kind: string;
   title: string;
   note: string;
-  /** 站外链接过的根目录文件名（选填），比如 qr-wechat.jpg：这个地址总是跳到现在的二维码。 */
+  /** 외부에 링크된 사이트 루트 파일명(선택 사항), 예: qr-wechat.jpg. 이 주소는 항상 현재 QR 코드로 연결됩니다. */
   alias?: string;
 }
 
-/** 关于页的文案。数字（信源数、收录数、精选数、日报期数）来自站内实时统计，不用写在这里。 */
+/** 어바웃 페이지 문구. 숫자(출처 수, 수집 수, 엄선 수, 일간 리포트 발행 수)는 사이트 실시간 통계로 표시되므로 여기에 입력하지 않습니다. */
 export const ABOUT = {
   kicker: `${SITE.name} 소개`,
-  /** 页面描述（搜索结果、分享卡片）。 */
+  /** 페이지 설명(검색 결과, 공유 카드). */
   description: `${SITE.name} 소개: ${SITE.description}`,
-  /** 大标题：第一行正常颜色，第二行强调色。 */
+  /** 큰 제목: 첫째 줄은 기본 색상, 둘째 줄은 강조 색상으로 표시합니다. */
   headline: ["AI 업계의 새로운 소식은 매일 쏟아집니다.", "주목할 소식만 골라 전합니다."] as [string, string],
-  /** 标题下面的一段话。{sources} 会换成实时的信源数（两边自动加空格，所以 {sources} 两边不写空格）；统计没取到时换成 sourcesFallback。 */
+  /** 제목 아래에 표시할 문단. {sources}는 실시간 출처 수로 바뀝니다(양쪽에 공백이 자동으로 들어가므로 {sources} 앞뒤에 공백을 넣지 마세요). 통계를 가져오지 못하면 sourcesFallback으로 대체합니다. */
   lead: `${SITE.name}이(가) {sources}개의 신호원을 살펴보고, 수집·분류·평가해 엄선한 뒤 ${EDITION_WHEN.daily} 일간 리포트로 전합니다. 무료이며 가입이 필요 없습니다.`,
   sourcesFallback: "십수",
-  /** 信源河动画下面的四个环节。 */
+  /** 출처 흐름 애니메이션 아래에 표시할 네 단계. */
   steps: {
     collect: "공식 블로그, 언론사와 개인의 피드를 살펴봅니다. 자주 갱신되는 신호원은 더 자주 확인하며, 가장 빠르면 15분마다 확인합니다.",
     store: "수집한 내용을 저장하고 같은 사건을 다룬 보도를 묶습니다. 핫 뉴스 순위도 이 자료를 바탕으로 계산합니다.",
@@ -165,9 +165,9 @@ export const ABOUT = {
     publish: `${EDITION_WHEN.daily} 일간, ${EDITION_WHEN.weekly} 주간, ${EDITION_WHEN.monthly} 월간 리포트를 발행합니다.`,
   },
   /**
-   * 作者块（选填），null 就不显示。
-   * avatarSourceId：一个 X 账号信源的 id，头像取它的（选填）。
-   * 二维码在后台“设置”里上传，或者放进 site/brand/contact/；没有二维码就不显示那张卡片。
+   * 작성자 영역(선택 사항). null이면 표시하지 않습니다.
+   * avatarSourceId: X 계정 출처의 id를 지정하면 해당 계정의 프로필 사진을 사용합니다(선택 사항).
+   * QR 코드는 관리자 “설정”에서 업로드하거나 site/brand/contact/에 넣으세요. QR 코드가 없으면 해당 카드를 표시하지 않습니다.
    */
   maker: null as null | {
     name: string;
@@ -176,81 +176,81 @@ export const ABOUT = {
     wechat?: ContactCard;
     feishu?: ContactCard;
   },
-  /** 页面底部的版权与下架说明，中间接“反馈页”的链接。 */
+  /** 페이지 하단의 저작권 및 삭제 안내. 문구 중간에 피드백 페이지 링크가 연결됩니다. */
   copyright: [`${SITE.name}은(는) 요약과 읽기 링크를 제공합니다. 원문의 권리는 각 출처에 있습니다. 출처 관계자가 수정·삭제 또는 표시 방식 변경을 요청하려면`, "피드백 페이지로 연락해 주세요."] as [string, string],
-  /** 页面底部“使用规则”链接的锚点 id（选填）：外部文档写死过这个锚点就填上，以后不要改。 */
+  /** 페이지 하단 “이용 규칙” 링크의 앵커 id(선택 사항). 외부 문서에 이 앵커가 고정되어 있다면 입력하고 이후 변경하지 마세요. */
   termsAnchor: null as string | null,
 } as const;
 
-/** 后台页面上给管理员的提示（选填）。 */
+/** 관리자 페이지에서 관리자에게 표시할 안내(선택 사항). */
 export const ADMIN = {
-  /** “反馈”页标题下的一行。 */
+  /** “피드백” 페이지 제목 아래에 표시할 한 줄. */
   feedbackNote: null as string | null,
-  /** 确认框里补的一句本站规定：封禁反馈来源时。 */
+  /** 피드백 출처를 차단할 때 확인 창에 덧붙일 사이트 규칙 안내. */
   banNote: null as string | null,
-  /** 确认框里补的一句本站规定：调整付费服务的请求上限时。 */
+  /** 유료 서비스 요청 한도를 조정할 때 확인 창에 덧붙일 사이트 규칙 안내. */
   budgetNote: null as string | null,
 };
 
-/** Agent 接入页的示例。 */
+/** Agent 연동 페이지의 예시. */
 export const AGENT = {
-  /** MCP 工具表里“搜索”一行：能搜什么、可以怎么问。 */
+  /** MCP 도구 표의 “검색” 항목: 검색할 수 있는 내용과 질문 예시. */
   search: { scope: "회사·제품·인물·주제별 최근 7일 검색", ask: "이 회사가 최근에 발표한 소식은 무엇인가요?" },
 };
 
-/** 日报、周报、月报版面上的说法。 */
+/** 일간·주간·월간 리포트에 표시할 문구. */
 export const REPORTS = {
-  /** 报头下面的出版者一行。 */
+  /** 제호 아래에 표시할 발행자 한 줄. */
   imprint: "AIHOT TECH KOREA",
-  /** 报头旁边的一个词。 */
+  /** 제호 옆에 표시할 단어. */
   motto: SITE.subject as string,
-  /** 每种报告页面的描述（搜索结果、分享卡片），不带句号；llms.txt 介绍周报、月报时也用它。 */
+  /** 각 리포트 페이지의 설명(검색 결과, 공유 카드). 마침표는 붙이지 않습니다. llms.txt에서 주간·월간 리포트를 소개할 때도 사용합니다. */
   descriptions: {
     daily: `${SITE.name} ${subjectAfter(`${EDITION_WHEN.daily} 발행`, "업계 엄선 일간 리포트")}`,
     weekly: subjectAfter("매주 발행하는", "업계 주간 종합 리포트"),
     monthly: subjectAfter("매월 발행하는", "업계 월간 결산"),
   },
   /**
-   * 一期里的一条怎么称呼（“4 件大事”）：没有头条时的标题（“这一天的 4 件 AI 大事”）、报头和往期目录的条数、
-   * 周报月报没有总述时的那句话，以及订阅说明里的“按栏目分好的大事”都用它。
+   * 한 호의 항목을 세는 단위(“주요 소식 4건”): 대표 기사가 없을 때의 제목(“오늘의 AI 주요 소식 4건”), 제호와 지난 호 목록의 항목 수,
+   * 주간·월간 리포트에 총평이 없을 때의 문구, 구독 안내의 “분야별 주요 소식”에 사용합니다.
    */
   entry: { measure: "건", noun: "큰 소식" },
-  /** 报头上其余几个数字后面的说法；精选数和日报期数在关于页、主题页也这样写。 */
+  /** 제호에서 다른 숫자 뒤에 붙일 표현. 엄선 수와 일간 리포트 발행 수는 어바웃 페이지와 주제 페이지에서도 같은 표현을 사용합니다. */
   metricUnits: { sourcesCount: "개의 출처", firstPartyEvents: "건의 1차 발표", selectedCount: "건의 엄선", reportsCovered: "기 일간" },
-  /** 报告分享图上“共几条”的说法。 */
+  /** 리포트 공유 이미지에서 전체 항목 수를 나타내는 표현. */
   shareUnit: "건의 큰 소식",
-  /** 日报时段内有资料经过评判、但没有新大事时的标题与导语。 */
+  /** 일간 리포트 대상 시간에 자료를 평가했지만 새로운 주요 소식이 없을 때 표시할 제목과 안내 문구. */
   quiet: { title: "오늘은 조용합니다 — 큰 소식 없음", paragraph: `한국시간 {start}부터 {end}까지 새로운 주요 소식이 없었습니다.` },
 };
 
-/** 运维告警（只发给站长）里随部署而变的几处说法。 */
+/** 운영 알림(사이트 관리자에게만 발송)에 배포별로 설정할 문구. */
 export const ALERTS = {
-  /** 多少分钟没有收录新文章就告警“网站停止收录新内容”（最多一天）；环境变量 ALERT_QUIET_MINUTES 优先。 */
+  /** 새 글을 수집하지 않은 시간이 몇 분일 때 “사이트가 새 콘텐츠 수집을 중단했습니다” 알림을 보낼지 설정합니다(최대 하루). ALERT_QUIET_MINUTES 환경 변수가 우선합니다. */
   quietMinutes: 360,
-  /** 编辑信源一直抓取成功、只是没有新文章时，多少分钟才告警（最多一天）。 */
+  /** 출처 수집은 계속 성공하지만 새 글이 없을 때 알림을 보낼 시간(분, 최대 하루). */
   quietWhileFetchingMinutes: 720,
-  /** 同一条告警里，“没有”后面补一句平时的收录量；null 就不写。 */
+  /** 같은 알림에서 “없음” 뒤에 평소 수집량을 덧붙입니다. null이면 생략합니다. */
   usualFlow: null as string | null,
-  /** worker 停了的告警里，怎么看它的日志。 */
+  /** worker 중단 알림에서 로그 확인 방법을 안내합니다. */
   workerLogs: "看 worker 的日志（docker compose logs worker）",
 };
 
-/** 后台新建信源时的默认设置。 */
+/** 관리자에서 새 출처를 추가할 때 적용할 기본 설정. */
 export const SOURCE_DEFAULTS = {
-  /** 站内展示全文；false 时只显示摘要和原文链接。 */
+  /** 사이트에 전문을 표시합니다. false이면 요약과 원문 링크만 표시합니다. */
   siteFulltext: false,
 };
 
 /**
- * 社区站的信源（填信源 id）：算热度时按发帖的账号计，一个账号算一个独立来源，而不是整个信源只算一个。
- * dev 是 dev.to 的文章流，hn 是 Hacker News 的帖子流。
+ * 커뮤니티 사이트의 출처(id 입력): 인기도를 계산할 때 게시 계정별로 각각 독립된 출처로 집계하며, 출처 전체를 하나로 세지 않습니다.
+ * dev는 dev.to 게시물 피드, hn은 Hacker News 게시물 피드입니다.
  */
 export const COMMUNITY_FEEDS: { dev: string[]; hn: string[] } = {
   dev: [],
   hn: [],
 };
 
-/** 各页分享图（/og/pages/*.png）上的文字。主题目录页的那张按主题数自动生成。 */
+/** 각 페이지 공유 이미지(/og/pages/*.png)에 표시할 문구. 주제 목록 페이지의 이미지는 주제 수에 따라 자동 생성됩니다. */
 export const CARDS: Record<string, { kicker: string; title: string; subtitle: string; accent?: "hot" | "amber" }> = {
   site: { kicker: subjectAfter("매일", "엄선 뉴스"), title: SITE.tagline, subtitle: SITE.description },
   all: { kicker: subjectAfter("전체", "동향"), title: "모든 신호원의 최신 동향을 한곳에서", subtitle: "신호원별 최신 소식을 시간순으로 모아 분류와 태그로 살펴봅니다." },
@@ -266,65 +266,65 @@ export const CARDS: Record<string, { kicker: string; title: string; subtitle: st
   agent: { kicker: "Agent 연동", title: `${SITE.name}을(를) Agent에 연결하세요`, subtitle: "MCP·RSS·API로 익명 읽기 전용 연동이 가능하며 API Key가 필요 없습니다." },
 };
 
-/** 公开接口的访问约定里随部署而变的几处：给 Agent 的使用说明、llms.txt 会写。 */
+/** 공개 인터페이스 이용 안내에서 배포별로 달라지는 설정. Agent 사용 안내와 llms.txt에 표시합니다. */
 export const ACCESS = {
-  /** 同一 IP 每分钟大约能请求多少次，超过会收到 429 并带 Retry-After（选填，由部署的反向代理限流）；null 表示不限流，说明里不提。 */
+  /** 같은 IP에서 분당 허용할 대략적인 요청 수. 초과하면 Retry-After와 함께 429를 반환합니다(선택 사항, 배포 환경의 리버스 프록시에서 제한). null이면 제한이 없으며 안내에도 언급하지 않습니다. */
   ratePerMinute: null as number | null,
-  /** 请写程序同步数据的人报上的 User-Agent（选填），写在 JSON 接口的说明后面。 */
+  /** 데이터를 동기화하는 프로그램이 전달할 User-Agent(선택 사항). JSON 인터페이스 안내 뒤에 표시합니다. */
   userAgent: null as string | null,
 };
 
-/** 这个部署自己的几处安排（选填）。 */
+/** 이 배포 환경에만 적용할 설정(선택 사항). */
 export const DEPLOYMENT = {
-  /** 凭据分组文件（models.env、collectors.env……）默认放在哪个目录，相对仓库根目录；环境变量 AIHOT_CREDENTIALS_DIR 优先，都没有就只读环境变量。 */
+  /** 자격 증명 그룹 파일(models.env, collectors.env 등)을 기본으로 둘 디렉터리(저장소 루트 기준). AIHOT_CREDENTIALS_DIR 환경 변수가 우선하며, 둘 다 없으면 환경 변수만 읽습니다. */
   credentialsDir: null as string | null,
-  /** 凭据分组的文件名（放在凭据目录下，选填）：没写的分组用“分组名.env”，比如 models.env。 */
+  /** 자격 증명 디렉터리에 둘 그룹별 파일명(선택 사항). 지정하지 않은 그룹은 “그룹명.env”를 사용합니다. 예: models.env. */
   credentialFiles: {} as Partial<Record<string, string>>,
-  /** 这个部署额外要求的凭据（[分组, 环境变量名]）；生产 API 启动时检查，默认没有额外要求。 */
+  /** 이 배포에 추가로 필요한 자격 증명([그룹, 환경 변수명]). 운영 API 시작 시 확인하며, 기본값은 추가 요구 사항이 없습니다. */
   requiredSecrets: [] as const,
-  /** 线上 api 收到的 Host（CDN 回源用的域名，选填）；本地开发时，网页开发服务器转给 api 的请求也换成它，和线上一致。 */
+  /** 운영 api가 수신할 Host(CDN 원본 서버용 도메인, 선택 사항). 로컬 개발 시 웹 개발 서버가 api로 전달하는 요청에도 적용해 운영 환경과 맞춥니다. */
   originHost: null as string | null,
-  /** 反向代理把没登录的后台访问转去登录时，用哪个请求头带上原来的地址（选填，登录后回到那里）。 */
+  /** 리버스 프록시가 로그인하지 않은 관리자 요청을 로그인 페이지로 보낼 때 원래 주소를 전달할 요청 헤더(선택 사항). 로그인 후 해당 주소로 돌아갑니다. */
   loginReturnHeader: null as string | null,
   /**
-   * 图片代理从原站取图的流量上限：超过后没缓存的图先返回 503，等这一分钟或这一天过去，当天额度用完会进运营日报；
-   * null 就不设上限。环境变量 IMGPROXY_UPSTREAM_MB_PER_MINUTE、IMGPROXY_UPSTREAM_GB_PER_DAY 优先。
+   * 이미지 프록시가 원본 사이트에서 가져오는 트래픽 한도: 초과하면 캐시되지 않은 이미지는 우선 503을 반환합니다. 분 또는 일 한도가 지나거나 당일 할당량을 모두 사용하면 운영 일간 리포트에 기록됩니다.
+   * null이면 한도를 설정하지 않습니다. IMGPROXY_UPSTREAM_MB_PER_MINUTE, IMGPROXY_UPSTREAM_GB_PER_DAY 환경 변수가 우선합니다.
    */
   imageUpstreamBudget: null as null | { mbPerMinute: number; gbPerDay: number },
   /**
-   * 已实测应由服务器直接连接、不走出网代理（EGRESS_PROXY_URL）的域名，采集和图片共用（选填）。
-   * 每次重定向重新按目标域名选路，直连仍检查实际连接地址。
+   * 서버가 아웃바운드 프록시(EGRESS_PROXY_URL)를 거치지 않고 직접 연결해야 하는 것으로 확인된 도메인. 수집과 이미지 처리에 함께 사용합니다(선택 사항).
+   * 리디렉션할 때마다 대상 도메인에 따라 경로를 다시 선택하며, 직접 연결도 실제 연결 주소를 확인합니다.
    */
   directFetchHosts: [] as string[],
   /**
-   * 精选评测（scripts/eval-selection.ts）不带参数时用的金标集：文件（相对仓库根目录）、抽样条数、只抽哪一份、门槛扫描范围。
-   * null 就用 .data/gold.jsonl 的全部样本（最多 200 条），在 40–90 之间扫描。
+   * 엄선 평가(scripts/eval-selection.ts)를 인자 없이 실행할 때 사용할 정답 데이터 세트: 파일(저장소 루트 기준), 샘플 수, 추출할 분할, 문턱 탐색 범위.
+   * null이면 .data/gold.jsonl의 전체 샘플(최대 200개)을 사용하고 40–90 범위에서 탐색합니다.
    */
   selectionGold: null as null | { file: string; sample: number; split: string; sweep: [number, number] },
 };
 
-/** RSS 订阅源的说明里随站点而变的说法。 */
+/** 사이트별 RSS 피드 안내 문구. */
 export const FEED_COPY = {
-  /** “全部动态”源的说明里，除了未审内容、低相关条目、低分条目和已合并重复条目，还写明不含的内容（选填）。 */
+  /** “전체 동향” 피드 안내에 미검토 콘텐츠, 관련성이 낮은 항목, 점수가 낮은 항목, 중복으로 병합된 항목 외에 포함하지 않는 내용을 덧붙입니다(선택 사항). */
   allLeavesOut: [] as string[],
 };
 
 /**
- * 公开接口（API、RSS、MCP）里和网页不同的类别（选填）。上线后不要改：接口参数和订阅地址里有类别的 key。
- * merge：并进另一类发布的类别，key 是行业包里的类别，值是它并进的类别（公开接口比网页少一类时用）；
- * feedLabels：分类 RSS 标题里的名字，替换行业包里的 feedLabel（并进了别的类别时，名字常常也要跟着改）。
+ * 공개 인터페이스(API, RSS, MCP)에서 웹페이지와 다르게 사용할 카테고리(선택 사항). 공개 후에는 변경하지 마세요. 인터페이스 매개변수와 구독 주소에 카테고리 key가 포함됩니다.
+ * merge: 다른 카테고리에 합칠 카테고리. key는 업종 패키지의 카테고리, 값은 합쳐질 카테고리입니다(공개 인터페이스의 카테고리가 웹페이지보다 적을 때 사용).
+ * feedLabels: 카테고리 RSS 제목에 표시할 이름으로, 업종 패키지의 feedLabel을 대체합니다(다른 카테고리에 합친 경우 이름도 함께 변경해야 할 수 있습니다).
  */
 export const PUBLIC_CATEGORIES = {
   merge: {},
   feedLabels: {},
 } as const;
 
-/** 업종명과 명사 사이에 영문이면 공백을, 한글이면 공백을 넣지 않습니다. */
+/** 업종명과 명사 사이에 영문은 공백을 넣고, 한글은 붙여 씁니다. */
 export function withSubject(noun: string): string {
   return /[A-Za-z0-9]$/.test(SITE.subject) ? `${SITE.subject} ${noun}` : `${SITE.subject}${noun}`;
 }
 
-/** 문구 뒤에 업종명을 붙일 때 영문 앞에는 공백을, 한글 앞에는 공백을 넣지 않습니다. */
+/** 문구 뒤에 업종명을 붙일 때 영문 앞에는 공백을 넣고, 한글은 붙여 씁니다. */
 export function subjectAfter(text: string, noun?: string): string {
   const gap = /^[A-Za-z0-9]/.test(SITE.subject) ? " " : "";
   return `${text}${gap}${noun ? withSubject(noun) : SITE.subject}`;
@@ -337,22 +337,22 @@ function spokenTime(time: string): string {
 }
 
 /**
- * 入口页在搜索结果里的标题：读者会搜的词放前面，页面自动在最后接上“ · 站名”（首页用 SITE.homeTitle）。
- * 日期一律是这一期、这一页内容的日期，不是今天的日期。换行业时把里面的说法一起换掉。
+ * 진입 페이지가 검색 결과에 표시될 제목: 독자가 검색할 단어를 앞에 두며, 페이지 끝에 “ · 사이트명”을 자동으로 붙입니다(홈은 SITE.homeTitle 사용).
+ * 날짜는 항상 해당 호와 페이지 콘텐츠의 날짜이며 오늘 날짜가 아닙니다. 업종을 바꿀 때는 문구도 함께 바꾸세요.
  */
 export const SEO_TITLES = {
-  /** 热点榜（/hot）。 */
+  /** 핫 이슈(/hot). */
   hot: `${withSubject("핫 뉴스 목록")}: 오늘 인기 이벤트 순위`,
-  /** 全部动态（/all），不含搜索和筛选结果。 */
+  /** 전체 동향(/all). 검색 및 필터 결과는 제외합니다. */
   all: `${subjectAfter("최신", "동향")}: 실시간 업데이트`,
-  /** Agent 接入页（/agent）。 */
+  /** Agent 연동 페이지(/agent). */
   agent: `${withSubject("뉴스")} API·MCP·RSS: Agent 연동`,
-  /** 关于页（/about）的完整标题，已含站名。 */
+  /** 어바웃 페이지(/about)의 전체 제목. 사이트명이 이미 포함되어 있습니다. */
   about: `${SITE.name} 소개: ${SITE.tagline}`,
-  /** 日报、周报、月报的最新一期（/daily、/weekly、/monthly）；date 是这一期的日期：“11月7日”“10月26日—11月1日”“2026年10月”。 */
+  /** 최신 일간·주간·월간 리포트(/daily, /weekly, /monthly). date는 해당 호의 날짜입니다(예: “11월 7일”, “10월 26일—11월 1일”, “2026년 10월”). */
   latestReport: (kind: "daily" | "weekly" | "monthly", date: string): string =>
     ({ daily: `${withSubject("일간 리포트")}: ${date} 주요 뉴스`, weekly: `${withSubject("주간 리포트")}: ${date} 한 주 돌아보기`, monthly: `${withSubject("월간 리포트")}: ${date} 주요 소식 돌아보기` })[kind],
-  /** 主题页第一页：公司搜“最新消息”，方向和内容类型搜“最新进展”；updated 是最新一篇精选的日期（“11月7日”），没有时为 null。 */
+  /** 주제 페이지 첫 화면: 기업은 “최신 소식”, 분야와 콘텐츠 유형은 “최신 동향”을 검색합니다. updated는 가장 최근에 엄선한 항목의 날짜(“11월 7일”)이며, 없으면 null입니다. */
   topic: (name: string, group: "company" | "field" | "genre", updated: string | null): string =>
     `${name} ${group === "company" ? "최신 소식과 동향" : "최신 동향과 진전"}${updated ? `(${updated} 업데이트)` : ""}`,
 };
