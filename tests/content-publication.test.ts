@@ -95,7 +95,7 @@ test("mentions cannot choose a timeline origin, anchor, representative, or a lat
   const media = await source("media", "T2");
   const t1 = await source("t1", "T1");
   const g = await story();
-  const official = await report(organization, g, { title: "Dots 正式发布", hours: 3, score: 65 });
+  const official = await report(organization, g, { title: "Dots 정식 출시", hours: 3, score: 65 });
   const latest = await report(media, g, { title: "Dots 后续更新", hours: 2, score: 90 });
   const earlyMention = await report(t1, g, { title: "EARLY ROUNDUP", hours: 90, role: "mention" });
   const lateMention = await report(t1, g, { title: "LATEST ROUNDUP", hours: 1, role: "mention" });
@@ -123,7 +123,7 @@ test("mentions cannot choose a timeline origin, anchor, representative, or a lat
   await sql`UPDATE publications SET visibility='withdrawn' WHERE article_id=${latest}`;
   const after = (await loadStoryDetail(g.storyId, now))!;
   assert.equal(after.latestReport!.id, official);
-  assert.equal(after.latest, "Dots 正式发布");
+  assert.equal(after.latest, "Dots 정식 출시");
   assert.equal((await v1Story(g.storyId))!.story.latest, after.latest);
   const firstParty = await loadTimeline({ ...q, channel: "firstParty" });
   assert.ok(!firstParty.cards.some(c => c.item.id === official), "a stale true projection flag cannot put T1_5 into first-party channel");
@@ -305,7 +305,7 @@ for (const proof of ["no-hash", "no-ids", "no-version", "different-text"] as con
     if (proof === "different-text") await sql`UPDATE stories SET digest = '与有证据版本不一致的旧综述' WHERE id = ${g.storyId}`;
     const calls = provider.hits();
     for (const change of ["unchanged", "corrected", "withdrawn"] as const) {
-      if (change === "corrected") await overrideFields(id, { fields: { summary: "更正后的当前摘要" }, reason: "correct historical evidence", version: 0 }, "test");
+      if (change === "corrected") await overrideFields(id, { fields: { summary: "更正后的当前요약" }, reason: "correct historical evidence", version: 0 }, "test");
       if (change === "withdrawn") {
         await report(s, g, { title: "撤稿后仍公开的报道", hours: 1, selected: false });
         await setVisibility(id, { visibility: "withdrawn", reason: "withdraw historical evidence", version: 1 }, "test");
@@ -328,12 +328,12 @@ for (const proof of ["no-hash", "no-ids", "no-version", "different-text"] as con
 test("a story summary is visible only while a current public report supports those exact words", async () => {
   const s = await source("summary-evidence", "T1");
   const g = await story();
-  const id = await report(s, g, { title: "当前可核实的事实摘要", hours: 2, selected: false });
-  await sql`UPDATE stories SET summary = '当前可核实的事实摘要' WHERE id = ${g.storyId}`;
-  assert.equal((await storyTexts([g.storyId], now)).get(g.storyId)!.summary, "当前可核实的事实摘要");
-  await overrideFields(id, { fields: { summary: "已更正事实摘要" }, reason: "correct supporting report", version: 0 }, "test");
+  const id = await report(s, g, { title: "当前可核实的事实요약", hours: 2, selected: false });
+  await sql`UPDATE stories SET summary = '当前可核实的事实요약' WHERE id = ${g.storyId}`;
+  assert.equal((await storyTexts([g.storyId], now)).get(g.storyId)!.summary, "当前可核实的事实요약");
+  await overrideFields(id, { fields: { summary: "已更正事实요약" }, reason: "correct supporting report", version: 0 }, "test");
   assert.equal((await storyTexts([g.storyId], now)).get(g.storyId)!.summary, null);
-  await sql`UPDATE stories SET summary = '已更正事实摘要' WHERE id = ${g.storyId}`;
+  await sql`UPDATE stories SET summary = '已更正事实요약' WHERE id = ${g.storyId}`;
   await setVisibility(id, { visibility: "withdrawn", reason: "withdraw supporting report", version: 1 }, "test");
   assert.equal((await storyTexts([g.storyId], now)).get(g.storyId)!.summary, null);
 });
@@ -447,7 +447,7 @@ for (const change of ["correction", "withdrawal", "detach", "addition"] as const
     const pending = composeStoryDigest(g.storyId);
     await entered.promise;
     try {
-      if (change === "correction") await overrideFields(id, { fields: { summary: "已经核实的更正摘要" }, reason: "correct input", version: 0 }, "test");
+      if (change === "correction") await overrideFields(id, { fields: { summary: "已经核实的更正요약" }, reason: "correct input", version: 0 }, "test");
       if (change === "withdrawal") await setVisibility(id, { visibility: "withdrawn", reason: "withdraw input", version: 0 }, "test");
       if (change === "detach") await detachFromFact(id, "wrong fact", "test");
       if (change === "addition") await report(s, g, { title: "模型请求后抵达的新进展", hours: 1, selected: false });
@@ -456,7 +456,7 @@ for (const change of ["correction", "withdrawal", "detach", "addition"] as const
     assert.equal((await sql`SELECT 1 FROM story_digests WHERE story_id = ${g.storyId}`).length, 0);
     if (change === "correction" || change === "addition") {
       assert.equal((await composeStoryDigest(g.storyId)).updated, true, "a subsequent job accepts the current evidence");
-      assert.ok(digestPrompt.includes(change === "correction" ? "已经核实的更正摘要" : "模型请求后抵达的新进展"));
+      assert.ok(digestPrompt.includes(change === "correction" ? "已经核实的更正요약" : "模型请求后抵达的新进展"));
     }
   });
 }

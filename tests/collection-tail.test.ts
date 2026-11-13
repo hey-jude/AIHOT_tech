@@ -48,7 +48,7 @@ after(async () => { await new Promise<void>(resolve => server.close(() => resolv
 
 function items(name: string, count: number): Item[] {
   return Array.from({ length: count }, (_, i) => ({
-    url: `${base}/article/${T}-${name}/${i}`, title: `测试文章 ${name} ${i}`, date: new Date(Date.now() - i * 1000).toISOString(), summary: `摘要 ${name} ${i}`,
+    url: `${base}/article/${T}-${name}/${i}`, title: `测试文章 ${name} ${i}`, date: new Date(Date.now() - i * 1000).toISOString(), summary: `요약 ${name} ${i}`,
   }));
 }
 async function source(name: string, kind: Kind, rows: Item[], extra: Record<string, unknown> = {}, initialized = true) {
@@ -141,7 +141,7 @@ test("with the first 60 known, the tail is still created and revised, and queued
   // The first job is done: the revision must queue processing again.
   await sql`DELETE FROM pgboss.job WHERE data->>'articleId'=${tail!.id}`;
   await sql`UPDATE articles SET processing_queued_at=NULL WHERE id=${tail!.id}`;
-  rows[60] = { ...rows[60]!, title: "尾部修订后的标题", summary: "尾部修订后的正文" };
+  rows[60] = { ...rows[60]!, title: "尾部修订后的제목", summary: "尾部修订后的正文" };
   const revised = await collectSource(id);
   assert.deepEqual([revised.status, revised.created, revised.revised], ["ok", 0, 1]);
   const [saved] = await sql`SELECT title,body_text,revision,processing_queued_at FROM articles WHERE id=${tail!.id}`;
@@ -218,7 +218,7 @@ test("a listing repairs an existing old article without admitting a new old arch
 
 test("in the tail an alias of a known URL keeps the first record, and URL, category and noise filters still apply", async () => {
   const rows = items("filters", 60);
-  rows.push({ ...rows[0]!, url: rows[0]!.url + "?utm_source=tail", title: "不应覆盖首次标题" });
+  rows.push({ ...rows[0]!, url: rows[0]!.url + "?utm_source=tail", title: "不应覆盖首次제목" });
   rows.push(...items("filters-tail", 5));
   rows[62]!.title = "noise 排除条目";
   rows[63]!.url = `${base}/denied/${T}`;

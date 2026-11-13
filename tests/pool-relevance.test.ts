@@ -78,7 +78,7 @@ test("search terms split where Han meets a Latin word, not before digits", () =>
   assert.deepEqual(searchTerms("多模态RAG"), ["多模态", "rag"]);
   assert.deepEqual(searchTerms("claude code更新 gpt-5 deepseek v4"), ["claude", "code", "更新", "gpt-5", "deepseek", "v4"]);
   assert.deepEqual(searchTerms("v4版本"), ["v4", "版本"]);
-  assert.deepEqual(searchTerms("10月"), ["10月"]);
+  assert.deepEqual(searchTerms("10월"), ["10월"]);
 });
 
 test("public search needs a plain Latin term to start a word in the body", async () => {

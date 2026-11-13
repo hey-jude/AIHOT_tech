@@ -39,7 +39,7 @@ async function report(n: number, hoursAgo: number, subject = "minimax"): Promise
   });
   await sql`UPDATE articles SET discovered_at = ${at}, timeline_at = ${at}, grouped_at = now() WHERE id = ${articleId}`;
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected, subjects, tags)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`${subject} 消息 ${n}`}, '摘要', 80, true, ${[subject]}, ${['模型发布']})`;
+            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`${subject} 消息 ${n}`}, '요약', 80, true, ${[subject]}, ${['모델 출시']})`;
   await publishArticle(articleId, { releasedAt: new Date(at.getTime() + 60_000) });
   return articleId;
 }
@@ -59,7 +59,7 @@ test("a withdrawn report leaves the topic page and the index while the topic ind
 
 test("a correction refreshes named content and its topic membership before the index expires", async () => {
   const title = `Qwen 更正后的模型消息 ${T}`;
-  await overrideFields(corrected, { fields: { title }, version: 0, reason: "更正标题" }, "test-topics");
+  await overrideFields(corrected, { fields: { title }, version: 0, reason: "更正제목" }, "test-topics");
   const retitled = await loadTopicPage("qwen", 1);
   assert.equal(retitled?.items[0]?.title, title, "the list");
   assert.equal(retitled?.topic.latest?.title, title, "the page headline");
@@ -69,7 +69,7 @@ test("a correction refreshes named content and its topic membership before the i
   const reclassified = await loadTopicPage("qwen", 1);
   assert.equal(reclassified?.items[0]?.id, corrected, "it remains a selected report");
 
-  await overrideFields(corrected, { fields: { tags: ["教程/实践", "entity:kimi"] }, version: 2, reason: "更正主体公司" }, "test-topics");
+  await overrideFields(corrected, { fields: { tags: ["튜토리얼/실전", "entity:kimi"] }, version: 2, reason: "更正主体公司" }, "test-topics");
   const moved = await loadTopicPage("qwen", 1);
   assert.deepEqual(moved?.items, [], "the old topic list drops it");
   assert.equal(moved?.topic.latest, null, "the old topic headline drops it");

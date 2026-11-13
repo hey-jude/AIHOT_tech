@@ -137,7 +137,7 @@ test("an audited presentation refresh previews and applies only the reviewed lay
   assert.deepEqual(await rerun(articleId, "presentation", "apply-layout", "test", { version: preview.version }), applied, "the audited request is idempotent");
   assert.equal((await sql`SELECT 1 FROM audit_log WHERE subject=${`content:${articleId}`} AND action='content.rerun.presentation'`).length, 1);
   await sql`INSERT INTO translations(article_id,lang,revision,body_html,body_text,complete,origin)
-    VALUES (${articleId},'zh',${before.revision},'<p>原有的<a href="https://example.com/legacy">中文</a>译文。</p>','原有的中文译文。',true,'model')`;
+    VALUES (${articleId},'ko',${before.revision},'<p>기존 <a href="https://example.com/legacy">한국어</a> 번역입니다.</p>','기존 한국어 번역입니다.',true,'model')`;
   const unchanged = await rerun(articleId, "presentation", "preview-unchanged", "test", { preview: true });
   assert.equal(unchanged?.changed, false);
   assert.equal(unchanged?.ready, true, "unchanged original HTML does not require reusing mismatched historical translation structure");

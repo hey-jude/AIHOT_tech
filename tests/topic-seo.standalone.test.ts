@@ -25,13 +25,13 @@ test("a topic page is a collection at its own address", () => {
 
 test("a list the page shows keeps its ordered entry names and public story links", () => {
   const json = topicLd({ ...topic, lists: [{ name: "大事记", entries: [
-    { title: "正式发布", href: "/story/model-release" },
+    { title: "정식 출시", href: "/story/model-release" },
     { title: "历史节点", href: null },
   ] }] });
   const list = json.mainEntity as { numberOfItems: number; itemListElement: unknown[] };
   assert.equal(list.numberOfItems, 2);
   assert.deepEqual(list.itemListElement, [
-    { "@type": "ListItem", position: 1, name: "正式发布", url: `${siteUrl()}/story/model-release` },
+    { "@type": "ListItem", position: 1, name: "정식 출시", url: `${siteUrl()}/story/model-release` },
     { "@type": "ListItem", position: 2, name: "历史节点" },
   ]);
 });

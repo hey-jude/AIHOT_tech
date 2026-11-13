@@ -40,7 +40,7 @@ async function article(selected = false) {
   const { articleId } = await upsertMaterial({ sourceId: SOURCE, url: `https://example.com/ops-${T}-${n}`, title: `Ops ${n} ${T}`, bodyText: "b", bodyHtml: "<p>b</p>", bodyStatus: "ok", via: "fetch", publishedAt: new Date() });
   if (selected) {
     await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected)
-              VALUES (${articleId}, 1, 'rule', 'pass', 'industry', ${`标题${n}-${T}`}, ${`摘要${n}-${T}`}, 90, true)`;
+              VALUES (${articleId}, 1, 'rule', 'pass', 'industry', ${`제목${n}-${T}`}, ${`요약${n}-${T}`}, 90, true)`;
   }
   return articleId;
 }
@@ -78,7 +78,7 @@ test("the content group gets first-party and near-first-party sources only", asy
   await sql`INSERT INTO sources (id, name, kind, tier, participation_mode, next_fetch_at) VALUES (${media}, 'Media', 'rss', 'T2', 'editorial', '2100-01-01')`;
   const { articleId } = await upsertMaterial({ sourceId: media, url: `https://example.com/ops-t2-${T}`, title: `Ops T2 ${T}`, bodyText: "b", bodyHtml: "<p>b</p>", bodyStatus: "ok", via: "fetch", publishedAt: new Date() });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'industry', ${`标题T2-${T}`}, ${`摘要T2-${T}`}, 90, true)`;
+            VALUES (${articleId}, 1, 'rule', 'pass', 'industry', ${`제목T2-${T}`}, ${`요약T2-${T}`}, 90, true)`;
   await sql`UPDATE articles SET grouping_status = 'complete', grouped_at = now() WHERE id = ${articleId}`;
   await publishArticle(articleId);
   assert.deepEqual(await pushSelected(articleId), { status: "skipped", reason: "not a first-party source" });
@@ -144,10 +144,10 @@ test("a dingtalk target with its channel valve off records a skip and sends noth
 test("DingTalk markdown keeps an original link with brackets whole and dates like the Feishu card", async () => {
   const { dingtalkMarkdown } = await import("@aihot/backend/notify/dingtalk");
   const { text } = dingtalkMarkdown({
-    title: "t", sourceName: "s", published: "11月7日发布", summary: null, reason: null, reasonLabel: "r",
+    title: "t", sourceName: "s", published: "11월7일发布", summary: null, reason: null, reasonLabel: "r",
     articleId: "a1", url: "https://en.wikipedia.org/wiki/Claude_(language_model) x",
   });
-  assert.ok(text.includes("s · 11月7日发布"), text);
+  assert.ok(text.includes("s · 11월7일发布"), text);
   assert.ok(text.includes("(https://en.wikipedia.org/wiki/Claude_%28language_model%29%20x)"), text);
 });
 

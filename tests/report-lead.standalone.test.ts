@@ -15,7 +15,7 @@ test("an editors' lead is matched to the item it is written about", () => {
 });
 
 test("a lead that matches no item clearly has no item", () => {
-  assert.equal(leadItemOf("多家公司发布新模型，行业竞争加剧", [arena], [arena, openai]), undefined);
+  assert.equal(leadItemOf("多家公司신규 모델 출시，行业竞争加剧", [arena], [arena, openai]), undefined);
 });
 
 test("without an editors' lead the first highlight leads", () => {

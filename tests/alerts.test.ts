@@ -266,7 +266,7 @@ test("selected identity delays show reader impact, recovery state and the affect
       VALUES(${id},${source},${id},${`https://example.com/${id}`},${id},${at},${at},${at},${state},${state === "failed" ? "identity provider timed out" : null})`;
     await sql`INSERT INTO publications(article_id,source_id,title,summary,eligible,selected,selection_candidate,visibility,
       selected_ready_at,discovered_at,timeline_at,sort_at,url,category,channel)
-      VALUES(${id},${source},${`新闻 ${id}`},'摘要',true,false,${candidate},${visibility},${at},${at},${at},${at},${`https://example.com/${id}`},'industry','news')`;
+      VALUES(${id},${source},${`新闻 ${id}`},'요약',true,false,${candidate},${visibility},${at},${at},${at},${at},${`https://example.com/${id}`},'industry','news')`;
   };
   process.env.COLLECT_ENABLED = "true";
   process.env.MODEL_CALLS_ENABLED = "true";
@@ -458,7 +458,7 @@ test("provider impact includes the same evaluated fallback as modelRoute", async
     const route = await modelRoute("summarize");
     assert.equal(route.fallbackModel, "test-backup");
     const steps = await stepsOnService("zhipu", new Set(["glm-5.3-flash"]));
-    assert.ok(steps.includes("标题摘要"), "the fallback can fail and stop articles even without a primary on this supplier");
+    assert.ok(steps.includes("제목요약"), "the fallback can fail and stop articles even without a primary on this supplier");
     assert.ok(!steps.includes("精选评分"), "an unevaluated fallback is not invented for other steps");
   } finally {
     for (const [key, value] of Object.entries(envs)) if (value === undefined) delete process.env[key]; else process.env[key] = value;

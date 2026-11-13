@@ -11,7 +11,7 @@ import { loadHot, loadStoryDetail } from '@aihot/backend/publication/stories';
 after(closeDb);
 test('hot cards send a Unicode-safe excerpt while the event keeps its complete public text',async()=>{
   const at=new Date(Date.now()-60_000);
-  const intro='摘要'.repeat(238)+'🤖'.repeat(4);
+  const intro='요약'.repeat(238)+'🤖'.repeat(4);
   const full=intro+'仅在详情显示'.repeat(300);
   await sql`INSERT INTO sources (id,name,kind,tier,participation_mode,next_fetch_at)
     VALUES ('hot-card','Hot card','rss','T1','editorial','2100-01-01')`;
@@ -28,7 +28,7 @@ test('hot cards send a Unicode-safe excerpt while the event keeps its complete p
   await sql`INSERT INTO hot_rankings(computed_at,rule_version,entries,published) VALUES (now(),'test',${sql.json([entry] as never)},true)`;
   assert.equal((await loadHot()).entries[0]!.summary,intro+'…');
   assert.equal((await loadStoryDetail(story!.id))!.summary,full,'the event remains the full reading surface');
-  await sql`UPDATE stories SET summary='短摘要' WHERE id=${story!.id}`;
-  await sql`UPDATE publications SET summary='短摘要' WHERE article_id='hot-card'`;
-  assert.equal((await loadHot()).entries[0]!.summary,'短摘要');
+  await sql`UPDATE stories SET summary='短요약' WHERE id=${story!.id}`;
+  await sql`UPDATE publications SET summary='短요약' WHERE article_id='hot-card'`;
+  assert.equal((await loadHot()).entries[0]!.summary,'短요약');
 });

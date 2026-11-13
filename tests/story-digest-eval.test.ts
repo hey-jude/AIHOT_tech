@@ -70,7 +70,7 @@ async function report(sourceId: string, group: Awaited<ReturnType<typeof story>>
       ${sql.json({ fact: { evidence: `${opts.title} 原文`, conditions: [{ text: "仅限首批客户", quote: "first customers only" }] } })}) RETURNING id`;
   await sql`INSERT INTO publications (article_id,analysis_id,source_id,title,summary,url,channel,first_party,timeline_at,discovered_at,published_at,sort_at,
     story_id,fact_id,selected,eligible,visible_after,tags,body_mode,score,visibility)
-    VALUES (${id},${a!.id},${sourceId},${opts.title},${`${opts.title} 的摘要`},${`https://example.org/${id}`},'news',true,${date},${date},${date},${date},
+    VALUES (${id},${a!.id},${sourceId},${opts.title},${`${opts.title} 的요약`},${`https://example.org/${id}`},'news',true,${date},${date},${date},${date},
     ${group.id},${group.factId},true,true,${date},${[key]},'full',70,${opts.visibility ?? "public"})`;
   await sql`INSERT INTO fact_articles (fact_id,article_id,role,evidence) VALUES (${group.factId},${id},${opts.role ?? "report"},${`${opts.title} 的证据`})`;
   return id;
@@ -107,7 +107,7 @@ test("a case exported from an event reaches the model exactly as the site's own 
   await report(media, g, { suffix: "withdrawn", title: "WITHDRAWN REPORT", hours: 4, visibility: "withdrawn" });
 
   for (const step of ["first digest", "rewrite after a correction"] as const) {
-    if (step === "rewrite after a correction") await sql`UPDATE publications SET summary = '已经更正的摘要' WHERE article_id = ${first}`;
+    if (step === "rewrite after a correction") await sql`UPDATE publications SET summary = '已经更正的요약' WHERE article_id = ${first}`;
     const snapshot = path.join(dir, `${step.replace(/\W+/g, "-")}.jsonl`);
     const before = await storyState(g.id);
     const exported = await run(["--stories", g.publicId.toUpperCase(), "--out", snapshot], provider.url);
@@ -121,7 +121,7 @@ test("a case exported from an event reaches the model exactly as the site's own 
 
     assert.equal((await composeStoryDigest(g.id)).updated, true);
     const site = bodies.at(-1)!;
-    assert.ok(step === "first digest" ? site.includes("【新】") : site.includes("经过更正") && site.includes("已经更正的摘要"), step);
+    assert.ok(step === "first digest" ? site.includes("【신규】보도") : site.includes("보도 내용이나 사실 근거가 수정되었습니다") && site.includes("이미 수정된 요약"), step);
     const evaluated = await run(["--cases", snapshot, "--out-dir", dir], provider.url);
     assert.equal(evaluated.code, 0, evaluated.stderr);
     assert.equal(bodies.at(-1), site, `${step}: model, system prompt, input and sampling are the site's, byte for byte`);

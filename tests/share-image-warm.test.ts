@@ -44,7 +44,7 @@ test("the worker warms the API's current public PNG without an HTTP server", asy
   assert.equal(response.statusCode, 200);
   assert.deepEqual(response.rawPayload, png);
 
-  await sql`UPDATE publications SET title = '修正后的分享图标题' WHERE article_id = ${articleId}`;
+  await sql`UPDATE publications SET title = '修正后的分享图제목' WHERE article_id = ${articleId}`;
   assert.equal(await warmShareImage(articleId), true);
   const corrected = await app.inject(`/og/items/${articleId}.png`);
   assert.equal(corrected.statusCode, 200);

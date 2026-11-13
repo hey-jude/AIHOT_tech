@@ -15,7 +15,7 @@ const targets: MentionTarget[] = [
   { href: "/models/oss", names: ["gpt-oss-120b"] },
   { href: "/models/command", names: ["Command A"] },
   { href: "/topics/meta", names: ["Meta", "Meta AI"] },
-  { href: "/topics/nvidia", names: ["英伟达"] },
+  { href: "/topics/nvidia", names: ["엔비디아"] },
   { href: "/models/k3", names: ["Kimi K3"] },
 ];
 
@@ -30,8 +30,8 @@ test("the longest name wins, and only the first mention of each page links", () 
 });
 
 test("a Latin name stands as a whole word; a Chinese one needs no boundary", () => {
-  assert.deepEqual(show(linkMentions(["GPT-5.55 和 GPT-5.5-mini 不是 Metaverse 里的 Meta，Kimi K3.1 也不是。英伟达发布新卡。"], targets)), [
-    "GPT-5.55 和 GPT-5.5-mini 不是 Metaverse 里的 [Meta→/topics/meta]，Kimi K3.1 也不是。[英伟达→/topics/nvidia]发布新卡。",
+  assert.deepEqual(show(linkMentions(["GPT-5.55 和 GPT-5.5-mini 不是 Metaverse 里的 Meta，Kimi K3.1 也不是。엔비디아发布新卡。"], targets)), [
+    "GPT-5.55 和 GPT-5.5-mini 不是 Metaverse 里的 [Meta→/topics/meta]，Kimi K3.1 也不是。[엔비디아→/topics/nvidia]发布新卡。",
   ]);
 });
 
@@ -39,11 +39,11 @@ test("a name followed by a Latin word is the start of a longer name and does not
   assert.deepEqual(show(linkMentions(["Claude Code 和 GPT-5.5 Pro 更新，GPT-5.5 和 Claude 都在"], targets)), [
     "Claude Code 和 GPT-5.5 Pro 更新，[GPT-5.5→/models/gpt] 和 [Claude→/topics/anthropic] 都在",
   ]);
-  assert.deepEqual(show(linkMentions(["英伟达 Kimi K3 合作，英伟达H200"], targets)), ["英伟达 [Kimi K3→/models/k3] 合作，英伟达H200"]);
+  assert.deepEqual(show(linkMentions(["엔비디아 Kimi K3 合作，엔비디아H200"], targets)), ["엔비디아 [Kimi K3→/models/k3] 合作，엔비디아H200"]);
   // A shorter name inside the longer one is part of it too, and its page still links at its next mention.
-  const ali = [{ href: "/topics/qwen", names: ["阿里巴巴", "阿里云", "阿里"] }, { href: "/models/q", names: ["Qwen3.8-27B"] }];
-  assert.deepEqual(show(linkMentions(["阿里巴巴 Qwen3.8-27B 开源，阿里云 Qwen3.8-27B 上线，阿里巴巴说"], ali)), [
-    "阿里巴巴 [Qwen3.8-27B→/models/q] 开源，阿里云 Qwen3.8-27B 上线，[阿里巴巴→/topics/qwen]说",
+  const ali = [{ href: "/topics/qwen", names: ["알리바바", "알리바바 클라우드", "阿里"] }, { href: "/models/q", names: ["Qwen3.8-27B"] }];
+  assert.deepEqual(show(linkMentions(["알리바바 Qwen3.8-27B 开源，알리바바 클라우드 Qwen3.8-27B 上线，알리바바说"], ali)), [
+    "알리바바 [Qwen3.8-27B→/models/q] 开源，알리바바 클라우드 Qwen3.8-27B 上线，[알리바바→/topics/qwen]说",
   ]);
 });
 
@@ -58,9 +58,9 @@ test("a name without a version number must match its case exactly", () => {
 });
 
 test("a text links at most `perText` names; a name it has no room for links at its next mention", () => {
-  assert.deepEqual(show(linkMentions(["OpenAI、Anthropic、Meta 和英伟达", "OpenAI 和英伟达"], targets, 2)), [
-    "[OpenAI→/topics/openai]、[Anthropic→/topics/anthropic]、Meta 和英伟达",
-    "OpenAI 和[英伟达→/topics/nvidia]",
+  assert.deepEqual(show(linkMentions(["OpenAI、Anthropic、Meta 和엔비디아", "OpenAI 和엔비디아"], targets, 2)), [
+    "[OpenAI→/topics/openai]、[Anthropic→/topics/anthropic]、Meta 和엔비디아",
+    "OpenAI 和[엔비디아→/topics/nvidia]",
   ]);
 });
 
@@ -86,8 +86,8 @@ test("a name two pages claim links to neither, but a shorter name inside it does
     { href: "/topics/meta", names: ["Meta"] },
     { href: null, names: ["Muse", "muse"] },
   ]);
-  const ali = withoutSharedNames([{ href: "/a", names: ["阿里巴巴"] }, { href: "/b", names: ["阿里巴巴"] }, { href: "/c", names: ["阿里"] }]);
-  assert.deepEqual(show(linkMentions(["阿里巴巴发布，阿里说"], ali)), ["阿里巴巴发布，[阿里→/c]说"]);
+  const ali = withoutSharedNames([{ href: "/a", names: ["알리바바"] }, { href: "/b", names: ["알리바바"] }, { href: "/c", names: ["阿里"] }]);
+  assert.deepEqual(show(linkMentions(["알리바바发布，阿里说"], ali)), ["알리바바发布，[阿里→/c]说"]);
 });
 
 test("a page is sent only the targets its texts name, with the names it found", () => {
@@ -98,15 +98,15 @@ test("a page is sent only the targets its texts name, with the names it found", 
 });
 
 // The api sends a page only the targets its texts name (mentionedTargets); the page links with those.
-// A name that holds its place without linking ("阿里巴巴" before an English name) must reach the page too,
+// A name that holds its place without linking ("알리바바" before an English name) must reach the page too,
 // or the page links the shorter name inside it.
 test("a page linking with the targets sent for it links exactly as with the whole list", () => {
-  const all = [...targets, { href: "/topics/qwen", names: ["阿里巴巴", "阿里云", "阿里"] }, { href: "/models/q", names: ["Qwen3.8-27B"] }];
+  const all = [...targets, { href: "/topics/qwen", names: ["알리바바", "알리바바 클라우드", "阿里"] }, { href: "/models/q", names: ["Qwen3.8-27B"] }];
   const pages = [
-    ["阿里巴巴 Qwen3.8-27B 开源，阿里说"],
-    ["阿里云 Qwen3.8-27B 上线", "阿里巴巴说 Claude Code 和 GPT-5.5 Pro 更新，GPT-5.5 和 Claude 都在"],
+    ["알리바바 Qwen3.8-27B 开源，阿里说"],
+    ["알리바바 클라우드 Qwen3.8-27B 上线", "알리바바说 Claude Code 和 GPT-5.5 Pro 更新，GPT-5.5 和 Claude 都在"],
     ["GPT-5.55 和 GPT-5.5-mini 不是 Metaverse 里的 Meta，Kimi K3.1 也不是。"],
   ];
   for (const texts of pages) assert.deepEqual(show(linkMentions(texts, mentionedTargets(texts, all))), show(linkMentions(texts, all)), texts[0]);
-  assert.deepEqual(show(linkMentions(pages[0], mentionedTargets(pages[0], all))), ["阿里巴巴 [Qwen3.8-27B→/models/q] 开源，[阿里→/topics/qwen]说"]);
+  assert.deepEqual(show(linkMentions(pages[0], mentionedTargets(pages[0], all))), ["알리바바 [Qwen3.8-27B→/models/q] 开源，[阿里→/topics/qwen]说"]);
 });

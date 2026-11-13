@@ -19,7 +19,7 @@ import { resolveStory } from "@aihot/backend/publication/stories";
 
 const T = tag();
 const SOURCE = `test-events-${T}`;
-const FACT_TITLE = `测试事件${T}发布新模型`;
+const FACT_TITLE = `测试事件${T}신규 모델 출시`;
 
 // The model calls the first candidate the same occurrence (and, asked about a pair, agrees), but
 // only once the test lets it answer; the same stub serves the judge and the review model.
@@ -36,11 +36,11 @@ const provider = await stub(async (_hit, req) => {
   await hold.promise;
   const body = JSON.parse(req.body) as { messages: Array<{ content: string }> };
   const user = body.messages[1]!.content;
-  const pair = user.includes("报道 A");
-  const ids = [...user.matchAll(/【候选 (C\d+)】/g)].map((m) => m[1]!);
+  const pair = user.includes("보도 A");
+  const ids = [...user.matchAll(/【후보 (C\d+)】/g)].map((m) => m[1]!);
   const answer = pair
     ? { a: "发布", b: "发布", relation: pairRelation ?? relation, difference: "", confidence: 0.95 }
-    : { query: "发布新模型", decisions: ids.map((id, index) => ({ id, relation: answerAll || index === 0 ? relation : "UNRELATED", confidence: 0.95, note: "" })), selection: { addsValue: true, reason: "fixture news" } };
+    : { query: "신규 모델 출시", decisions: ids.map((id, index) => ({ id, relation: answerAll || index === 0 ? relation : "UNRELATED", confidence: 0.95, note: "" })), selection: { addsValue: true, reason: "fixture news" } };
   return { id: "stub", choices: [{ message: { content: JSON.stringify(answer) } }], usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 } };
 });
 for (const name of ["DEEPSEEK", "XIAOMI_MIMO"]) {
@@ -69,7 +69,7 @@ function randomText() {
   return String.fromCharCode(...chars);
 }
 
-async function report(suffix: string, title = FACT_TITLE, summary = "摘要", publishedAt = new Date()) {
+async function report(suffix: string, title = FACT_TITLE, summary = "요약", publishedAt = new Date()) {
   const { articleId } = await upsertMaterial({
     sourceId: SOURCE, url: `https://example.com/events-${T}-${suffix}`, title: `Model launch ${T} ${suffix}`, bodyText: "A new model.", bodyStatus: "ok", via: "fetch", publishedAt,
   });

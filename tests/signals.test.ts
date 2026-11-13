@@ -45,8 +45,8 @@ const provider = await stub((_hit, req) => {
     }) };
   }
   const user = body.messages?.find((m) => m.role === "user")?.content ?? "";
-  const post = user.startsWith("【帖子】");
-  const candidates = user.split("【候选 C").slice(1);
+  const post = user.startsWith("【새 보도】");
+  const candidates = user.split("【후보 C").slice(1);
   if (post) [postJudgements, shown] = [postJudgements + 1, candidates];
   const no = post && user.split("\n\n")[0]!.includes("NOPE");
   const decisions = candidates.map((candidate, i) => ({
@@ -70,7 +70,7 @@ async function report(suffix: string, opts: { title: string; backfill?: string; 
     publishedAt: opts.publishedAt ?? new Date(), backfill: opts.backfill ?? null,
   });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected, output)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${opts.title}, '摘要', 80, false, ${sql.json({ fact: { title: opts.title } })})`;
+            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${opts.title}, '요약', 80, false, ${sql.json({ fact: { title: opts.title } })})`;
   await publishArticle(articleId);
   return articleId;
 }
@@ -235,7 +235,7 @@ test("a discussion post that quotes a post not yet collected joins its story whe
     via: "fetch", publishedAt: new Date(), xPost: { tweetId, authorName: "Anthropic", handle: "AnthropicAI", text: `Introducing ${TOPIC} Sonnet` },
   });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected, output)
-            VALUES (${originalId}, 1, 'rule', 'pass', 'ai-models', ${`Anthropic 发布 ${TOPIC} Sonnet`}, '摘要', 80, false, ${sql.json({ fact: { title: "Sonnet" } })})`;
+            VALUES (${originalId}, 1, 'rule', 'pass', 'ai-models', ${`Anthropic 发布 ${TOPIC} Sonnet`}, '요약', 80, false, ${sql.json({ fact: { title: "Sonnet" } })})`;
   const joined = await groupArticle(originalId);
   assert.equal(joined.verdict, "same-fact");
   assert.equal(joined.storyId, first.storyId);

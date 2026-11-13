@@ -1,7 +1,7 @@
 // Public scope and sync through the real api routes: a licence revocation or a withdrawal reaches
 // every exit, reports stop quoting withdrawn items, the hot board drops a withdrawn item at once, item
 // pages follow one rule, a withdrawal next to an unresolved selection leaves new snapshots at once,
-// snapshots answer conditional requests, and browsing 全部动态 leaves out low scores that a search still finds.
+// snapshots answer conditional requests, and browsing 전체 동향 leaves out low scores that a search still finds.
 import { tag } from "./setup.ts";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -49,7 +49,7 @@ async function article(): Promise<string> {
     sourceId: SOURCE, url: `https://example.com/${T}-${n}`, title: `Test ${n}`, bodyText: BODY, bodyHtml: `<p>${BODY}</p>`, bodyStatus: "ok", via: "fetch", publishedAt: minuteAgo, discoveredAt: minuteAgo,
   });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, reason_zh, score, selected)
-            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`标题${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
+            VALUES (${articleId}, 1, 'rule', 'pass', 'ai-models', ${`제목${n}-${T}`}, ${`SUMMARY-${n}-${T}`}, '理由', 90, true)`;
   return articleId;
 }
 
@@ -154,15 +154,15 @@ test("Markdown retains numeric superscripts, subscripts and fenced code while re
 test("site reading sends one language while exports retain both, including after withdrawal", async () => {
   const id = await article();
   await sql`UPDATE articles SET language = 'en', body_html = '<h2>Original heading</h2><p>Original full body</p>' WHERE id = ${id}`;
-  await sql`INSERT INTO translations (article_id, revision, body_html, body_text, origin) VALUES (${id}, 1, '<h2>译文标题</h2><p>中文完整正文</p>', '中文完整正文', 'source')`;
+  await sql`INSERT INTO translations (article_id, revision, body_html, body_text, origin) VALUES (${id}, 1, '<h2>译文제목</h2><p>中文完整正文</p>', '中文完整正文', 'source')`;
   await publishArticle(id, released());
   const normal = JSON.parse((await get(`/api/site/items/${id}`)).body);
   const original = JSON.parse((await get(`/api/site/items/${id}/original`)).body);
-  assert.equal(normal.bodyLanguage, 'zh');
+  assert.equal(normal.bodyLanguage, 'ko');
   assert.equal(normal.hasTranslation, true);
   assert.equal(normal.body.original, null);
   assert.ok(normal.body.zh.includes('中文完整正文'));
-  assert.equal(normal.outline[0].text, '译文标题');
+  assert.equal(normal.outline[0].text, '译文제목');
   assert.equal(original.bodyLanguage, 'original');
   assert.equal(original.body.zh, null);
   assert.ok(original.body.original.includes('Original full body'));
@@ -560,7 +560,7 @@ test("minimal sync projection preserves snapshot fields, pagination bindings and
 test("a new selected snapshot includes corrections already covered by its watermark", async () => {
   const id = await article();
   await publishArticle(id, released());
-  const title = '已经核实的更正标题';
+  const title = '已经核实的更正제목';
   await overrideFields(id, { fields: { title }, reason: 'correct before snapshot', version: 0 }, 'test');
   for (const fields of ['default', 'minimal']) {
     const response = await get(`/api/v1/selected/snapshot?fields=${fields}&limit=1000`);
@@ -581,7 +581,7 @@ test("a correction between snapshot pages arrives through changes after the fixe
   assert.ok(first.nextPage);
   const id = ids.find((id) => !first.items.some((item: { id: string }) => item.id === id))!;
   const oldTitle = JSON.parse((await get(`/api/site/items/${id}`)).body).title;
-  const title = '翻页期间刚刚核实的更正标题';
+  const title = '翻页期间刚刚核实的更正제목';
   await overrideFields(id, { fields: { title }, reason: 'correct during snapshot', version: 0 }, 'test');
 
   const continuation = await get(`/api/v1/selected/snapshot?limit=1000&page=${encodeURIComponent(first.nextPage)}`);
@@ -601,7 +601,7 @@ test("a correction between snapshot pages arrives through changes after the fixe
 
 // Failure modes: a low-score item still shows on the web list or its page count, v1 (which MCP reads), the
 // Agent list or the all RSS; an unscored item disappears; a search no longer reaches a low-score item.
-test("browsing 全部动态 on every exit leaves out items below the floor, which a search still finds", async () => {
+test("browsing 전체 동향 on every exit leaves out items below the floor, which a search still finds", async () => {
   const source = `${SOURCE}-floor`;
   const at = new Date(Date.now() - 3600_000);
   const floor = SELECTION.browseFloor;

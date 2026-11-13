@@ -122,11 +122,11 @@ test("the alert webhook keeps within the custom bot's limits: 20 KB a request, 1
   const lines = Array.from({ length: 900 }, (_, i) => `第 ${i} 个信源：连续抓取失败，读者看不到它的新内容`);
   lines.push("长".repeat(9000));
   lines.push(...Array.from({ length: 400 }, () => String.raw`详情：{"error":"\"bad\" \\path\\"}`));
-  await sendAlert("系统日报", lines);
+  await sendAlert("系统일간", lines);
   assert.ok(hooked.length >= 3);
   assert.ok(hookedBytes.every((n) => n <= 20 * 1024), `request sizes ${hookedBytes.join(", ")}`);
-  assert.match(hooked.join(""), /^(【[^】]+】)?系统日报\n/);
-  assert.ok(hooked.join("").endsWith(`系统日报\n${lines.join("\n")}`), "the pieces are the whole text, in order");
+  assert.match(hooked.join(""), /^(【[^】]+】)?系统일간\n/);
+  assert.ok(hooked.join("").endsWith(`系统일간\n${lines.join("\n")}`), "the pieces are the whole text, in order");
   for (let i = 1; i < hookedAt.length; i++) assert.ok(hookedAt[i]! - hookedAt[i - 1]! >= 600, `at most 100 a minute: gaps ${gaps()}`);
 });
 
@@ -134,7 +134,7 @@ test("the alert webhook keeps within the custom bot's limits: 20 KB a request, 1
 test("a request that reaches Feishu late still leaves 600 ms before the next one", async () => {
   process.env.FEISHU_ALERT_WEBHOOK_URL = `https://open.feishu.cn/open-apis/bot/v2/hook/test-${T}`;
   hookDelay = 300;
-  await sendAlert("系统日报", Array.from({ length: 900 }, (_, i) => `第 ${i} 个信源：连续抓取失败，读者看不到它的新内容`));
+  await sendAlert("系统일간", Array.from({ length: 900 }, (_, i) => `第 ${i} 个信源：连续抓取失败，读者看不到它的新内容`));
   assert.ok(hookedAt.length >= 3);
   for (let i = 1; i < hookedAt.length; i++) assert.ok(hookedAt[i]! - hookedAt[i - 1]! >= 600, `gaps ${gaps()}`);
 });

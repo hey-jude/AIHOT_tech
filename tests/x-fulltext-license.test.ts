@@ -42,7 +42,7 @@ async function fixture(options: {
   const quoted = `X-QUOTED-${key}`;
   const quotedZh = options.translation === "same" ? quoted : `X-QUOTED-ZH-${key}`;
   const media = `X-MEDIA-${key}`;
-  const summary = options.summary === false || options.shape === "quote-only" ? null : `摘要-${key}`;
+  const summary = options.summary === false || options.shape === "quote-only" ? null : `요약-${key}`;
   const kind = options.kind ?? "x_search";
   const url = kind === "x_search" ? `https://x.com/license/status/${tweet}` : `https://example.org/${key}`;
   const xPost: XPostData | null = kind === "rss" || options.shape === "missing" ? null : {
@@ -62,7 +62,7 @@ async function fixture(options: {
     bodyText: options.bodyStatus === "none" ? null : main, bodyHtml: options.bodyStatus === "none" ? null : `<p>${main}</p>`,
     bodyStatus: options.bodyStatus ?? "ok", xPost, via: "fetch", publishedAt: minuteAgo, discoveredAt: minuteAgo });
   await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, reason_zh, tags, score, selected)
-    VALUES (${id}, 1, 'rule', 'pass', 'ai-models', ${`标题-${key}`}, ${summary}, '推荐理由', ${[T, key]}, 90, true)`;
+    VALUES (${id}, 1, 'rule', 'pass', 'ai-models', ${`제목-${key}`}, ${summary}, '추천 이유', ${[T, key]}, 90, true)`;
   if (options.translation !== "missing") {
     await sql`INSERT INTO translations (article_id, revision, body_text, body_html, origin)
       VALUES (${id}, ${options.translation === "stale" ? 0 : 1}, ${zh}, ${`<p>${zh}</p>`}, 'source')`;
@@ -103,7 +103,7 @@ async function summaryDetail(f: Fixture) {
     noContent(response.body, f);
     assert.equal(detail.x, null);
     assert.equal(detail.body, null);
-    assert.equal(detail.readingMode, "full", "全文许可不等于严格仅摘要的人工可见性");
+    assert.equal(detail.readingMode, "full", "全文许可不等于严格仅요약的人工可见性");
     assert.equal(detail.markdownAvailable, !!f.summary);
   }
 }
@@ -122,7 +122,7 @@ async function summaryLists(f: Fixture) {
   for (const [path, summary] of [[`/api/site/timeline?tag=${f.key}`, true], [`/api/site/pool?tag=${f.key}`, true], [`/api/site/groups/${f.fact}/reports`, false]] as const) {
     const response = await get(path);
     assert.ok(response.body.includes(f.id), `${path} 确实包含目标条目`);
-    if (summary) assert.ok(response.body.includes(f.summary!), `${path} 保留摘要`);
+    if (summary) assert.ok(response.body.includes(f.summary!), `${path} 保留요약`);
     noContent(response.body, f);
   }
   // Topic pages and the other card lists share this projection.
@@ -197,7 +197,7 @@ for (const kind of ["x_search", "rss"] as const) {
       if (full) {
         const normal = (await get(`/api/site/items/${f.id}`)).json();
         const original = (await get(`/api/site/items/${f.id}/original`)).json();
-        assert.equal(normal.bodyLanguage, "zh");
+        assert.equal(normal.bodyLanguage, "ko");
         assert.equal(normal.hasTranslation, true);
         assert.ok(normal.body.zh.includes(f.zh));
         assert.equal(normal.body.original, null);

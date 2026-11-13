@@ -16,9 +16,9 @@ import { fakeApi, FIXTURE_AT, itemDetail, startWebServer, type WebServer } from 
 
 const agent = { slug: "agent", name: "Agent 智能体" };
 const items: SiteItemDetail[] = [
-  itemDetail({ id: "links-lead", title: "日报头条", topics: [agent], daily: { key: "2026-11-07", lead: true } }),
-  itemDetail({ id: "links-entry", title: "日报里的一条", daily: { key: "2026-11-07", lead: false } }),
-  itemDetail({ id: "links-none", title: "没进日报" }),
+  itemDetail({ id: "links-lead", title: "일간头条", topics: [agent], daily: { key: "2026-11-07", lead: true } }),
+  itemDetail({ id: "links-entry", title: "일간里的一条", daily: { key: "2026-11-07", lead: false } }),
+  itemDetail({ id: "links-none", title: "没进일간" }),
   // Tagged with a company its title does not name: that company's topic is the tag's, not the article's.
   itemDetail({ id: "links-tags", title: "带标签", topics: [agent], tags: ["Agent", "OpenAI", "框架"], tagTopics: { Agent: "agent", OpenAI: "openai" } }),
 ];
@@ -56,21 +56,21 @@ function railOf($: cheerio.CheerioAPI, heading: string): string[] {
 }
 
 test("an article a daily carries links to that issue, in the rail and first among the phone chips", async () => {
-  const daily = withSubject("日报");
-  for (const [id, name] of [["links-lead", `11月7日 ${daily} · 头条`], ["links-entry", `11月7日 ${daily}`]] as const) {
+  const daily = withSubject("일간");
+  for (const [id, name] of [["links-lead", `11월 7일 ${daily} · 주요 기사`], ["links-entry", `11월 7일 ${daily}`]] as const) {
     const $ = await page(`/items/${id}`);
     const links = $("a[href='/daily/2026-11-07']");
     // On phones it heads the row of topic and tag chips at the end of the text; wide screens have it in the rail.
-    assert.deepEqual(links.toArray().map((el) => $(el).text()), [`收录于 ${name}`, name], id);
+    assert.deepEqual(links.toArray().map((el) => $(el).text()), [`${name}에 수록`, name], id);
     const chip = links.eq(0);
     assert.ok(chip.closest("article").length && chip.is(chip.parent().children().first()), id);
-    assert.equal(links.eq(1).closest("section").find("h2").text(), "收录于");
+    assert.equal(links.eq(1).closest("section").find("h2").text(), "수록");
   }
   // Between the reason and the topics.
-  assert.deepEqual(railOf(await page("/items/links-lead"), "收录于"), [ITEM_COPY.reasonLabel, "收录于", "主题"]);
+  assert.deepEqual(railOf(await page("/items/links-lead"), "수록"), [ITEM_COPY.reasonLabel, "수록", "주제"]);
   const $ = await page("/items/links-none");
   assert.equal($("a[href^='/daily/2']").length, 0);
-  assert.equal($("h2").filter((_, el) => $(el).text() === "收录于").length, 0);
+  assert.equal($("h2").filter((_, el) => $(el).text() === "수록").length, 0);
 });
 
 test("a tag that is a topic's own leads to the topic page, and not beside that topic's chip", async () => {
@@ -86,13 +86,13 @@ test("a tag that is a topic's own leads to the topic page, and not beside that t
 
 test("an event page says when it was first reported, by the Seoul day and its year when not this one", async () => {
   const day = seoulDate(recent);
-  for (const [id, date, at] of [["links-this-year", `${Number(day.slice(5, 7))}月${Number(day.slice(8, 10))}日`, recent], ["links-last-year", "2025年12月31日", "2025-12-30T17:00:00.000Z"]] as const) {
+  for (const [id, date, at] of [["links-this-year", `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일`, recent], ["links-last-year", "2025년 12월 31일", "2025-12-30T17:00:00.000Z"]] as const) {
     const header = (await page(`/story/${id}`))("h1").closest("header");
     const line = header.text();
-    assert.ok(line.includes(`${date}首报`), `${id}: ${line}`);
-    assert.ok(line.indexOf("个报道来源") < line.indexOf("首报") && line.indexOf("首报") < line.indexOf("更新"), line);
+    assert.ok(line.includes(`${date}첫 보도`), `${id}: ${line}`);
+    assert.ok(line.indexOf("출처") < line.indexOf("첫 보도") && line.indexOf("첫 보도") < line.indexOf("업데이트"), line);
     assert.equal(header.find("time").attr("datetime"), at);
   }
   const undated = await page("/story/links-undated");
-  assert.ok(!undated("h1").closest("header").text().includes("首报"));
+  assert.ok(!undated("h1").closest("header").text().includes("첫 보도"));
 });

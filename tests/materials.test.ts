@@ -108,7 +108,7 @@ test("another source listing the same article records a discovery, not a revisio
   const url = `https://example.com/listed-twice-${tag()}`;
   const own = await upsertMaterial({ sourceId: SOURCE, url, title: "One month without AI", excerpt: "own summary", via: "fetch" });
   for (let i = 0; i < 3; i++) {
-    const mirror = await upsertMaterial({ sourceId: OTHER, url, title: "没有AI的一个月", excerpt: "译文摘要", via: "fetch" });
+    const mirror = await upsertMaterial({ sourceId: OTHER, url, title: "没有AI的一个月", excerpt: "译文요약", via: "fetch" });
     assert.deepEqual([mirror.articleId, mirror.revised], [own.articleId, false]);
     assert.equal((await upsertMaterial({ sourceId: SOURCE, url, title: "One month without AI", excerpt: "own summary", via: "fetch" })).revised, false);
   }
@@ -161,7 +161,7 @@ test("an article linking to a tweet is stored separately from the tweet", async 
 test("another source reporting an imported article first does not set its baseline", async () => {
   const url = `https://example.com/imported-mirror-${tag()}`;
   const id = await imported(url);
-  const mirror = await upsertMaterial({ sourceId: OTHER, url, title: "镜像站的标题", excerpt: "镜像摘要", via: "fetch" });
+  const mirror = await upsertMaterial({ sourceId: OTHER, url, title: "镜像站的제목", excerpt: "镜像요약", via: "fetch" });
   assert.deepEqual([mirror.articleId, mirror.revised], [id, false]);
   assert.equal((await state(id)).content_hash, null, "the mirror's version is not the baseline");
   const own = await upsertMaterial({ sourceId: SOURCE, url, title: "Imported title", excerpt: "feed summary", via: "fetch" });

@@ -239,10 +239,10 @@ test("noise words match whatever their case", () => {
 test("a time without a zone is read in the source's offset, in JSON lists and in detail page metadata", async () => {
   const list = async (extra: Record<string, unknown> = {}) => (await fetchJsonList({ id: "test-json", config: { url: `${site}/zoneless.json`, itemsPath: "result", titlePaths: ["title"], urlTemplate: "https://example.org/p/{id}", publishedAtPath: "publishDate", ...extra } } as never))
     .map((c) => c.publishedAt?.toISOString());
-  assert.deepEqual(await list(), ["2026-09-30T09:43:58.000Z", "2026-09-30T17:43:58.000Z", "2026-09-30T22:43:58.000Z"], "+09:00 by default, as list pages; a time with its zone keeps it");
+  assert.deepEqual(await list(), ["2026-09-30T08:43:58.000Z", "2026-09-30T17:43:58.000Z", "2026-09-30T22:43:58.000Z"], "+09:00 by default, as list pages; a time with its zone keeps it");
   assert.deepEqual(await list({ publishedAtUtcOffset: "+00:00" }), ["2026-09-30T17:43:58.000Z", "2026-09-30T17:43:58.000Z", "2026-09-30T22:43:58.000Z"]);
   const detail = async (offset?: string) => (await fetchDetail(`${site}/zoneless-post`, { id: "test-feed", config: { detail: { maxFetches: 20, publishedAtUtcOffset: offset } } } as never, { date: true, title: false, summary: false, body: false })).publishedAt?.toISOString();
-  assert.deepEqual([await detail(), await detail("+00:00")], ["2026-09-30T09:43:58.000Z", "2026-09-30T17:43:58.000Z"]);
+  assert.deepEqual([await detail(), await detail("+00:00")], ["2026-09-30T08:43:58.000Z", "2026-09-30T17:43:58.000Z"]);
 });
 
 test("posts embedded in a flight payload keep their own arrays and brackets inside strings", async () => {
@@ -252,9 +252,9 @@ test("posts embedded in a flight payload keep their own arrays and brackets insi
 
 test("dates in yyyymmdd and in JSON-LD are read", async () => {
   const days = await fetchJsonList({ id: "test-json", config: { url: `${site}/days.json`, itemsPath: "data.list", titlePaths: ["ttl"], urlTemplate: "https://example.org/blog/view?seq={seq}", publishedAtPath: "day", publishedAtUnit: "yyyymmdd" } } as never);
-  assert.deepEqual(days.map((c) => c.publishedAt?.toISOString() ?? null), ["2026-09-21T16:00:00.000Z", null], "calendar days use the source offset; February 30 is no date");
+  assert.deepEqual(days.map((c) => c.publishedAt?.toISOString() ?? null), ["2026-09-21T15:00:00.000Z", null], "calendar days use the source offset; February 30 is no date");
   const got = await fetchDetail(`${site}/ld-post`, { id: "test-feed", config: { detail: { maxFetches: 20 } } } as never, { date: true, title: false, summary: false, body: false });
-  assert.equal(got.publishedAt?.toISOString(), "2026-09-23T16:00:00.000Z");
+  assert.equal(got.publishedAt?.toISOString(), "2026-09-23T15:00:00.000Z");
   assert.equal(got.publicationTime, "2026-09-24");
 });
 

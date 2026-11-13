@@ -22,8 +22,8 @@ const provider = await stub((_hit, req) => {
   const content = step === "prefilter" ? { label: "UNKNOWN", reason: "No standalone text evidence" }
     : step === "score" ? { attentionScore: req.body.includes("high-score") ? SELECTING_SCORE : 12 }
     : step === "structure" ? { category: "ai-products", tags: [], subjects: [], scope: "single", fact: null }
-    : step === "understand" ? { itemType: "product_update", authorRole: "principal", tags: [], editorialJudgment: "产品更新", titleZh: "实际正文标题", summaryZh: "这是实际正文的中文摘要。" }
-    : "title_zh: 实际正文标题\nbody_zh: 这是实际正文的中文摘要。";
+    : step === "understand" ? { itemType: "product_update", authorRole: "principal", tags: [], editorialJudgment: "제품 업데이트", titleZh: "实际正文제목", summaryZh: "这是实际正文的中文요약。" }
+    : "title_zh: 实际正文제목\nbody_zh: 这是实际正文的中文요약。";
   return { choices: [{ message: { content: typeof content === "string" ? content : JSON.stringify(content) } }] };
 });
 pointModels(provider.url);
@@ -116,7 +116,7 @@ test("real text containing links and a fetched X Article keep their normal writi
     assert.ok(requests.slice(start).includes("summarize"), `${name}: real material is still translated`);
     await publishArticle(id, released());
     const [p] = await sql`SELECT summary FROM publications WHERE article_id=${id}`;
-    assert.equal(p!.summary, "这是实际正文的中文摘要。");
+    assert.equal(p!.summary, "这是实际正文的中文요약。");
   }
 });
 
@@ -126,7 +126,7 @@ test("a saved X Article reaches public readers and full-text exports without buy
   await sql`UPDATE articles SET x_article=${sql.json({ title: "Saved research article", text })},
     body_text=${`https://x.com/i/article/987654\n\n# Saved research article\n\n${text}`} WHERE id=${id}`;
   await sql`INSERT INTO analyses(article_id,input_revision,origin,relevance,title_zh,summary_zh,score,selected)
-    VALUES(${id},1,'model','pass','已保存的研究长文','已保存正文的摘要',${SELECTING_SCORE},true)`;
+    VALUES(${id},1,'model','pass','已保存的研究长文','已保存正文的요약',${SELECTING_SCORE},true)`;
   await publishArticle(id, released());
   // Existing X translations cover only x_post.text, not the saved long article.
   await sql`INSERT INTO translations(article_id,revision,body_text,body_html,complete,origin)
@@ -152,7 +152,7 @@ test("a saved X Article with its layout reads as an article in every exit", asyn
   await sql`UPDATE articles SET x_article=${sql.json({ title: "Laid out article", text, html })},
     body_text=${`https://x.com/i/article/987656\n\n# Laid out article\n\n${text}`} WHERE id=${id}`;
   await sql`INSERT INTO analyses(article_id,input_revision,origin,relevance,title_zh,summary_zh,score,selected)
-    VALUES(${id},1,'model','pass','排好版的长文','排好版的长文摘要',${SELECTING_SCORE},true)`;
+    VALUES(${id},1,'model','pass','排好版的长文','排好版的长文요약',${SELECTING_SCORE},true)`;
   await publishArticle(id, released());
   const detail = (await app.inject({ method: "GET", url: `/api/site/items/${id}` })).json();
   const body: string = detail.body.original ?? detail.body.zh;
@@ -192,7 +192,7 @@ test("saved long articles remain private when only the X post itself may be show
   const text = "RESTRICTED_ARTICLE_EVIDENCE: saved for analysis, not licensed for full-text display.";
   await sql`UPDATE articles SET x_article=${sql.json({ title: "Restricted long article", text })}, body_text=${text} WHERE id=${id}`;
   await sql`INSERT INTO analyses(article_id,input_revision,origin,relevance,title_zh,summary_zh,score,selected)
-    VALUES(${id},1,'model','pass','受限长文标题','许可内的简短摘要',${SELECTING_SCORE},true)`;
+    VALUES(${id},1,'model','pass','受限长文제목','许可内的简短요약',${SELECTING_SCORE},true)`;
   await publishArticle(id, released());
   const before = provider.hits();
   for (const path of [`/api/site/items/${id}`, `/api/site/items/${id}/original`, `/items/${id}/markdown`, "/feed/full.xml"]) {

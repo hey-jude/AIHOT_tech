@@ -78,7 +78,7 @@ const followUps = async (sourceId: string) => (await collectFindings(now)).filte
 async function weekly() {
   const lines: string[] = [];
   const log = console.log;
-  console.log = (value: unknown) => { if (String(value).includes("信源周报")) lines.push(...JSON.parse(String(value)).lines); };
+  console.log = (value: unknown) => { if (String(value).includes("信源주간")) lines.push(...JSON.parse(String(value)).lines); };
   try { await sourceHealthWeekly(now); } finally { console.log = log; }
   return lines.join("\n");
 }
@@ -324,7 +324,7 @@ test("a source follow-up closed as not to be fixed leaves the digest until it is
   const log = console.log;
   const digest = async () => {
     const lines: string[] = [];
-    console.log = (value: unknown) => { if (String(value).includes("系统日报")) lines.push(...JSON.parse(String(value)).lines); };
+    console.log = (value: unknown) => { if (String(value).includes("系统일간")) lines.push(...JSON.parse(String(value)).lines); };
     try { await sendDigest(now); } finally { console.log = log; }
     return lines.join("\n");
   };

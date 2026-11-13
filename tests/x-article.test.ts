@@ -131,7 +131,7 @@ test("a post a module reads (sources.uses) has its X Article fetched while it is
 const block = (type: string, text: string, extra: Record<string, unknown> = {}) => ({ type, text, inlineStyleRanges: [], entityRanges: [], ...extra });
 const atomic = (key: number) => block("atomic", " ", { entityRanges: [{ key, offset: 0, length: 1 }] });
 const LAID_OUT: SdArticle = {
-  title: "标题",
+  title: "제목",
   cover_url: "https://pbs.twimg.com/media/cover.jpg",
   media_entities: [
     { media_id: "11", media_info: { __typename: "ApiImage", original_img_url: "https://pbs.twimg.com/media/a.jpg", original_img_width: 1080, original_img_height: 609 } },
