@@ -1,11 +1,12 @@
-这两个 ttf 是 Noto Sans CJK SC（Noto Sans SC）的子集化产物，仅用于 AIHOT 的 OG
-分享图渲染（GB2312 + 拉丁 + 标点子集，见 scripts/og/build-og-font.mjs）。
+이 디렉터리에는 OG 공유 이미지와 포스터 렌더링용 글꼴 두 계열이 들어 있습니다 (OFL-1.1).
 
-原字体：Noto Sans CJK / Noto Sans SC
-版权：Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name
-      'Source'. （Google Noto 项目分发）
-许可：SIL Open Font License, Version 1.1 (OFL-1.1)
-      https://scripts.sil.org/OFL  ·  https://github.com/notofonts/noto-cjk
+1. noto-sans-sc-400.ttf / noto-sans-sc-700.ttf — Noto Sans CJK SC (Noto Sans SC)의 서브셋(GB2312 + 라틴 + 구두점), scripts/og/build-og-font.mjs로 생성. OG 공유 이미지 렌더링 전용(GB2312 이미지용).
+2. noto-sans-kr-400.ttf / noto-sans-kr-700.ttf — Noto Sans KR v2.004의 전체 TTF (버전명 Version 2.004-H2;hotconv 1.0.118;makeotfexe 2.5.65603). hotconv 변환본, 글리프 서브셋 없음.
 
-OFL 允许嵌入、子集化与再分发，要求保留版权与许可声明（本文件即为此）。子集化字体
-不得单独售卖，可随软件/产品自由分发。完整 OFL 全文见上方链接。
+원 글꼴: Noto Sans CJK / Noto Sans KR (Noto 프로젝트)
+저작권: Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name
+       'Source'. (Google Noto 프로젝트 배포)
+라이선스: SIL Open Font License, Version 1.1 (OFL-1.1)
+       https://scripts.sil.org/OFL  ·  https://github.com/notofonts/noto-cjk  ·  https://github.com/notofonts/notofonts.github.io
+
+OFL은 임베드·서브셋화·재배포를 허용하되 저작권 및 라이선스 표시의 유지를 요구합니다 (이 파일이 그 역할입니다). OFL 하의 글꼴은 단독으로 판매할 수 없으며, 소프트웨어/제품과 함께 자유롭게 배포할 수 있습니다. 전체 OFL 라이선스는 https://scripts.sil.org/OFL 을 참조하십시오.
