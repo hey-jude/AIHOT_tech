@@ -84,12 +84,12 @@ test("one alert when the worker stops, none while it stays stopped, one recovery
   await checkWorkerHeartbeat();
   await checkWorkerHeartbeat();
   assert.equal(attempts.length, 1);
-  assert.match(attempts[0]!, /后台处理服务停了/);
+  assert.match(attempts[0]!, /백그라운드 처리 서비스 중단/);
   await heartbeat(false);
   await checkWorkerHeartbeat();
   await checkWorkerHeartbeat();
   assert.equal(attempts.length, 2);
-  assert.match(attempts[1]!, /已恢复/);
+  assert.match(attempts[1]!, /복구됨/);
 });
 
 test("a failed send is tried again at the next check", async () => {
@@ -100,7 +100,7 @@ test("a failed send is tried again at the next check", async () => {
   await checkWorkerHeartbeat();
   await checkWorkerHeartbeat();
   assert.equal(attempts.length, 2, "the failed alert goes out at the next check, and only then");
-  assert.ok(attempts.every((text) => text.includes("后台处理服务停了")));
+  assert.ok(attempts.every((text) => text.includes("백그라운드 처리 서비스 중단")));
 });
 
 test("with an alert webhook, alerts go to the group bot alone and need no message app", async () => {
@@ -114,7 +114,7 @@ test("with an alert webhook, alerts go to the group bot alone and need no messag
   await checkWorkerHeartbeat();
   assert.equal(attempts.length, 0, "nothing goes through the message app");
   assert.equal(hooked.length, 2, "a refused webhook send is tried again at the next check");
-  assert.ok(hooked.every((text) => text.includes("后台处理服务停了")));
+  assert.ok(hooked.every((text) => text.includes("백그라운드 처리 서비스 중단")));
 });
 
 test("the alert webhook keeps within the custom bot's limits: 20 KB a request, 100 requests a minute", async () => {

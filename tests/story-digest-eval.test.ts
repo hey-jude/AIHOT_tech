@@ -121,7 +121,7 @@ test("a case exported from an event reaches the model exactly as the site's own 
 
     assert.equal((await composeStoryDigest(g.id)).updated, true);
     const site = bodies.at(-1)!;
-    assert.ok(step === "first digest" ? site.includes("【신규】보도") : site.includes("보도 내용이나 사실 근거가 수정되었습니다") && site.includes("이미 수정된 요약"), step);
+    assert.ok(step === "first digest" ? site.includes("【신규】보도") : site.includes("보도 내용이나 사실 근거가 수정되었습니다") && site.includes("已经更正的요약"), step);
     const evaluated = await run(["--cases", snapshot, "--out-dir", dir], provider.url);
     assert.equal(evaluated.code, 0, evaluated.stderr);
     assert.equal(bodies.at(-1), site, `${step}: model, system prompt, input and sampling are the site's, byte for byte`);

@@ -65,7 +65,13 @@ if (process.env.NODE_TEST_CONTEXT && isMainThread) {
     await import("./standalone.ts");
   } else {
     const copy = `${name}_f${process.pid}_${suffix}`;
-    await onServer((db) => db`CREATE DATABASE ${db(copy)} TEMPLATE ${db(name)}`);
+    await onServer(async (db) => {
+      // The session pooler (Supavisor) keeps one idle server session on the template at all times.
+      // CREATE DATABASE ... TEMPLATE refuses while ANY session is open on the template, so
+      // terminate the pooler's session from a different pool first (its own connections don't match).
+      await db`SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = ${name}`;
+      await db`CREATE DATABASE ${db(copy)} TEMPLATE ${db(name)}`;
+    });
     process.env.DATABASE_URL = urlOf(copy);
   }
   const scratch = mkdtempSync(path.join(tmpdir(), scratchPrefix(process.ppid)));

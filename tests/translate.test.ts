@@ -141,7 +141,7 @@ test("a presentation-only source update repairs original and translated bodies w
   const feedItem = feed.body.split("<item>").find(item => item.includes(`<guid isPermaLink="false">${articleId}</guid>`));
   assert.match(feedItem ?? "", /chart\.png/);
   assert.match(feedItem ?? "", /example.com\/docs/);
-  assert.match(feedItem ?? "", /模型有实用改进/);
+  assert.match(feedItem ?? "", /모델이 실용적으로 개선되었습니다/);
   assert.deepEqual({ ...(await sql`SELECT revision,content_hash,processing_state,grouping_status,timeline_at FROM articles WHERE id=${articleId}`)[0] }, { ...before });
   assert.deepEqual({ ...(await sql`SELECT revision,selected,fact_id,story_id FROM publications WHERE article_id=${articleId}`)[0] }, { ...publication });
   assert.equal(provider.hits(), calls);
@@ -161,7 +161,7 @@ test("a layout refresh follows image identity when translated text moved its pic
     VALUES (${articleId},'ko',1,'<p>B 이미지<img src="https://example.com/b.png">와 A 이미지<img src="https://example.com/a.png">.</p>','B 이미지와 A 이미지.',true,'model')`;
   await upsertMaterial({ ...input, bodyHtml: input.bodyHtml.replace('/a.png', '/a-new.png').replace('/b.png', '/b-new.png') });
   const [tr] = await sql`SELECT body_html FROM translations WHERE article_id=${articleId}`;
-  assert.equal(tr!.body_html, '<p>乙图<img src="https://example.com/b-new.png">与甲图<img src="https://example.com/a-new.png">。</p>');
+  assert.equal(tr!.body_html, '<p>B 이미지<img src="https://example.com/b-new.png">와 A 이미지<img src="https://example.com/a-new.png">.</p>');
 });
 
 test("a translation finishing during a layout refresh cannot restore the missing image", async () => {

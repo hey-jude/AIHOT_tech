@@ -78,7 +78,7 @@ const followUps = async (sourceId: string) => (await collectFindings(now)).filte
 async function weekly() {
   const lines: string[] = [];
   const log = console.log;
-  console.log = (value: unknown) => { if (String(value).includes("信源주간")) lines.push(...JSON.parse(String(value)).lines); };
+  console.log = (value: unknown) => { if (String(value).includes("출처 주간 보고")) lines.push(...JSON.parse(String(value)).lines); };
   try { await sourceHealthWeekly(now); } finally { console.log = log; }
   return lines.join("\n");
 }
@@ -89,7 +89,7 @@ test("hot-signal activity does not hide editorial collection stopping", async ()
   await material(signal, "signal");
   const finding = (await collectFindings(now)).find(f => f.key === "content.collect");
   assert.equal(finding?.level, "now");
-  assert.match(finding!.title, /文章|编辑/);
+  assert.match(finding!.title, /사이트에서 새 기사를 수집하지 않습니다/);
   await material(editorial, "editorial");
   assert.equal((await collectFindings(now)).find(f => f.key === "content.collect"), undefined);
 });
@@ -142,13 +142,13 @@ test("daily follow-ups retain chronic failures after a successful run, separatel
         CASE WHEN i BETWEEN 1 AND 5 THEN 'failed' ELSE 'ok' END, 1, 0,
         CASE WHEN i BETWEEN 1 AND 5 THEN 'no items matched (html)' ELSE NULL END FROM generate_series(0,19) i`;
   }
-  for (const [name, id] of [["编辑内容", editorial], ["热度信号", signal]]) {
+  for (const [name, id] of [["편집 콘텐츠", editorial], ["화제 신호", signal]]) {
     const [f, ...more] = await followUps(id!);
     assert.equal(more.length, 0);
     assert.equal(f?.key, `sources.unstable.${id}`);
     assert.ok(f!.title.startsWith(name!));
     assert.ok(f!.title.includes(id!));
-    assert.match(f!.detail!, /5\/20/);
+    assert.match(f!.detail!, /20회 중 5회/);
   }
   assert.deepEqual(await followUps(budget), [], "a spent budget is not a failing source");
 });
@@ -158,7 +158,7 @@ test("each failing source is a follow-up of its own, closed when that source rec
   const second = await source("failing-second", "editorial", new Date(now));
   for (const id of [first, second]) await sql`UPDATE sources SET health = 'failing', fail_count = 6, last_error = 'HTTP 403' WHERE id = ${id}`;
   assert.deepEqual((await followUps(first)).map(f => f.key), [`sources.failing.${first}`]);
-  assert.match((await followUps(first))[0]!.detail!, /连续失败 6 次，HTTP 403/);
+  assert.match((await followUps(first))[0]!.detail!, /6회 연속 실패.*HTTP 403/);
   await sql`UPDATE sources SET health = 'ok', fail_count = 0, last_error = NULL WHERE id = ${first}`;
   assert.deepEqual(await followUps(first), []);
   assert.deepEqual((await followUps(second)).map(f => f.key), [`sources.failing.${second}`]);
@@ -175,8 +175,8 @@ test("the weekly report stays a few lines: quiet and problem sources are counted
   assert.ok(quiet.includes(`${T}-silent-17`), "every quiet source is still there for the patrol");
   assert.ok(!quiet.includes(collector), "a collector with attributed discoveries is not quiet");
   const text = await weekly();
-  assert.match(text, /本周收录 /);
-  assert.match(text, /在用信源 \d+ 个/);
+  assert.match(text, /이번 주 \d+건 수집/);
+  assert.match(text, /활성 출처 \d+곳/);
   assert.doesNotMatch(text, /silent-|没有新内容|已判定不修|转给 AI/);
   assert.ok(text.length < 400, text);
 });
@@ -193,8 +193,8 @@ test("undated editorial articles and repeated edits are follow-ups of their own,
     SELECT ${article.articleId},i,'changed',${new Date(now)} FROM generate_series(2,6) i`;
   const found = await followUps(editorial);
   assert.deepEqual(found.map(f => f.key).sort(), [`sources.revisions.${editorial}`, `sources.undated.${editorial}`]);
-  assert.match(found.find(f => f.key.startsWith("sources.undated"))!.detail!, /缺发布时间 1/);
-  assert.match(found.find(f => f.key.startsWith("sources.revisions"))!.detail!, /反复修订 1/);
+  assert.match(found.find(f => f.key.startsWith("sources.undated"))!.detail!, /게시 시각이 없는 기사 1건/);
+  assert.match(found.find(f => f.key.startsWith("sources.revisions"))!.detail!, /반복 수정된 기사 1건/);
   const closed = await dismissedFollowUps(found, now);
   assert.ok(closed[`sources.undated.${editorial}`]);
   assert.equal(closed[`sources.revisions.${editorial}`], undefined, "repeated edits are not hidden by the closure of missing dates");
@@ -216,7 +216,7 @@ test("detail pages that keep failing are a follow-up, an occasional timeout amon
   const [f, ...more] = await followUps(refused);
   assert.equal(more.length, 0);
   assert.equal(f?.key, `sources.details.${refused}`);
-  assert.match(f!.detail!, /近 7 天失败 6\/34 页/);
+  assert.match(f!.detail!, /34[^0-9]*6[^0-9]*실패/);
 });
 
 test("a low-frequency source quiet for a week is not late, while a daily one is", async () => {
@@ -324,7 +324,7 @@ test("a source follow-up closed as not to be fixed leaves the digest until it is
   const log = console.log;
   const digest = async () => {
     const lines: string[] = [];
-    console.log = (value: unknown) => { if (String(value).includes("系统일간")) lines.push(...JSON.parse(String(value)).lines); };
+    console.log = (value: unknown) => { if (String(value).includes("시스템 운영 보고")) lines.push(...JSON.parse(String(value)).lines); };
     try { await sendDigest(now); } finally { console.log = log; }
     return lines.join("\n");
   };
@@ -424,14 +424,14 @@ test("the weekly report names sources paused or partly excluded this week, with 
   await sql`UPDATE sources SET enabled = false, health = 'paused' WHERE id = ${earlier}`;
   await update(earlier, "admin:ou_test", "改一下名字", { enabled: false, name: "旧名" }, { enabled: false, name: earlier });
   const text = await weekly();
-  assert.match(text, new RegExp(`本周停用、现在仍停着的信源 1 个：\\n· ${paused}（AI，[^）]+）：订阅源反复 404，按授权暂停`));
-  assert.match(text, new RegExp(`本周排除了部分入口的信源 1 个：\\n· ${fenced}（后台，[^，]+，排除 https://example\\.test/dead）：这一篇原文 404，只排除这一篇\\n· ${fenced}（AI，[^，]+，排除 https://example\\.test/gone）：又一篇原文 404`));
+  assert.match(text, new RegExp(`이번 주 비활성화되어 현재도 중단된 출처 1곳:\\n· ${paused}（AI, [^）]+）：订阅源反复 404，按授权暂停`));
+  assert.match(text, new RegExp(`이번 주 일부 수집 경로를 제외한 출처 1곳:\\n· ${fenced}\\(관리자, [^,]+, 제외 https://example\\.test/dead\\): 这一篇原文 404，只排除这一篇\\n· ${fenced}\\(AI, [^,]+, 제외 https://example\\.test/gone\\): 又一篇原文 404`));
   assert.doesNotMatch(text, new RegExp(`· ${resumed}`), "a source enabled again is not listed as paused");
   assert.doesNotMatch(text, new RegExp(`· ${earlier}`), "a source paused before this week is not listed as paused this week");
 });
 
 test("sources only a module uses are counted and named on their own, apart from the news sources", async () => {
-  const counts = async () => Number(/在用信源 (\d+) 个/.exec(await weekly())![1]);
+  const counts = async () => Number(/활성 출처 (\d+)곳/.exec(await weekly())![1]);
   const before = await counts();
   const watched = await source("module-only", "isolated");
   const failing = await source("module-only-failing", "isolated");
@@ -442,6 +442,6 @@ test("sources only a module uses are counted and named on their own, apart from 
   await sql`INSERT INTO audit_log(actor,action,subject,reason,before,after,created_at) VALUES('ops-script','source.update',${`source:${paused}`},'账号设为私密',${sql.json({ enabled: true })},${sql.json({ enabled: false })},${new Date(now - 86400_000)})`;
   const text = await weekly();
   assert.equal(await counts(), before, "the news sources in use are counted without them");
-  assert.match(text, /另有只给模块用的信源 2 个（盯梢 2），抓取失败 1 个/);
-  assert.match(text, new RegExp(`· ${paused}（AI，[^，）]+，只给盯梢用）：账号设为私密`));
+  assert.match(text, /모듈 전용 출처 2곳\(盯梢 2\)이 추가로 있으며, 수집 실패 1곳/);
+  assert.match(text, new RegExp(`· ${paused}（AI, [^）]+, 盯梢 전용）：账号设为私密`));
 });

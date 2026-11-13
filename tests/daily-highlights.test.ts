@@ -117,7 +117,7 @@ test("a thin issue fills its highlights with the window's best reports it left o
   assert.deepEqual(v1.highlights?.map((h) => h.title), ["最值得看的", "刚过门槛的"]);
   assert.ok(v1.highlights?.[0]?.links.aihot?.endsWith(`/items/${best}`));
   const agent = (await app.inject(`/api/v1/agent/daily/${day}`)).body;
-  assert.match(agent, /【今日看点】/);
+  assert.match(agent, /【오늘의 주요 소식】/);
   assert.ok(agent.includes("最值得看的") && agent.includes("刚过门槛的"));
   assert.ok(!agent.includes("第二值得看的"), "a withdrawn report is not handed to Agents");
 });

@@ -81,7 +81,7 @@ async function submit(): Promise<{ id: number; file: string }> {
 const state = async (id: number) =>
   (await sql<{ forwarded: boolean; forward_error: string | null; screenshot_key: string | null }[]>`
     SELECT forwarded_at IS NOT NULL AS forwarded, forward_error, screenshot_key FROM feedback WHERE id = ${id}`)[0]!;
-const sentFor = (id: number) => feishu.sent.find((m) => m.title === `反馈 #${id}`);
+const sentFor = (id: number) => feishu.sent.find((m) => m.title === `피드백 #${id}`);
 const olderBy = (id: number, interval: string) => sql`UPDATE feedback SET created_at = now() - ${interval}::interval WHERE id = ${id}`;
 
 test("a failed screenshot upload keeps the feedback waiting, and the sweep sends it with the image", async () => {
@@ -120,7 +120,7 @@ test("a screenshot that cannot be uploaded for a day is dropped, and the text st
   feishu.uploadFails = false;
   assert.deepEqual({ ...(await state(id)) }, { forwarded: true, forward_error: null, screenshot_key: "gone:upload" });
   assert.ok(!existsSync(file), "no copy of the screenshot is kept");
-  assert.ok(JSON.stringify(sentFor(id)?.content).includes("截图未能上传"), "the chat is told the screenshot is missing");
+  assert.ok(JSON.stringify(sentFor(id)?.content).includes("스크린샷 업로드에 실패하여 삭제했습니다"), "the chat is told the screenshot is missing");
 });
 
 test("a picture Feishu refuses is dropped at once, and the text still goes", async () => {
@@ -169,7 +169,7 @@ test("a browser retry creates one feedback and forwards one notification", async
   const id = results[0]!.id;
   for (let i = 0; i < 100 && !(await state(id)).forwarded; i++) await new Promise(resolve => setTimeout(resolve, 10));
   assert.ok((await state(id)).forwarded);
-  assert.equal(feishu.sent.filter(m => m.title === `反馈 #${id}`).length, 1);
+  assert.equal(feishu.sent.filter(m => m.title === `피드백 #${id}`).length, 1);
   assert.ok(JSON.stringify(sentFor(id)?.content).includes(input.content));
 });
 
@@ -192,7 +192,7 @@ test("a report the model reads as empty is marked spam and not pushed; a real on
     assert.equal(sentFor(empty), undefined);
     const dropped = await record(empty);
     assert.deepEqual([dropped.status, dropped.kind, dropped.forward_error], ["spam", "other", null]);
-    assert.match(dropped.note!, /模型/, "the record says why nobody was told");
+    assert.match(dropped.note!, /모델이 내용 없음으로 판단하여 전달하지 않음/, "the record says why nobody was told");
     const [logged] = await sql<{ actor: string }[]>`SELECT actor FROM audit_log WHERE subject = ${`feedback:${empty}`} AND action = 'feedback.update'`;
     assert.equal(logged?.actor, "feedback-auto");
     const calls = model.calls;
@@ -322,7 +322,7 @@ test("the pool lists every idea, however many there are", async () => {
 test("an unknown kind, an idea outside a suggestion and a stale version are refused; reclassifying leaves the pool", async () => {
   const { id } = await ask("为什么模型榜上没有千问了", "198.51.100.21");
   await assert.rejects(handle(id, { kind: "praise" }), /unknown kind/);
-  await assert.rejects(handle(id, { kind: "question", idea: "千问上榜" }), /只有建议/);
+  await assert.rejects(handle(id, { kind: "question", idea: "千问上榜" }), /제안만/);
   await assert.rejects(handle(id, { kind: "suggestion", idea: "名".repeat(41) }), /40/);
   const stale = new Date((await listFeedback({ id })).rows[0]!.updated_at).toISOString();
   await handle(id, { kind: "suggestion", idea: `千问上榜 ${T}` });

@@ -83,7 +83,7 @@ test("a post that links an X Article waits for extraction, which brings the arti
   assert.match(a!.body_text, /^https:\/\/x\.com\/i\/article\/777\n\n# To Seek a Newer World\n\nWorld Labs is joining AMD\./);
 
   const input = (await loadAnalyzeInput(id))!;
-  assert.match(String(input.xPost!.text), /【X 长文】To Seek a Newer World\n\nWorld Labs is joining AMD\./, "every judging step reads the article");
+  assert.match(String(input.xPost!.text), /【X 아티클】To Seek a Newer World\n\nWorld Labs is joining AMD\./, "every judging step reads the article");
   assert.doesNotMatch(renderContext(input), /正文未抓到/);
 
   // The same post read again (a later search, an overlap) is the version already seen.
@@ -110,7 +110,7 @@ test("an article that cannot be fetched is flagged to the model, not passed off 
   assert.equal(await extractArticleBody(id), "unconfirmed");
   const input = (await loadAnalyzeInput(id))!;
   assert.equal(input.bodyStatus, "unconfirmed");
-  assert.match(renderContext(input), /【媒体】含 X 长文链接（正文未抓到）/);
+  assert.match(renderContext(input), /【미디어】X 장문 링크 포함\(본문 미수집\)/);
 });
 
 test("a post a module reads (sources.uses) has its X Article fetched while it is news; one nobody reads whole is grouped as it is", async () => {
@@ -188,7 +188,7 @@ test("the laid-out article keeps links, embedded posts, tables, code and video s
   assert.match(html, /<a href="https:\/\/x\.com\/i\/status\/2114377706603429899">x\.com\/i\/status\/21143777066034…<\/a>/);
   assert.match(html, /<table>[\s\S]*<th>项<\/th>[\s\S]*<td>1<\/td>[\s\S]*<\/table>/);
   assert.match(html, /<pre><code class="language-bash">echo hi\n<\/code><\/pre>/);
-  assert.match(html, /<figure><a href="https:\/\/x\.com\/someone\/status\/2114878401190506902"><img src="https:\/\/pbs\.twimg\.com\/media\/v\.jpg" width="1280" height="720" alt="">在 X 查看原视频<\/a><\/figure>/);
+  assert.match(html, /<figure><a href="https:\/\/x\.com\/someone\/status\/2114878401190506902"><img src="https:\/\/pbs\.twimg\.com\/media\/v\.jpg" width="1280" height="720" alt="">X에서 원본 동영상 보기<\/a><\/figure>/);
 });
 
 test("a long X article keeps the playable rendition of an inline video and a link to the original", () => {
@@ -203,6 +203,6 @@ test("a long X article keeps the playable rendition of an inline video and a lin
   };
   const html = xArticleHtml(article, POST_URL)!;
   assert.match(html, /<video[^>]*src="https:\/\/video\.twimg\.com\/amplify_video\/12\/vid\/v\.mp4\?tag=29"[^>]*controls[^>]*preload="none"/);
-  assert.match(html, /<\/video><a href="https:\/\/x\.com\/someone\/status\/2114878401190506902">在 X 查看原视频<\/a>/);
+  assert.match(html, /<\/video><a href="https:\/\/x\.com\/someone\/status\/2114878401190506902">X에서 원본 동영상 보기<\/a>/);
   assert.doesNotMatch(html, /evil\.example|\.m3u8/);
 });

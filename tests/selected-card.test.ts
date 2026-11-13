@@ -52,10 +52,10 @@ test("the title is larger than the summary, followed by the source and Seoul dat
   for (const end of ["default", "pc", "mobile"]) assert.match(size[end], /^heading-[34]$/, "18px on computers, 16px on phones");
   assert.equal(summary.text_size ?? "normal", "normal");
   assert.equal(summary.content, "官方演示了团队协作用法。");
-  assert.deepEqual([meta.text_size, meta.content], ["notation", "<font color='grey'>ChatGPT · 10월15일发布</font>"]);
+  assert.deepEqual([meta.text_size, meta.content], ["notation", "<font color='grey'>ChatGPT · 10월 15일 발행</font>"]);
   assert.deepEqual([reason.text_size, reason.content], ["notation", `<font color='grey'>**${ITEM_COPY.reasonLabel}**　官方演示了 Space 的协作用法。</font>`]);
   const links = buttons.columns.map((c: any) => c.elements[0]);
-  assert.deepEqual(links.map((b: any) => b.text.content), [`在 ${SITE.name} 阅读`, "原文"]);
+  assert.deepEqual(links.map((b: any) => b.text.content), [`${SITE.name}에서 읽기`, "원문"]);
   assert.ok(links.every((b: any) => b.behaviors[0].type === "open_url" && b.behaviors[0].default_url.startsWith("https://")));
   assert.doesNotMatch(JSON.stringify(card), /来源：/);
 });

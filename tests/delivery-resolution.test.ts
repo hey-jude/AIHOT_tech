@@ -58,6 +58,6 @@ test("giving up a delivery closes it and removes it from the unresolved queue", 
   const result = await resolveDelivery(row!.id,{outcome:"drop",note:"checked and chose not to send"},"test");
   assert.equal(result!.status,"skipped");
   assert.equal((await runsOverview()).deliveries.some(d=>d.id===row!.id),false);
-  await assert.rejects(resendDelivery(row!.id),/不需要处理/);
+  await assert.rejects(resendDelivery(row!.id),/처리할 필요가 없습니다/);
   assert.equal(sent,0);
 });

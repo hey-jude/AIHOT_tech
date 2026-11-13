@@ -45,7 +45,7 @@ const provider = await stub((_hit, req) => {
     }) };
   }
   const user = body.messages?.find((m) => m.role === "user")?.content ?? "";
-  const post = user.startsWith("【새 보도】");
+  const post = user.startsWith("【게시물】");
   const candidates = user.split("【후보 C").slice(1);
   if (post) [postJudgements, shown] = [postJudgements + 1, candidates];
   const no = post && user.split("\n\n")[0]!.includes("NOPE");

@@ -54,7 +54,7 @@ test("an outage is announced once, repeated hourly, and closed with one recovery
     const [state] = await sql<{ value: Record<string, { since: string }> }[]>`SELECT value FROM settings WHERE key = 'alerts.state'`;
     assert.equal(Date.parse(state!.value["content.process"]!.since), t0, "the episode is not dated by the oldest waiting article");
     const finding = (await collectFindings(t0)).find((f) => f.key === "content.process")!;
-    assert.match(finding.detail!, /最老的一篇 .* 收进/);
+    assert.match(finding.detail!, /가장 오래된 기사/);
     r = await checkAlerts(t0 + 50 * 60_000);
     assert.deepEqual(stuck(r.sent), [], "no repeat within the hour");
     r = await checkAlerts(t0 + 61 * 60_000);
@@ -93,7 +93,7 @@ test("many sources failing within the hour is announced while the rest still col
     await run(ids.slice(49, 60), "failed", 15);
     const finding = await fetching();
     assert.equal(finding?.level, "now");
-    assert.match(finding!.impact!, /300 个信源.*60 个/);
+    assert.match(finding!.impact!, /최근 수집한 출처 300곳 중 60곳/);
     assert.equal(finding!.since!.getTime(), now - 20 * 60_000, "dated by the first failure still standing");
     // A failing source is not fetched again for hours (its backoff), while the others keep being fetched: neither
     // time passing nor more successes elsewhere is recovery. Nor is pausing collection.
@@ -285,8 +285,8 @@ test("selected identity delays show reader impact, recovery state and the affect
     await make("group-alert-failed", 20, "failed");
     let warning = await finding();
     assert.equal(warning?.level, "now");
-    assert.match(warning!.impact!, /1 条.*精选/);
-    assert.match(warning!.heals!, /人工|处理后/);
+    assert.match(warning!.impact!, /엄선 기준을 충족한 기사 1건/);
+    assert.match(warning!.heals!, /수동 처리/);
     assert.match(warning!.detail!, /group-alert-failed/);
     const runs = await runsOverview();
     assert.equal(runs.grouping.waiting, 3, "the runs page includes normal waits but no false candidates");
@@ -297,12 +297,12 @@ test("selected identity delays show reader impact, recovery state and the affect
       VALUES('group-alert-receipt','deepseek','event_identity','article:group-alert-failed','unknown') RETURNING id`;
     await sql`UPDATE articles SET grouping_receipt_id=${receipt!.id} WHERE id='group-alert-failed'`;
     warning = await finding();
-    assert.match(warning!.heals!, /自动/);
-    assert.match(warning!.heals!, /30 分钟/);
+    assert.match(warning!.heals!, /자동/);
+    assert.match(warning!.heals!, /30분/);
     await sql`INSERT INTO receipt_attempts(receipt_id,service,attempt,status,error)
-      VALUES(${receipt!.id},'deepseek',1,'failed','自动放行：结果未知超过 30 分钟，未核对是否计费')`;
+      VALUES(${receipt!.id},'deepseek',1,'failed','자동 허용: 결과가 30분 넘게 불명확하며 결제 여부는 확인되지 않음')`;
     warning = await finding();
-    assert.match(warning!.heals!, /人工|处理后/);
+    assert.match(warning!.heals!, /수동 처리|처리 후/);
     assert.match(warning!.detail!, new RegExp(`#${receipt!.id}`));
 
     await checkAlerts(now);
@@ -336,8 +336,8 @@ test("the ops digest does not describe unknown paid work as harmless or already 
     console.log = (value: unknown) => { lines.push(String(value)); };
     await sendDigest();
     const message = lines.join("\n");
-    assert.match(message, /结果.*未知|结果.*确认/);
-    assert.doesNotMatch(message, /以下事项不影响读者|自动重试过一次/);
+    assert.match(message, /결과가 아직 확인되지 않았습니다/);
+    assert.doesNotMatch(message, /독자에게 영향을 주지 않습니다|자동으로 한 번 재시도했습니다/);
   } finally {
     console.log = log;
     if (enabled === undefined) delete process.env.FEISHU_INTERNAL_ENABLED;
@@ -428,13 +428,13 @@ test("provider recovery follows the refused model and current routing", async ()
       VALUES(${r!.id},4,'dashscope','qwen3.8-flash','received')`;
     assert.ok((await checkAlerts(now+2*3600_000)).open.includes('provider.refused.dashscope:qwen3.7-flash'), 'another model cannot prove recovery');
     let finding=(await collectFindings(now+2*3600_000)).find(f=>f.key==='provider.refused.dashscope:qwen3.7-flash')!;
-    assert.match(finding.impact!, /精选预筛/);
-    assert.doesNotMatch(finding.impact!, /结构抽取/);
+    assert.match(finding.impact!, /엄선 사전 필터/);
+    assert.doesNotMatch(finding.impact!, /구조 추출/);
     process.env.PREFILTER_MODEL = "qwen3.8-flash";
     invalidateModelCache();
     finding=(await collectFindings(now+2*3600_000)).find(f=>f.key==='provider.refused.dashscope:qwen3.7-flash')!;
     assert.equal(finding.level,'later');
-    assert.match(finding.impact!, /当前.*未使用.*旧限制.*未验证/);
+    assert.match(finding.impact!, /현재 처리 단계에서 제한된 모델을 사용하지 않지만 이전 제한은 아직 검증되지 않았습니다/);
     assert.ok(!(await checkAlerts(now+2*3600_000+60_000)).sent.includes('provider.refused.dashscope:qwen3.7-flash:recovered'));
     await sql`INSERT INTO receipt_attempts(receipt_id,attempt,service,model,status)
       VALUES(${r!.id},5,'dashscope','qwen3.7-flash','received')`;
@@ -458,8 +458,8 @@ test("provider impact includes the same evaluated fallback as modelRoute", async
     const route = await modelRoute("summarize");
     assert.equal(route.fallbackModel, "test-backup");
     const steps = await stepsOnService("zhipu", new Set(["glm-5.3-flash"]));
-    assert.ok(steps.includes("제목요약"), "the fallback can fail and stop articles even without a primary on this supplier");
-    assert.ok(!steps.includes("精选评分"), "an unevaluated fallback is not invented for other steps");
+    assert.ok(steps.some((s) => s.startsWith("제목·요약(")), "the fallback can fail and stop articles even without a primary on this supplier");
+    assert.ok(!steps.includes("엄선 점수"), "an unevaluated fallback is not invented for other steps");
   } finally {
     for (const [key, value] of Object.entries(envs)) if (value === undefined) delete process.env[key]; else process.env[key] = value;
     delete MODELS["test-primary"];

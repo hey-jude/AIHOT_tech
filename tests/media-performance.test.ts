@@ -180,10 +180,10 @@ test("concurrent cold OG and poster requests all succeed with identical cached b
   assert.equal((await sharp(posters[0]!.png).metadata()).width, 1080);
 });
 
-test("share images take added fonts only from <name>-400/-700.ttf beside Noto Sans SC", () => {
-  const files = ["LICENSE", "noto-sans-sc-700.ttf", "noto-sans-kr-700.ttf", "noto-sans-sc-400.ttf", "noto-sans-kr-400.ttf", "extra.otf", "extra-500.ttf", "-400.ttf"];
-  assert.deepEqual(fallbackFontFiles(files), ["noto-sans-kr-400.ttf", "noto-sans-kr-700.ttf"]);
-  assert.deepEqual(fallbackFontFiles(["LICENSE", "noto-sans-sc-400.ttf", "noto-sans-sc-700.ttf"]), []);
+test("share images take added fonts only from <name>-400/-700.ttf beside Noto Sans KR", () => {
+  const files = ["LICENSE", "noto-sans-sc-700.ttf", "noto-sans-kr-700.ttf", "noto-sans-sc-400.ttf", "noto-sans-kr-400.ttf", "noto-sans-jp-400.ttf", "noto-sans-jp-700.ttf", "extra.otf", "extra-500.ttf", "-400.ttf"];
+  assert.deepEqual(fallbackFontFiles(files), ["noto-sans-jp-400.ttf", "noto-sans-jp-700.ttf"]);
+  assert.deepEqual(fallbackFontFiles(["LICENSE", "noto-sans-sc-400.ttf", "noto-sans-sc-700.ttf", "noto-sans-kr-400.ttf", "noto-sans-kr-700.ttf"]), []);
 });
 
 test("without added fonts, share images and posters keep their cache keys", { skip: FALLBACK_FONTS.length > 0 }, () => {

@@ -160,7 +160,7 @@ test("structure retains grounded conditions, rejects invented or unseen quotes, 
   const base = { category: "ai-models", tags: [], subjects: [], fact: frame };
   const out = normalizeStructure(StructureSchema.parse(base), input);
   assert.ok(buildMaterial(input).includes("Only available in the US."), "a condition after the old 7000-character cutoff reaches the model");
-  assert.ok(buildMaterial(input).includes("后文未提供"));
+  assert.ok(buildMaterial(input).includes("이후 내용은 제공되지 않음"));
   assert.equal(out.scope, "unknown", "an older result with a fact is not proof of single scope");
   assert.deepEqual(out.fact?.conditions, frame.conditions.slice(0, 2));
   assert.equal(out.fact?.evidence, frame.evidence);

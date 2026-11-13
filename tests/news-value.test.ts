@@ -296,7 +296,7 @@ test("a launch selected before the identity window is still reader coverage for 
   const calls = provider.hits();
   const result = await groupArticle(id);
   assert.equal(provider.hits(), calls + 1, "judged in the batch call");
-  assert.ok(users.at(-1)!.includes("已公开精选阅读背景 R1") && users.at(-1)!.includes(text + "首发"));
+  assert.ok(users.at(-1)!.includes("기존 공개 엄선 참고 자료 R1") && users.at(-1)!.includes(text + "首发"));
   assert.doesNotMatch(users.at(-1)!, /【후보 C\d+】/);
   assert.equal(result.verdict, "new-story", "identity keeps its own window");
   assert.deepEqual([(await state(id)).selection_adds_value, (await state(id)).selected], [false, false]);
@@ -313,9 +313,9 @@ test("a selected fact still among the candidates is not repeated as reading cont
   selection = { addsValue: false, reason: "已覆盖" };
   const id = await report(text + "再次介绍");
   await groupArticle(id);
-  const batch = users.findLast(u => u.startsWith(`【新报道】\n제목：${text}再次介绍`))!;
+  const batch = users.findLast(u => u.startsWith(`【새 보도】\n제목: ${text}再次介绍`))!;
   assert.match(batch, /【후보 C1】/);
-  assert.doesNotMatch(batch, /阅读背景/);
+  assert.doesNotMatch(batch, /기존 공개 엄선 참고 자료/);
 });
 
 test("unselected candidates are not prior selected coverage", async () => {
@@ -453,7 +453,7 @@ test("history telling the news of a card around its date stays out of selection 
   otherNews("SAME_STORY");
   const own = await report(text + "另有其事", "single", true, sourceId, daysAgo(3));
   assert.equal((await groupArticle(own)).verdict, "historical");
-  assert.deepEqual([(await state(own)).selected, (await state(own)).selection_value_reason], [true, "历史资料按原文时间归档"]);
+  assert.deepEqual([(await state(own)).selected, (await state(own)).selection_value_reason], [true, "과거 자료를 원문 시각 기준으로 정리함"]);
 });
 
 test("a composite whose news is on a card stays out; one with news of its own keeps its card", async () => {

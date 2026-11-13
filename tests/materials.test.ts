@@ -239,7 +239,7 @@ test('stored publication date remains a date in the model input, even at a sourc
   const { articleId } = await upsertMaterial(input);
   const article = await loadAnalyzeInput(articleId);
   assert.equal(article?.publicationTime, '2026-10-13');
-  assert.match(buildMaterial(article!), /2026-10-13（原文仅有日期，时刻未知）/);
+  assert.match(buildMaterial(article!), /2026-10-13\(원문에 날짜만 있고 시각은 없음\)/);
   assert.doesNotMatch(buildMaterial(article!), /15:00/);
   await upsertMaterial(input);
   const [row] = await sql`SELECT publication_time, revision FROM articles WHERE id=${articleId}`;

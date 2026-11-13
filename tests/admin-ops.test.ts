@@ -112,7 +112,7 @@ test("an enabled DingTalk target receives signed markdown", async () => {
   assert.equal(message.msgtype, "markdown");
   assert.equal(message.markdown.title, pub!.title);
   assert.ok(message.markdown.text.includes(pub!.title), "the title is in the text");
-  assert.ok(message.markdown.text.includes("原文"), "the original link is in the text");
+  assert.ok(message.markdown.text.includes("원문"), "the original link is in the text");
   // The signature: HMAC-SHA256 of "timestamp\nsecret", base64 — the robot's 加签 rule. searchParams
   // already decodes the URL-encoded sign the sender appends, so compare the raw base64.
   const url = new URL(last.url, "http://127.0.0.1");
@@ -144,10 +144,10 @@ test("a dingtalk target with its channel valve off records a skip and sends noth
 test("DingTalk markdown keeps an original link with brackets whole and dates like the Feishu card", async () => {
   const { dingtalkMarkdown } = await import("@aihot/backend/notify/dingtalk");
   const { text } = dingtalkMarkdown({
-    title: "t", sourceName: "s", published: "11월7일发布", summary: null, reason: null, reasonLabel: "r",
+    title: "t", sourceName: "s", published: "11월 7일 발행", summary: null, reason: null, reasonLabel: "r",
     articleId: "a1", url: "https://en.wikipedia.org/wiki/Claude_(language_model) x",
   });
-  assert.ok(text.includes("s · 11월7일发布"), text);
+  assert.ok(text.includes("s · 11월 7일 발행"), text);
   assert.ok(text.includes("(https://en.wikipedia.org/wiki/Claude_%28language_model%29%20x)"), text);
 });
 

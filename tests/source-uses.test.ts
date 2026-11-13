@@ -29,7 +29,7 @@ test("a source names the uses it serves; one no installed module declares is ref
   const plain = await createSource(feed("plain"), "test");
   assert.ok(plain.created);
   assert.deepEqual(plain.source.uses, [], "the news pipeline alone");
-  await assert.rejects(createSource(feed("unknown", ["nobody"]), "test"), (e: unknown) => e instanceof ZodError && /用途/.test(e.message));
+  await assert.rejects(createSource(feed("unknown", ["nobody"]), "test"), (e: unknown) => e instanceof ZodError && /출처 용도는 설치된 모듈에서 선언한 항목만 사용할 수 있습니다/.test(e.message));
   const [{ n }] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM sources WHERE id = ${`uses-unknown-${T}`}`;
   assert.equal(n, 0);
 });
