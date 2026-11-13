@@ -1,12 +1,12 @@
 
-【标题自洽规则 — 让读者不点开就知道"这是关于谁的什么事"】
+【제목 자립 규칙 — 독자가 클릭하지 않아도 “누구의 무슨 일인지” 알 수 있게】
 
-1. 标题必须点出核心主体：模型名 / 产品名 / 公司名 / 项目名。
-2. 原标题已经清楚点出主体的：英文标题翻译成中文、中文标题保持原意，不要为改写而改写。
-3. 原标题只是版本号 / 代号 / 没信息量的 teaser（如 "v2.1.159"、"Small is a feature"、"Day 1"、"重磅发布"）时，结合【来源】和正文把主体补进标题。例：原标题 "v2.1.159" + 来源 "Claude Code：GitHub Releases" → "Claude Code v2.1.159 发布"。
-4. 补主体只能用【来源】或正文里真实出现的名字。正文和来源都没点出具体型号时，用上位词（如"开源多模态模型"）兜底，绝不凭"行业常识"编一个具体型号 / 版本 / 数字。
-5. 原标题表达的【文章类型和核心动作】是硬边界：How / Why / Guide / Analysis / Review / Benchmark 这类解释、分析、教程或评测标题，中文标题必须保留这个类型；不能因为正文谈到一个已经存在的模型、产品或新数据，就改写成“发布 / 推出 / 上线 / 开源”。只有原标题明确宣布了发布、推出、上线或开源，中文标题才能使用对应动作。保留文章类型不等于删主体：仍须按第 1-4 条补全正文或来源明确给出的公司、产品、项目名。
-   例：原标题 "How GPT-5.6 fuses frontier intelligence with frontier efficiency" → "GPT-5.6 如何兼顾前沿智能与效率"，不能写成 "OpenAI 发布 GPT-5.6"。
-   例：原标题 "How to build interactive experiences with canvases" + 来源和正文明确是 GitHub Copilot → "GitHub Copilot 如何用 canvases 构建交互体验"，不能只写成缺主体的 "如何用 canvases 构建交互体验"。
-6. 本条的动作和背景里的旧发布要分清：原文把发布写成过去的事（“At DevDay, we introduced …”“Last week we launched …”“上周我们发布了…”），本条是在讲用法、做演示或再次推广时，标题写介绍、演示或讲解，把发布交代成此前的事；不能写成“推出 / 发布 / 上线”，否则读者会当成今天的新闻。只有原文明确某项能力是现在才开放或新增，才对那一项用对应动作。
-   例：正文 "At DevDay, we introduced ChatGPT Space … See how it works below" → "OpenAI 演示 DevDay 发布的 ChatGPT Space 团队协作用法"，不能写成 "OpenAI 在 DevDay 推出 ChatGPT Space"。
+1. 제목은 반드시 핵심 주체(모델명 / 제품명 / 회사명 / 프로젝트명)를 드러내야 합니다.
+2. 원제목이 이미 주체를 분명히 드러낸 경우: 영문 제목은 한국어로 번역하고, 한국어 제목은 원문 의미를 유지하며, 고쳐쓰기를 위한 고쳐쓰기를 하지 마십시오.
+3. 원제목이 버전 번호 / 코드네임 / 정보량 없는 티저(예: “v2.1.159”, “Small is a feature”, “Day 1”, “대반전 공개”)인 경우, 【출처】와 본문을 결합해 주체를 보완하십시오. 예: 원제목 “v2.1.159” + 출처 “Claude Code: GitHub Releases” → “Claude Code v2.1.159 출시”.
+4. 주체 보완은 오직 【출처】 또는 본문에 실제로 등장한 이름만 사용할 수 있습니다. 본문과 출처 모두 구체적인 모델을 밝히지 않았다면 상위어(예: “오픈소스 멀티모달 모델”)로 대체하고, “업계 상식”으로 구체적인 모델 / 버전 / 숫자를 지어내면 절대 안 됩니다.
+5. 원제목이 표현하는 【글의 유형과 핵심 행위】는 하드 바운더리입니다: How / Why / Guide / Analysis / Review / Benchmark 같은 설명·분석·튜토리얼·평가 제목은, 한국어 제목도 반드시 이 유형을 유지해야 하며, 본문이 이미 존재하는 모델·제품·새 데이터를 다룬다는 이유로 “출시 / 공개 / 오픈소스화”로 고쳐쓰면 안 됩니다. 오직 원제목이 출시·공개·오픈소스화를 명시적으로 선언했을 때만 한국어 제목에 해당 행위를 쓸 수 있습니다. 글 유형 유지가 주체 삭제를 의미하지는 않습니다: 여전히 1–4조에 따라 본문 또는 출처가 명확히 제시한 회사·제품·프로젝트명을 보완해야 합니다.
+   예: 원제목 “How GPT-5.6 fuses frontier intelligence with frontier efficiency” → “GPT-5.6는 어떻게 프런티어 지능과 효율을 동시에 잡는가”, “OpenAI, GPT-5.6 출시”로 쓰면 안 됩니다.
+   예: 원제목 “How to build interactive experiences with canvases” + 출처와 본문이 GitHub Copilot임을 명확히 밝힘 → “GitHub Copilot, 캔버스로 상호작용 경험을 만드는 방법”, 주체가 빠진 “캔버스로 상호작용 경험을 만드는 방법”만 쓰면 안 됩니다.
+6. 이 건의 행위와 배경의 기존 출시를 구분하십시오: 원문이 출시를 과거의 일로 서술(“At DevDay, we introduced …”, “Last week we launched …”, “지난주 우리는 …를 출시했다”)하고, 이 글이 사용법을 설명·시연·재홍보하는 경우, 제목은 소개·시연·설명으로 쓰고 출시는 이전의 일로 교대하십시오. “출시 / 공개 / 오픈소스화”로 쓰면 독자가 오늘의 뉴스로 오해합니다. 오직 원문이 어떤 능력이 지금에서야 개방·추가됨을 명시할 때만 그 능력에 대해 해당 행위를 쓰십시오.
+   예: 본문 “At DevDay, we introduced ChatGPT Space … See how it works below” → “OpenAI, DevDay에서 공개한 ChatGPT Space 팀 협업 사용법 시연”, “OpenAI, DevDay에서 ChatGPT Space 출시”로 쓰면 안 됩니다.

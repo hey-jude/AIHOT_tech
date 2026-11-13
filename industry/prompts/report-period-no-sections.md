@@ -1,1 +1,1 @@
-sections 留空。
+sections는 비워 두십시오.
