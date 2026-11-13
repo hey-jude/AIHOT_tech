@@ -16,7 +16,7 @@ import type { AgentTrack } from "../modules";
 import { PhoneBar } from "../components/shell/PhoneBar";
 import type { Screen } from "../components/shell/screens";
 
-export const handle: Screen = { tab: "me", name: "Agent 接入" };
+export const handle: Screen = { tab: "me", name: "Agent 접속" };
 
 export { pageHeaders as headers } from "../lib/api.server";
 
@@ -25,15 +25,15 @@ const V = PUBLIC_INTERFACE_VERSION;
 /** The ways in, the modules' first. The chooser's cards are the tabs: `?tab=` (the first is the default and not written). */
 const TRACKS: AgentTrack[] = [
   ...AGENT_PARTS.flatMap((p) => p.tracks ?? []),
-  { key: "mcp", name: "MCP", short: "MCP", pitch: `填一个地址，多出 ${mcpToolCount()} 个工具`, fit: "Claude 桌面版、Cursor 等远程 MCP 客户端", icon: IconPlug, Panel: McpPanel },
-  { key: "rss", name: "RSS", short: "RSS", pitch: "复制地址，用阅读器订阅", fit: "Reeder、Folo、Inoreader、n8n", icon: IconRss, Panel: RssPanel },
-  { key: "api", name: "REST API", short: "API", pitch: "匿名 GET，自己写程序取数", fit: "脚本、机器人、小程序、看板", icon: IconCode, Panel: ApiPanel, anchors: ["agent-api-recovery"] },
+  { key: "mcp", name: "MCP", short: "MCP", pitch: `주소 하나를 입력해 도구 ${mcpToolCount()}개 추가`, fit: "Claude 데스크톱, Cursor 등 원격 MCP 클라이언트", icon: IconPlug, Panel: McpPanel },
+  { key: "rss", name: "RSS", short: "RSS", pitch: "주소를 복사해 리더에서 구독", fit: "Reeder, Folo, Inoreader, n8n", icon: IconRss, Panel: RssPanel },
+  { key: "api", name: "REST API", short: "API", pitch: "익명 GET으로 직접 데이터 조회", fit: "스크립트, 봇, 미니 앱, 대시보드", icon: IconCode, Panel: ApiPanel, anchors: ["agent-api-recovery"] },
 ];
 const FIRST = TRACKS[0]!.key;
 const tabKey = (key: string | null) => key && TRACKS.some(t => t.key === key) ? key : FIRST;
 const hrefOf = (key: string) => (key === FIRST ? "/agent" : `/agent?tab=${key}`);
-/** How many ways, as the copy counts them ("四种方式"). */
-const WAYS = ["零", "一", "两", "三", "四", "五", "六"][TRACKS.length];
+/** The number of ways, written as Korean words. */
+const WAYS = ["영", "한", "두", "세", "네", "다섯", "여섯"][TRACKS.length];
 
 /** The modules' sections at the end of a panel. */
 const BLOCKS = AGENT_PARTS.flatMap((p) => p.blocks ?? []);
@@ -46,9 +46,9 @@ const anchorHref = (id: string) => `${hrefOf(ANCHORS.get(id)!)}#${id}`;
 
 /** Machine-readable entry points, with what each one is for. */
 const RESOURCES: Array<[label: string, href: string, note: string]> = [
-  ["llms.txt", "/llms.txt", "给大模型读的站点说明"],
-  ["Agent 使用说明", "/api/v1/agent", `Agent 读了就能查${GUIDE_CLIENTS ? `，${GUIDE_CLIENTS} 用的也是它` : ""}`],
-  ["OpenAPI 3.1", "/openapi-v1.json", `REST API 的完整定义 · ${V}`],
+  ["llms.txt", "/llms.txt", "대규모 언어 모델을 위한 사이트 안내"],
+  ["Agent 사용 안내", "/api/v1/agent", `Agent가 읽고 바로 조회할 수 있습니다${GUIDE_CLIENTS ? ` · ${GUIDE_CLIENTS}에서도 사용` : ""}`],
+  ["OpenAPI 3.1", "/openapi-v1.json", `REST API 전체 명세 · ${V}`],
   ...AGENT_PARTS.flatMap((p) => p.resources ?? []),
 ];
 
@@ -78,7 +78,7 @@ export function meta({ location }: Route.MetaArgs) {
   const path = listPath("/agent", { tab: tab !== FIRST ? tab : null });
   return pageMeta({
     title: SEO_TITLES.agent,
-    description: `把 ${SITE.name} 接进你的 Agent：${TRACKS.map((t) => t.name).join("、")} ${WAYS}种方式，匿名只读，无需 API Key，一分钟接好。`,
+    description: `${SITE.name}을 Agent에 연결하세요. ${TRACKS.map((t) => t.name).join(", ")} 등 ${WAYS}가지 방식으로 익명 조회가 가능하며, API Key 없이 간편하게 설정할 수 있습니다.`,
     path,
     image: "/og/pages/agent.png",
   });
@@ -121,8 +121,8 @@ export default function AgentPage() {
   const chip = "inline-flex h-7 items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 text-[12px] text-ink-3";
   const aside = (
     <>
-      <AsideCard title="接入方式" className="hidden side:block">
-        <nav aria-label="接入方式" className="-mx-2 -mb-1 space-y-0.5">
+      <AsideCard title="접속 방식" className="hidden side:block">
+        <nav aria-label="접속 방식" className="-mx-2 -mb-1 space-y-0.5">
           {TRACKS.map((t) => {
             const on = t.key === tab;
             return (
@@ -145,8 +145,8 @@ export default function AgentPage() {
           })}
         </nav>
       </AsideCard>
-      <AsideCard title="接入资源">
-        <nav aria-label="接入资源" className="-mx-2 -mb-1">
+      <AsideCard title="접속 자료">
+        <nav aria-label="접속 자료" className="-mx-2 -mb-1">
           {RESOURCES.map(([l, h, note]) => (
             <a key={h} href={h} target={h.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="group flex items-start gap-2 rounded-control px-2 py-2 transition-colors hover:bg-bg-sunk">
               <span className="min-w-0 flex-1">
@@ -158,10 +158,10 @@ export default function AgentPage() {
           ))}
         </nav>
       </AsideCard>
-      <AsideCard title="没接上？">
-        <p className="text-[13px] leading-[1.75] text-ink-3">把平台、版本和报错写在反馈页，别发 token 或本地文件。</p>
+      <AsideCard title="연결이 안 되나요?">
+        <p className="text-[13px] leading-[1.75] text-ink-3">플랫폼, 버전, 오류 내용을 피드백에 남겨 주세요. 토큰이나 로컬 파일은 보내지 마세요.</p>
         <IntentLink viewTransition to="/feedback" className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:underline">
-          去反馈 <IconChevronRight size={14} />
+          피드백 남기기 <IconChevronRight size={14} />
         </IntentLink>
       </AsideCard>
     </>
@@ -169,25 +169,25 @@ export default function AgentPage() {
 
   return (
     <>
-    <PhoneBar back={{ to: "/more", label: "我的" }} title="Agent 接入" />
+    <PhoneBar back={{ to: "/more", label: "마이" }} title="Agent 접속" />
     <ReadingLayout aside={aside}>
       <header className="lg:pt-5">
-        <Kicker>AGENT 接入</Kicker>
-        <h1 data-page-title="" className="mt-4 text-[28px] font-semibold leading-[1.3] text-ink sm:text-[32px]">{`把 ${SITE.name} 接进你的 Agent`}</h1>
-        <p className="mt-3 max-w-[40em] text-[15px] leading-[1.8] text-ink-3">{`${TRACKS.map((t) => t.short).join("、")} ${WAYS}种方式读的是同一份数据：精选、热点、日报、周报和月报，按你用的工具选一种就行。全部匿名只读，不用注册，也不用 API Key。`}</p>
+        <Kicker>AGENT 접속</Kicker>
+        <h1 data-page-title="" className="mt-4 text-[28px] font-semibold leading-[1.3] text-ink sm:text-[32px]">{`${SITE.name}을 Agent에 연결하세요`}</h1>
+        <p className="mt-3 max-w-[40em] text-[15px] leading-[1.8] text-ink-3">{`${TRACKS.map((t) => t.short).join(", ")} 등 ${WAYS}가지 방식으로 같은 데이터를 조회합니다. 엄선, 핫 이슈, 일간, 주간, 월간 중 사용하는 도구에 맞는 방식을 선택하세요. 모두 익명 읽기 전용이며 가입이나 API Key가 필요 없습니다.`}</p>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span className={`${chip} ${healthy ? "text-ok" : "text-hot"}`}>
             <span className={`size-1.5 rounded-full ${healthy ? "bg-ok" : "bg-hot"}`} aria-hidden="true" />
-            {healthy ? "服务正常" : "服务异常"}
+            {healthy ? "서비스 정상" : "서비스 오류"}
           </span>
-          <span className={chip}>版本 <span className="mono text-ink-2">{V}</span></span>
-          <span className={chip}>匿名只读 · 无需 Key</span>
+          <span className={chip}>버전 <span className="mono text-ink-2">{V}</span></span>
+          <span className={chip}>익명 읽기 전용 · Key 불필요</span>
         </div>
       </header>
 
       {BANNERS.map((Banner, i) => <Banner key={i} base={base} tag={tag} href={anchorHref} open={open} />)}
 
-      <div role="tablist" aria-label="接入方式" className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-3 2xl:grid-cols-4">
+      <div role="tablist" aria-label="접속 방식" className="mt-8 grid grid-cols-2 gap-2.5 sm:gap-3 2xl:grid-cols-4">
         {TRACKS.map((t) => {
           const on = t.key === tab;
           return (

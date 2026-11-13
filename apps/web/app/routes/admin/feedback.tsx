@@ -15,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   return adminGet<AdminFeedback>(request, `/api/admin/feedback${new URL(request.url).search}`);
 }
 
-export const meta: Route.MetaFunction = () => [{ title: `反馈 · ${SITE.name} 后台` }];
+export const meta: Route.MetaFunction = () => [{ title: `피드백 · ${SITE.name} 관리자` }];
 
 const TONE: Record<string, "accent" | "warn" | "ok" | "muted"> = { new: "accent", triaged: "warn", replied: "ok", resolved: "ok", spam: "muted" };
 /** The pool's names, offered while naming a suggestion so the same idea keeps one name. */
@@ -35,86 +35,86 @@ function FeedbackCard({ f }: { f: AdminFeedbackRow }) {
         <span className="num font-medium text-ink-2">#{f.id}</span>
         <Badge tone={TONE[f.status] ?? "muted"}>{FEEDBACK_STATUS[f.status] ?? f.status}</Badge>
         {f.kind && <Badge tone="info">{FEEDBACK_KIND[f.kind] ?? f.kind}</Badge>}
-        {f.idea && <Badge tone="muted" title="归入建议池的这一条">{f.idea}</Badge>}
+        {f.idea && <Badge tone="muted" title="제안 목록에 포함된 항목">{f.idea}</Badge>}
         <Time at={f.created_at} />
         {f.email && <a className="text-accent" href={`mailto:${f.email}`}>{f.email}</a>}
         {f.page_url && <a className="max-w-[320px] truncate hover:text-accent" href={f.page_url} target="_blank" rel="noreferrer">{f.page_url}</a>}
-        {f.from_source > 1 && <Badge tone="info" title="同一来源（IP 与浏览器家族的不可逆标识）">同来源 {f.from_source} 条</Badge>}
-        {f.banned && <Badge tone="bad">来源已封禁</Badge>}
-        {f.email_banned && <Badge tone="bad">邮箱已临时封禁</Badge>}
+        {f.from_source > 1 && <Badge tone="info" title="동일 출처 (IP와 브라우저 계열의 복원 불가능한 식별자)">동일 출처 {f.from_source}건</Badge>}
+        {f.banned && <Badge tone="bad">출처 차단됨</Badge>}
+        {f.email_banned && <Badge tone="bad">이메일 임시 차단됨</Badge>}
         {!f.forwarded_at && f.status === "new" && (
-          <Badge tone="warn" title={f.forward_error && f.forward_error !== "pending" ? `还没有转发到内部飞书群：${f.forward_error}` : "还没有转发到内部飞书群"}>未转发</Badge>
+          <Badge tone="warn" title={f.forward_error && f.forward_error !== "pending" ? `내부 페이슈 그룹에 아직 전달되지 않음：${f.forward_error}` : "내부 페이슈 그룹에 아직 전달되지 않음"}>전달 안 됨</Badge>
         )}
       </div>
       <p className="mt-2.5 whitespace-pre-wrap text-[14px] leading-relaxed text-ink">{f.content}</p>
       {f.screenshot === "local" && (
         <a href={`${base}/screenshot`} target="_blank" rel="noreferrer" className="mt-2 inline-block">
-          <img src={`${base}/screenshot`} alt="反馈截图" loading="lazy" className="max-h-48 rounded-control ring-1 ring-line" />
+          <img src={`${base}/screenshot`} alt="피드백 스크린샷" loading="lazy" className="max-h-48 rounded-control ring-1 ring-line" />
         </a>
       )}
-      {f.screenshot === "feishu" && <p className="mt-2 text-[12.5px] text-ink-4">截图已随反馈转到内部飞书群。</p>}
-      {f.screenshot === "gone" && <p className="mt-2 text-[12.5px] text-ink-4">截图未能转到飞书，已删除。</p>}
+      {f.screenshot === "feishu" && <p className="mt-2 text-[12.5px] text-ink-4">스크린샷이 피드백과 함께 내부 페이슈 그룹으로 전달되었습니다.</p>}
+      {f.screenshot === "gone" && <p className="mt-2 text-[12.5px] text-ink-4">스크린샷을 페이슈로 전달하지 못해 삭제했습니다.</p>}
       <div className="mt-3 grid gap-2 sm:grid-cols-[180px_1fr_auto] sm:items-start">
         <div className="grid gap-2">
           <Select
-            aria-label="处理状态"
+            aria-label="처리 상태"
             value={f.status}
             disabled={!!pending}
-            onChange={(e) => run("PATCH", base, { status: e.target.value, version }, { label: "status", success: "状态已更新" })}
+            onChange={(e) => run("PATCH", base, { status: e.target.value, version }, { label: "status", success: "상태 업데이트됨" })}
           >
             {Object.entries(FEEDBACK_STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </Select>
           <Select
-            aria-label="类型"
+            aria-label="유형"
             value={f.kind ?? ""}
             disabled={!!pending}
-            onChange={(e) => run("PATCH", base, { kind: e.target.value || null, version }, { label: "kind", success: "类型已更新" })}
+            onChange={(e) => run("PATCH", base, { kind: e.target.value || null, version }, { label: "kind", success: "유형을 업데이트했습니다" })}
           >
-            <option value="">未分类</option>
+            <option value="">미분류</option>
             {Object.entries(FEEDBACK_KIND).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </Select>
         </div>
         <div className="grid gap-2">
-          <Textarea rows={1} className="!min-h-[38px]" placeholder="处理备注（仅内部可见）" value={note} onChange={(e) => setNote(e.target.value)} />
+          <Textarea rows={1} className="!min-h-[38px]" placeholder="처리 메모 (내부 전용)" value={note} onChange={(e) => setNote(e.target.value)} />
           {f.kind === "suggestion" && (
-            <Input list={IDEAS_LIST} aria-label="归入的建议" placeholder="归入的建议（同一需求用同一个名字）" value={idea} onChange={(e) => setIdea(e.target.value)} />
+            <Input list={IDEAS_LIST} aria-label="연결할 제안" placeholder="연결할 제안 (같은 요청에는 같은 이름 사용)" value={idea} onChange={(e) => setIdea(e.target.value)} />
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <Button size="md" disabled={!edited} busy={pending === "note"} onClick={() => run("PATCH", base, { note: note || null, ...(f.kind === "suggestion" ? { idea: idea || null } : {}), version }, { label: "note", success: "已保存" })}>
-            保存
+          <Button size="md" disabled={!edited} busy={pending === "note"} onClick={() => run("PATCH", base, { note: note || null, ...(f.kind === "suggestion" ? { idea: idea || null } : {}), version }, { label: "note", success: "저장했습니다" })}>
+            저장
           </Button>
-          <Button tone="ghost" onClick={() => setDialog(f.banned ? null : "ban")} disabled={f.banned} title="拒绝这个来源的后续反馈">封禁来源</Button>
-          {f.email && <Button tone="ghost" onClick={() => setDialog("email-ban")} disabled={f.email_banned} title="拒绝填写这个邮箱的反馈，48 小时后自动解除">临时封禁邮箱</Button>}
-          <Button tone="ghost" onClick={() => setDialog("erase")} title="按隐私说明删除提交者的资料">删除资料</Button>
+          <Button tone="ghost" onClick={() => setDialog(f.banned ? null : "ban")} disabled={f.banned} title="이 출처의 후속 피드백 거부">출처 차단</Button>
+          {f.email && <Button tone="ghost" onClick={() => setDialog("email-ban")} disabled={f.email_banned} title="이 이메일로 보내는 피드백을 거부합니다. 48시간 후 자동 해제됩니다.">이메일 임시 차단</Button>}
+          <Button tone="ghost" onClick={() => setDialog("erase")} title="개인정보 안내에 따라 제출자 정보 삭제">정보 삭제</Button>
         </div>
       </div>
       <ReasonDialog
         open={dialog === "ban"}
-        title="封禁这个反馈来源"
-        description={`同一来源之后提交反馈会被拒绝。来源标识不可还原成 IP。${ADMIN?.banNote ?? ""}`}
+        title="이 피드백 출처 차단"
+        description={`같은 출처에서 이후 제출하는 피드백은 거부됩니다. 출처 식별자로 IP를 복원할 수 없습니다.${ADMIN?.banNote ?? ""}`}
         danger
-        confirmLabel="封禁"
+        confirmLabel="차단"
         onClose={() => setDialog(null)}
-        onSubmit={async (reason) => (await run("POST", "/api/admin/feedback-bans", { sourceHash: f.source_hash, reason }, { label: "ban", success: "已封禁" })) !== null}
+        onSubmit={async (reason) => (await run("POST", "/api/admin/feedback-bans", { sourceHash: f.source_hash, reason }, { label: "ban", success: "차단했습니다" })) !== null}
       />
       <ReasonDialog
         open={dialog === "email-ban"}
-        title="临时封禁这个反馈邮箱"
-        description="填写这个邮箱的反馈将暂停 48 小时，换网络或浏览器也生效。邮箱未经验证，请只在确认持续滥用后使用；不会连带封禁其他邮箱或访问网页。"
+        title="이 피드백 이메일 임시 차단"
+        description="이 이메일로 제출하는 피드백을 48시간 동안 일시 정지합니다. 네트워크나 브라우저를 바꿔도 적용됩니다. 이메일은 인증되지 않으므로 지속적인 악용이 확인된 경우에만 사용하세요. 다른 이메일이나 웹페이지 접근에는 영향이 없습니다."
         danger
-        confirmLabel="封禁 48 小时"
+        confirmLabel="48시간 차단"
         onClose={() => setDialog(null)}
-        onSubmit={async (reason) => (await run("POST", "/api/admin/feedback-bans", { feedbackId: f.id, reason }, { label: "email-ban", success: "邮箱已临时封禁 48 小时" })) !== null}
+        onSubmit={async (reason) => (await run("POST", "/api/admin/feedback-bans", { feedbackId: f.id, reason }, { label: "email-ban", success: "이메일을 48시간 임시 차단했습니다" })) !== null}
       />
       <ReasonDialog
         open={dialog === "erase"}
-        title="删除提交者资料"
-        description="删除正文、邮箱、页面地址和截图，只保留处理记录。不可恢复。"
+        title="제출자 정보 삭제"
+        description="본문, 이메일, 페이지 주소와 스크린샷을 삭제하고 처리 기록만 남깁니다. 복구할 수 없습니다."
         danger
-        confirmLabel="删除"
+        confirmLabel="삭제"
         onClose={() => setDialog(null)}
-        onSubmit={async (reason) => (await run("POST", `${base}/erase`, { reason }, { label: "erase", success: "资料已删除" })) !== null}
+        onSubmit={async (reason) => (await run("POST", `${base}/erase`, { reason }, { label: "erase", success: "정보를 삭제했습니다" })) !== null}
       />
     </article>
   );
@@ -126,45 +126,45 @@ export default function FeedbackAdmin({ loaderData }: Route.ComponentProps) {
   const { run } = useAdminAction();
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   return (
-    <AdminPage title="反馈" subtitle={ADMIN?.feedbackNote}>
+    <AdminPage title="피드백" subtitle={ADMIN?.feedbackNote}>
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-2">
           <FilterChips
             param="status"
-            options={[{ value: "", label: "全部", count: total }, ...Object.entries(FEEDBACK_STATUS).map(([k, v]) => ({ value: k, label: v, count: counts[k] ?? 0 }))]}
+            options={[{ value: "", label: "전체", count: total }, ...Object.entries(FEEDBACK_STATUS).map(([k, v]) => ({ value: k, label: v, count: counts[k] ?? 0 }))]}
           />
           <FilterChips
             param="kind"
             resets={["idea"]}
-            options={[{ value: "", label: "全部类型" }, ...Object.entries(FEEDBACK_KIND).map(([k, v]) => ({ value: k, label: v, count: kinds[k] ?? 0 }))]}
+            options={[{ value: "", label: "전체 유형" }, ...Object.entries(FEEDBACK_KIND).map(([k, v]) => ({ value: k, label: v, count: kinds[k] ?? 0 }))]}
           />
         </div>
         <Form method="get" className="w-full max-w-xs">
           {["status", "kind", "idea"].map((k) => sp.get(k) && <input key={k} type="hidden" name={k} value={sp.get(k)!} />)}
-          <Input name="q" defaultValue={sp.get("q") ?? ""} placeholder="搜索内容、邮箱、页面" aria-label="搜索反馈" />
+          <Input name="q" defaultValue={sp.get("q") ?? ""} placeholder="내용, 이메일, 페이지 검색" aria-label="피드백 검색" />
         </Form>
       </div>
       {sp.get("kind") === "suggestion" && ideas.length > 0 && (
-        <Card className="mb-4" title="建议池" right="按提出人数排序">
-          <FilterChips param="idea" options={[{ value: "", label: "全部建议" }, ...ideas.map((i) => ({ value: i.idea, label: i.idea, count: i.people }))]} />
+        <Card className="mb-4" title="제안 목록" right="제안자 수순">
+          <FilterChips param="idea" options={[{ value: "", label: "모든 제안" }, ...ideas.map((i) => ({ value: i.idea, label: i.idea, count: i.people }))]} />
         </Card>
       )}
       <datalist id={IDEAS_LIST}>{ideas.map((i) => <option key={i.idea} value={i.idea} />)}</datalist>
       <div className="space-y-3">
-        {rows.length ? rows.map((f) => <FeedbackCard key={`${f.id}-${f.updated_at}`} f={f} />) : <Card><Empty>没有符合条件的反馈</Empty></Card>}
+        {rows.length ? rows.map((f) => <FeedbackCard key={`${f.id}-${f.updated_at}`} f={f} />) : <Card><Empty>조건에 맞는 피드백 없음</Empty></Card>}
       </div>
       <Pager page={page} hasMore={rows.length === 50} />
       {bans.length > 0 && (
-        <Card className="mt-8" title="反馈封禁">
+        <Card className="mt-8" title="피드백 차단">
           <ul className="space-y-2 text-[13px]">
             {bans.map((b) => (
               <li key={b.source_hash} className="flex flex-wrap items-center justify-between gap-2">
                 <span>
-                  {b.source_hash.startsWith("email:") ? "邮箱" : "来源"} · <span className="break-all font-mono text-[12px] text-ink-3">{b.source_hash}</span> · {b.reason} · {b.created_by} · {bj(b.created_at, true)}
-                  {b.expires_at && <span> · {bj(b.expires_at, true)} 自动解除</span>}
+                  {b.source_hash.startsWith("email:") ? "이메일" : "출처"} · <span className="break-all font-mono text-[12px] text-ink-3">{b.source_hash}</span> · {b.reason} · {b.created_by} · {bj(b.created_at, true)}
+                  {b.expires_at && <span> · {bj(b.expires_at, true)} 자동 해제</span>}
                 </span>
-                <Button size="sm" tone="ghost" onClick={() => run("DELETE", `/api/admin/feedback-bans/${encodeURIComponent(b.source_hash)}`, undefined, { label: `unban-${b.source_hash}`, success: "已解除封禁" })}>
-                  解除
+                <Button size="sm" tone="ghost" onClick={() => run("DELETE", `/api/admin/feedback-bans/${encodeURIComponent(b.source_hash)}`, undefined, { label: `unban-${b.source_hash}`, success: "차단을 해제했습니다" })}>
+                  차단 해제
                 </Button>
               </li>
             ))}

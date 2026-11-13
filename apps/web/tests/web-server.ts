@@ -16,7 +16,7 @@ export const FIXTURE_AT = "2026-10-04T08:00:00.000Z";
 /** A report as list cards show it; the fields a test does not name are fixed. */
 export function feedItem(fields: Partial<FeedItemSummary> & Pick<FeedItemSummary, "id" | "title">): FeedItemSummary {
   return {
-    summary: "固定摘要", reason: "固定推荐理由", source: { name: "Fixture" }, publishedAt: FIXTURE_AT, timelineAt: FIXTURE_AT,
+    summary: "고정 요약", reason: "고정 추천 이유", source: { name: "Fixture" }, publishedAt: FIXTURE_AT, timelineAt: FIXTURE_AT,
     category: "ai-models", tags: [], score: 80, selected: true, channel: "news", x: null, ...fields,
   };
 }
@@ -26,7 +26,7 @@ export function itemDetail(fields: Partial<SiteItemDetail> & Pick<SiteItemDetail
   return {
     ...feedItem({ id: fields.id, title: fields.title }), x: null, originalTitle: null, links: { original: "https://example.org/article" },
     discoveredAt: FIXTURE_AT, story: null, readingMode: "full", author: null,
-    body: { zh: "<p>固定正文</p>", original: null, zhKind: "translation", complete: true },
+    body: { zh: "<p>고정 본문</p>", original: null, zhKind: "translation", complete: true },
     outline: [], relatedStories: [], topics: [], tagTopics: {}, daily: null, indexable: true, googleNoindex: false, markdownAvailable: true, group: null, hasTranslation: true, bodyLanguage: "ko", mentions: [],
     ...fields,
   };

@@ -1,8 +1,8 @@
 import { seoulDate, seoulTime, seoulWeekday, monthDay as engineMonthDay } from "@aihot/contracts/time";
 
 /**
- * "9月28日" of a calendar date (YYYY-MM-DD). A day of another year than `now` (Seoul) carries its year, so an
- * archived item is not read as this year's: "2019年2月19日". The engine's monthDay does this only when given today.
+ * "9월 28일" of a calendar date (YYYY-MM-DD). A day of another year than `now` (Seoul) carries its year, so an
+ * archived item is not read as this year's: "2019년 2월 19일". The engine's monthDay does this only when given today.
  */
 export function monthDay(date: string, now: number = Date.now()): string {
   return engineMonthDay(date, seoulDate(now));
@@ -20,33 +20,41 @@ export function bySeoulDay<T>(list: readonly T[], at: (entry: T) => string): Arr
   return days;
 }
 
-/** "周六" of a calendar date (YYYY-MM-DD). */
+/** The Korean weekday name of a calendar date (YYYY-MM-DD). */
 export function weekdayShort(date: string): string {
-  return seoulWeekday(date).replace("星期", "周");
+  return seoulWeekday(date)
+    .replace("\u661f\u671f", "")
+    .replace("\u4e00", "월")
+    .replace("\u4e8c", "화")
+    .replace("\u4e09", "수")
+    .replace("\u56db", "목")
+    .replace("\u4e94", "금")
+    .replace("\u516d", "토")
+    .replace("\u65e5", "일");
 }
 
 export function relativeTime(iso: string, now = Date.now()): string {
   return timeAgo(iso, now) ?? seoulDate(iso);
 }
 
-/** "3 天前" while that is under a month, else null: beside a full time, the date it would fall back to says nothing new. */
+/** A relative time under a month, else null: beside a full time, the date it would fall back to says nothing new. */
 export function timeAgo(iso: string, now = Date.now()): string | null {
   const t = Date.parse(iso);
   const s = Math.max(0, Math.round((now - t) / 1000));
-  if (s < 60) return "刚刚";
+  if (s < 60) return "방금";
   const m = Math.round(s / 60);
-  if (m < 60) return `${m} 分钟前`;
+  if (m < 60) return `${m}분 전`;
   const h = Math.round(m / 60);
-  if (h < 24) return `${h} 小时前`;
+  if (h < 24) return `${h}시간 전`;
   const d = Math.round(h / 24);
-  return d < 30 ? `${d} 天前` : null;
+  return d < 30 ? `${d}일 전` : null;
 }
 
 export function fullDateTime(iso: string): string {
   return `${seoulDate(iso)} ${seoulTime(iso)}`;
 }
 
-/** "9月24日 10:51" (Seoul), for lists that span days. */
+/** "9월 24일 10:51" (Seoul), for lists that span days. */
 export function monthDayTime(iso: string): string {
   return `${monthDay(seoulDate(iso))} ${seoulTime(iso)}`;
 }

@@ -1,8 +1,8 @@
 // The about page's river. Every line is one of the site's real sources (hover names it). Lines run in
-// from the left, gather into bundles (many reports of one story), meet the 精选 gate that lets a few
+// from the left, gather into bundles (many reports of one story), meet the 엄선 gate that lets a few
 // bundles through, and the ones that pass turn teal and run into a small newspaper: the day's report.
 // Pulses carry items along the lines; most stop at the gate, and each that reaches the paper calls
-// onArrive (the page brings up the next latest 精选). The four stages line up with the columns under
+// onArrive (the page brings up the next latest 엄선). The four stages line up with the columns under
 // the canvas, and `focus` lights one of them. On first sight the river flows in from the left once.
 // Theme-aware, paused off screen; reduced motion draws it still. The canvas only illustrates: what it
 // says is also written in the page.
@@ -18,11 +18,11 @@ export interface RiverSource {
   heatOnly: boolean;
 }
 
-/** Stage boundaries as fractions of the width: 采集 | 归并 | 精选 | 成刊. */
+/** Stage boundaries as fractions of the width: 수집 | 사건 묶기 | 엄선 | 발행. */
 export const STAGES = [0, 0.25, 0.5, 0.75, 1] as const;
 
 const STEP = 3;
-const KIND: Record<string, string> = { x_search: "X 账号", rss: "RSS", web_list: "网页", mp_account: "公众号", json_list: "接口" };
+const KIND: Record<string, string> = { x_search: "X 계정", rss: "RSS", web_list: "웹페이지", mp_account: "공식 계정", json_list: "API" };
 const FLASH_MS = 900;
 const INTRO_MS = 1800;
 /** Slow in, slow out: the river starts gently, crosses, and settles. */
@@ -73,7 +73,7 @@ function layout(w: number, h: number, sources: RiverSource[]): Layout {
   const x2 = w * STAGES[2];
   const gate = w * 0.625;
   const xo = w * 0.8;
-  // The paper sits a little above the middle; the page sets the latest 精选 under it (42% + 42px).
+  // The paper sits a little above the middle; the page sets the latest 엄선 기사 under it (42% + 42px).
   const out = h * 0.42;
   const pw = Math.max(26, Math.min(46, w * 0.042));
   const ph = pw * 1.32;
@@ -475,7 +475,7 @@ export function SignalRiver({
       const p = L.paper;
       if (x >= p.x - 8 && x <= p.x + p.w + 8 && y >= p.y - 8 && y <= p.y + p.h + 8) {
         hover = { s: null, bundle: null, paper: true };
-        place(x, y, withSubject("日报"), EDITION.daily);
+        place(x, y, withSubject("일간"), EDITION.daily);
         redraw();
         return;
       }
@@ -498,13 +498,13 @@ export function SignalRiver({
       const b = L.bundles[s.bundle]!;
       if (x < L.x2) {
         hover = { s: best, bundle: null, paper: false };
-        const kind = s.source ? (KIND[s.source.kind] ?? "信源") : "信源";
-        place(x, y, s.source ? s.source.name : "一个信源", s.source?.heatOnly ? `${kind} · 只计入热度` : kind);
+        const kind = s.source ? (KIND[s.source.kind] ?? "출처") : "출처";
+        place(x, y, s.source ? s.source.name : "한 출처", s.source?.heatOnly ? `${kind} · 관심도에만 반영` : kind);
       } else {
         hover = { s: null, bundle: s.bundle, paper: false };
-        if (x < L.gate) place(x, y, "同一件事", `${b.n} 个来源的报道合成一条`);
-        else if (b.kept) place(x, y, "进了精选", "有信息量，分数也够");
-        else place(x, y, "没进精选", "信息不够、重复或只是营销");
+        if (x < L.gate) place(x, y, "같은 사건", `${b.n}개 출처의 보도를 하나로 묶음`);
+        else if (b.kept) place(x, y, "엄선에 포함", "정보량이 충분하고 점수도 높음");
+        else place(x, y, "엄선에서 제외", "정보가 부족하거나 중복·홍보성 보도");
       }
       redraw();
     };

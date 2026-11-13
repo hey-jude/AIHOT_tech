@@ -23,7 +23,7 @@
 @custom-variant short (@media (max-height: 700px));
 
 @theme {
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "PingFang SC", "Hiragino Sans GB", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
   /* Semantic colours. */
@@ -219,7 +219,7 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
     /* Headlines and text reach the page from sources, models and authors, some typed with a space between
-       Chinese and Latin letters or digits ("Meta 在 Muse"), some without ("Meta在Muse"), and side by side
+       Chinese and Latin letters or digits ("Meta in Muse"), some without, and side by side
        they read as two styles. Spacing between scripts is the layout's job (W3C CLREQ), so the browser adds
        an eighth of an em wherever none was typed, on every page and whoever wrote the text; typed spaces
        stay as they are. Browsers without the property show the text as written. */
@@ -339,8 +339,8 @@
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
-/* The well: a quiet sunk panel for what navigates or annotates rather than reads (the report's 报眼,
-   the hot lead's heat panel, notes on about and feedback). Radius is set where it is used. */
+/* The well: a quiet sunk panel for what navigates or annotates rather than reads (the report's
+   masthead, the hot lead's heat panel, notes on about and feedback). Radius is set where it is used. */
 @utility well {
   background-color: var(--well);
   box-shadow: inset 0 0 0 1px var(--line-soft);
@@ -579,7 +579,7 @@
 .prose hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
 
 /* A quoted post's words, set as the post's own text is (QuotedPost), at the quote box's size: its
-   original language under 原文 smaller and quieter. */
+   original language under 원문 smaller and quieter. */
 .prose.prose-quote { font-size: 15px; line-height: 1.75; letter-spacing: 0; color: var(--ink-2); }
 .prose.prose-quote-original { font-size: 14px; line-height: 1.7; letter-spacing: 0; color: var(--ink-3); }
 .prose:is(.prose-quote, .prose-quote-original) > * + * { margin-top: 0.75em; }

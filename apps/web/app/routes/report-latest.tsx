@@ -1,7 +1,7 @@
 import { useLoaderData } from "react-router";
 import type { Route } from "./+types/report-latest";
 import { REPORT_NAMES, reportDateLabel, type ReportLatestPage } from "@aihot/contracts/site";
-import { REPORTS, SEO_TITLES, subjectAfter, withSubject } from "@aihot/site";
+import { REPORTS, SEO_TITLES, withSubject } from "@aihot/site";
 import { cachedPage, loadOr404 } from "../lib/api.server";
 import { pageReuse } from "../lib/page-reuse";
 import { pageMeta, reportDescription, reportLd } from "../lib/seo";
@@ -12,7 +12,7 @@ import { ReportPaper, reportOutline } from "../features/report/ReportPaper";
 import { KIND_PATH, feedLink, kindFromPath } from "../features/report/format";
 import type { Screen } from "../components/shell/screens";
 
-export const handle: Screen = { tab: "daily", name: "日报" };
+export const handle: Screen = { tab: "daily", name: "일간" };
 export { pageHeaders as headers } from "../lib/api.server";
 export const { clientLoader, shouldRevalidate } = pageReuse<typeof loader>();
 
@@ -43,7 +43,7 @@ export default function ReportLatestPage() {
   const { kind, report, index, today } = useLoaderData<typeof loader>();
   return (
     <ReportLayout kind={kind} index={index} current={report?.key ?? null} today={today} outline={report ? reportOutline(report) : []}>
-      {report ? <ReportPaper report={report} index={index} /> : <EmptyState title={subjectAfter("还没有发布", REPORT_NAMES[kind])}>第一期发布后会出现在这里。</EmptyState>}
+      {report ? <ReportPaper report={report} index={index} /> : <EmptyState title={`${REPORT_NAMES[kind]} 리포트가 아직 발행되지 않았습니다`}>첫 호가 발행되면 이곳에서 확인할 수 있습니다.</EmptyState>}
     </ReportLayout>
   );
 }

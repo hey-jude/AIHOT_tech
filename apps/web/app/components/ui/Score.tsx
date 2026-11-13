@@ -15,7 +15,7 @@ export function shownScore(score: number | null): number | null {
   return ITEM_COPY.showScore ? score : null;
 }
 
-/** "AI 评分 · 88" on desktop cards; `compact` keeps only the number (phones). */
+/** "AI 평점 · 88" on desktop cards; `compact` keeps only the number (phones). */
 export function ScoreLabel({ score, compact = false }: { score: number | null; compact?: boolean }) {
   const shown = shownScore(score);
   if (shown === null) return null;
@@ -23,14 +23,14 @@ export function ScoreLabel({ score, compact = false }: { score: number | null; c
   const tier = TIERS.find((t) => value >= t.min)!;
   return (
     <span
-      title={`AI 评分 ${value}/100`}
-      aria-label={`AI 评分 ${value} 分`}
+      title={`AI 평점 ${value}/100`}
+      aria-label={`AI 평점 ${value}점`}
       className={`inline-flex h-[20px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 ring-1 ring-inset ${tier.className}`}
     >
       {!compact && (
         <>
-          {/* The nudges center the ink, not the line box: the CJK label sits ~1px low and the mono digits ~0.5px high. */}
-          <span className="-translate-y-px text-[11px] font-medium leading-none opacity-80">AI 评分</span>
+          {/* The nudges center the ink, not the line box: the Korean label sits ~1px low and the mono digits ~0.5px high. */}
+          <span className="-translate-y-px text-[11px] font-medium leading-none opacity-80">AI 평점</span>
           <span className="h-2.5 w-px bg-current opacity-25" aria-hidden="true" />
         </>
       )}

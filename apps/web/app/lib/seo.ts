@@ -171,8 +171,8 @@ export function siteLd() {
       "@context": "https://schema.org",
       "@type": "Dataset",
       "@id": `${base}/#dataset`,
-      name: `${SITE.name} — ${withSubject("行业动态数据集")}`,
-      description: `${subjectAfter("持续更新的中文", "行业动态")}：每条附中文摘要、评分与原文出处，${subjectAfter("另有每日精选与", "日报")}，可通过 RSS 与公开 API 获取。`,
+      name: `${SITE.name} — ${withSubject("업계 동향 데이터셋")}`,
+      description: `계속 업데이트되는 AI 업계 동향으로, 각 항목에 한국어 요약과 점수, 원문 출처를 제공합니다. ${subjectAfter("매일 엄선 소식과", "일간 보고서")}도 RSS와 공개 API로 이용할 수 있습니다.`,
       url: base,
       inLanguage: SITE.locale,
       isAccessibleForFree: true,
@@ -181,12 +181,12 @@ export function siteLd() {
       creator: orgRef(),
       publisher: orgRef(),
       distribution: [
-        { "@type": "DataDownload", name: "精选 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
-        { "@type": "DataDownload", name: "全部动态 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/all.xml` },
-        { "@type": "DataDownload", name: `${withSubject("日报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/daily.xml` },
-        { "@type": "DataDownload", name: `${withSubject("周报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/weekly.xml` },
-        { "@type": "DataDownload", name: `${withSubject("月报")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/monthly.xml` },
-        { "@type": "DataDownload", name: "公开 API v1", encodingFormat: "application/json", contentUrl: `${base}/api/v1/items` },
+        { "@type": "DataDownload", name: "엄선 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
+        { "@type": "DataDownload", name: "전체 동향 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/all.xml` },
+        { "@type": "DataDownload", name: `${withSubject("일간")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/daily.xml` },
+        { "@type": "DataDownload", name: `${withSubject("주간")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/weekly.xml` },
+        { "@type": "DataDownload", name: `${withSubject("월간")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/monthly.xml` },
+        { "@type": "DataDownload", name: "공개 API v1", encodingFormat: "application/json", contentUrl: `${base}/api/v1/items` },
         { "@type": "DataDownload", name: "OpenAPI", encodingFormat: "application/json", contentUrl: `${base}/openapi-v1.json` },
       ],
     },
@@ -276,11 +276,11 @@ export function reportDescription(r: ReportDetail): string | null {
         if (text.length + t.length > 120) break;
         text += `；${t}`;
       }
-      return `${date} ${withSubject("新闻")}：${text}${/[。！？!?]$/.test(text) ? "" : "。"}`;
+      return `${date} ${withSubject("뉴스")}: ${text}${/[。！？!?]$/.test(text) ? "" : "。"}`;
     }
   }
   const lead = r.lead?.leadParagraph ?? r.overview?.slice(0, 150);
-  return lead ? `${date} ${withSubject("资讯")}：${lead}` : null;
+  return lead ? `${date} ${withSubject("소식")}: ${lead}` : null;
 }
 
 /** One report issue: an editorial round-up by the site (no personal byline), sections as its sections. */
@@ -317,7 +317,7 @@ export function storyLd(story: StoryDetail) {
     ...(reports.length ? {
       mainEntity: {
         "@type": "ItemList",
-        name: "报道时间线",
+        name: "보도 타임라인",
         itemListOrder: "https://schema.org/ItemListOrderDescending",
         numberOfItems: reports.length,
         itemListElement: reports.map((report, index) => ({ "@type": "ListItem", position: index + 1, name: report.title })),

@@ -20,7 +20,7 @@ export function ReadingLayout({ children, aside }: { children: ReactNode; aside?
 
 /**
  * Long reads (articles, terms, privacy): no sheet, the text sits on the page in a column of at most
- * 760px, the width Chinese magazines and news sites use (680–730px at 16–17px, about 42 characters a
+ * 760px, a comfortable reading width for magazines and news sites (680–730px at 16–17px, about 42 characters a
  * line). From 2xl a rail on each side (the piece's facts left, notes right) keeps the page filling a
  * 16:9 screen with the column in the middle; from `side` only the right rail shows, beside the centred
  * column; phones and narrow desktops read one column.
@@ -86,7 +86,7 @@ export function AsideCard({ title, children, className = "" }: { title: ReactNod
   );
 }
 
-/** "完整榜单 →" style link used in card headers. */
+/** "전체 순위 →" style link used in card headers. */
 export function MoreLink({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Link viewTransition to={to} className="inline-flex items-center gap-0.5 whitespace-nowrap text-[12px] font-semibold text-accent hover:text-accent-ink">

@@ -16,10 +16,10 @@ const keys = Object.fromEntries(kinds.map((kind) => [kind, Array.from({ length: 
   return kind === "weekly" ? isoWeekLabel(day) : day;
 })])) as Record<ReportKind, string[]>;
 /** The navigation as the api sends it: the newest 400 issues, each with its number in the whole series. */
-const index = (kind: ReportKind): ReportNavigationEntry[] => keys[kind].map((key, i) => ({ key, issueNumber: i + 1, title: `第${i + 1}期` })).reverse().slice(0, 400);
+const index = (kind: ReportKind): ReportNavigationEntry[] => keys[kind].map((key, i) => ({ key, issueNumber: i + 1, title: `제${i + 1}호` })).reverse().slice(0, 400);
 function report(kind: ReportKind, key: string): ReportDetail {
   return {
-    kind, key, issueNumber: keys[kind].indexOf(key) + 1, title: "测试刊物", generatedAt: "2020-01-02T00:00:00Z",
+    kind, key, issueNumber: keys[kind].indexOf(key) + 1, title: "테스트 간행물", generatedAt: "2020-01-02T00:00:00Z",
     lead: null, leadItemId: null, overview: null, highlights: [], sections: [], flashes: [], cover: null, metrics: {}, readingMinutes: 1, prev: null, next: null, mentions: [],
   };
 }
@@ -52,8 +52,8 @@ for (const kind of kinds) {
     const response = await fetch(`${web.origin}/${kind}`);
     assert.equal(response.status, 200, web.logs());
     const visible = masthead(await response.text());
-    assert.match(visible, /第\s*405\s*期/);
-    assert.doesNotMatch(visible, /第\s*400\s*期/);
+    assert.match(visible, /405\s*호/);
+    assert.doesNotMatch(visible, /400\s*호/);
   });
 
   test(`the oldest ${kind} issue, outside the navigation, keeps its number`, async () => {
@@ -61,7 +61,7 @@ for (const kind of kinds) {
     assert.ok(!index(kind).some((entry) => entry.key === first));
     const response = await fetch(`${web.origin}/${kind}/${first}`);
     assert.equal(response.status, 200, web.logs());
-    assert.match(masthead(await response.text()), /第\s*1\s*期/);
+    assert.match(masthead(await response.text()), /1\s*호/);
   });
 
   test(`the ${kind} calendar labels this issue with its own number and makes up none for others`, () => {
@@ -69,32 +69,31 @@ for (const kind of kinds) {
     const { cells } = periodGrid(kind, first, index(kind), 1);
     const current = cells.find((cell) => cell.key === first)!;
     assert.equal(current.state, "current");
-    assert.match(current.label, /第 1 期/);
+    assert.match(current.label, /1호/);
     const unlisted = cells.find((cell) => cell.key === keys[kind][1])!;
-    assert.doesNotMatch(unlisted.label, /第 \d+ 期/, "an issue the navigation does not list gets no number");
+    assert.doesNotMatch(unlisted.label, /\d+호/, "an issue the navigation does not list gets no number");
     assert.equal(issueNumber(index(kind), keys[kind].at(-1)!), 405);
     const stale = periodGrid(kind, first, [{ key: first, issueNumber: 9 }], 10);
-    assert.match(stale.cells.find((cell) => cell.key === first)!.label, /第 10 期/, "the report's own number wins over an older navigation");
+    assert.match(stale.cells.find((cell) => cell.key === first)!.label, /10호/, "the report's own number wins over an older navigation");
   });
 }
 
 test("the daily archive counts every issue, as the masthead numbers them", async () => {
   const response = await fetch(`${web.origin}/daily/archive`);
   assert.equal(response.status, 200, web.logs());
-  assert.match(masthead(await response.text()), /共\s*405\s*期/);
+  assert.match(masthead(await response.text()), /총 405호/);
 });
 
-// On 2 January 2027 the chip for the 31 December issue read "12月31日" and the 1 January issue's "前一日"
-// link "前一日 · 12月31日": both read as 2027's (KKKKhazix/AIHOT#274).
+// On 2 January 2027 the chip for the 31 December issue and the previous-day link must include 2026, not 2027.
 test("a day of another Seoul year carries its year in the phone chip and the prev/next links", () => {
-  const days = [{ key: "2026-12-31", issueNumber: 400, title: "第400期" }, { key: "2027-01-01", issueNumber: 401, title: "第401期" }];
-  assert.equal(chipLabel("daily", "2027-01-02", days, "2027-01-02"), "今天");
-  assert.equal(chipLabel("daily", "2027-01-01", days, "2027-01-02"), "1月1日");
-  assert.equal(chipLabel("daily", "2026-12-31", days, "2027-01-02"), "2026年12月31日");
+  const days = [{ key: "2026-12-31", issueNumber: 400, title: "제400호" }, { key: "2027-01-01", issueNumber: 401, title: "제401호" }];
+  assert.equal(chipLabel("daily", "2027-01-02", days, "2027-01-02"), "오늘");
+  assert.equal(chipLabel("daily", "2027-01-01", days, "2027-01-02"), "1월 1일");
+  assert.equal(chipLabel("daily", "2026-12-31", days, "2027-01-02"), "2026년 12월 31일");
   const endOfYear = Date.parse("2026-12-31T23:30:00+09:00");
-  assert.equal(neighbourLabel("daily", "2026-12-30", "prev", endOfYear), "前一日 · 12月30日");
-  assert.equal(neighbourLabel("daily", "2027-01-01", "prev", endOfYear), "前一日 · 2027年1月1日");
+  assert.equal(neighbourLabel("daily", "2026-12-30", "prev", endOfYear), "전날 · 12월 30일");
+  assert.equal(neighbourLabel("daily", "2027-01-01", "prev", endOfYear), "전날 · 2027년 1월 1일");
   const newYear = Date.parse("2027-01-01T08:00:00+09:00");
-  assert.equal(neighbourLabel("daily", "2026-12-31", "prev", newYear), "前一日 · 2026年12月31日");
-  assert.equal(neighbourLabel("daily", "2027-01-02", "next", newYear), "后一日 · 1月2日");
+  assert.equal(neighbourLabel("daily", "2026-12-31", "prev", newYear), "전날 · 2026년 12월 31일");
+  assert.equal(neighbourLabel("daily", "2027-01-02", "next", newYear), "다음 날 · 1월 2일");
 });

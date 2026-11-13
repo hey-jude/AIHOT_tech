@@ -7,7 +7,7 @@ import { IconArrowUpRight } from "../../components/icons";
 function Author({ quoted }: { quoted: Pick<QuotedPostView, "authorName" | "handle"> }) {
   return (
     <>
-      <span className="text-ink-4">引用</span>
+      <span className="text-ink-4">인용</span>
       <span className="font-semibold text-ink-2">{quoted.authorName || `@${quoted.handle}`}</span>
       {quoted.authorName && quoted.handle && <span className="text-ink-4">@{quoted.handle}</span>}
     </>
@@ -28,13 +28,13 @@ export function QuotedPost({ quoted, original = false }: { quoted: QuotedPostVie
       <blockquote className="prose prose-quote mt-2" dangerouslySetInnerHTML={{ __html: zh ?? quoted.html }} />
       {zh && (
         <details className="mt-2 text-[13px] text-ink-4">
-          <summary className="cursor-pointer select-none hover:text-ink-3">原文</summary>
+          <summary className="cursor-pointer select-none hover:text-ink-3">원문</summary>
           <div className="prose prose-quote-original mt-1.5" dangerouslySetInnerHTML={{ __html: quoted.html }} />
         </details>
       )}
       {quoted.url && (
         <a href={quoted.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-0.5 text-[13px] text-accent hover:text-accent-ink">
-          在 X 查看被引用的帖子 <IconArrowUpRight size={13} />
+          X에서 인용된 게시물 보기 <IconArrowUpRight size={13} />
         </a>
       )}
     </figure>
