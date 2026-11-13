@@ -347,8 +347,8 @@ function ItemView({ item, followups }: Loaded) {
     }
   };
 
-  const bodyHtml = lang === "zh" ? (item.body?.zh ?? item.body?.original) : (item.body?.original ?? item.body?.zh);
-  const bodyLabel = !item.body ? null : lang === "zh" && item.body.zhKind === "translation" ? "正文 · AI 翻译" : lang === "original" ? "正文 · 原文" : "正文";
+  const bodyHtml = lang === "ko" ? (item.body?.zh ?? item.body?.original) : (item.body?.original ?? item.body?.zh);
+  const bodyLabel = !item.body ? null : lang === "ko" && item.body.zhKind === "translation" ? "正文 · AI 翻译" : lang === "original" ? "正文 · 原文" : "正文";
   const isX = item.channel === "x" && !!item.x;
   // A post reads under its author; one that publishes a long X Article reads like an article, under its headline.
   const isPost = isX && !item.x!.article;
@@ -610,7 +610,7 @@ function ItemView({ item, followups }: Loaded) {
                   />
                 )}
               </div>
-              {hasTranslation && lang === "zh" && !item.body.complete && (
+              {hasTranslation && lang === "ko" && !item.body.complete && (
                 <p className="mb-5 rounded-control bg-bg-sunk px-3 py-2 text-[13px] text-ink-3">译文尚不完整，完整内容请切换到原文。</p>
               )}
               <ArticleBody html={bodyHtml} />

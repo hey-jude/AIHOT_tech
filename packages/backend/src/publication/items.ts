@@ -4,7 +4,7 @@ import { CATEGORY_KEYS, toPublicApiCategory, type CategoryKey, type ChannelKey, 
 import { STORY_INDEX_MIN_REPORTS, type FeedItemSummary, type ItemSummary, type MediaView, type XPostView } from "@aihot/contracts/site";
 import { POLICY } from "@aihot/site";
 import { sql, type Db } from "../db.ts";
-import { isChineseText } from "../lib/text.ts";
+import { isKoreanText } from "../lib/text.ts";
 import { isEmptyOrLinkOnly, withXArticle } from "../content/posts.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
 import { sourceOwnsPost } from "../sources/account.ts";
@@ -73,7 +73,7 @@ export const ITEM_FROM = sql`
   JOIN sources s ON s.id = p.source_id
   JOIN articles a ON a.id = p.article_id
   LEFT JOIN stories st ON st.id = p.story_id AND st.merged_into IS NULL
-  LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'zh' AND tr.revision >= a.revision
+  LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'ko' AND tr.revision >= a.revision
   LEFT JOIN quote_translations qt ON p.channel = 'x' AND qt.tweet_id = substring(a.x_post->'quoted'->>'url' from '/status/([0-9]+)')`;
 
 export function channelCondition(channel: ChannelKey | null | undefined) {
@@ -229,13 +229,13 @@ export function toFeedItemSummary(row: ItemRow): FeedItemSummary {
 /**
  * Every exit uses the same language decision as writing and translation.
  */
-export function isChineseBody(a: { language?: string | null; body_text?: string | null }): boolean {
-  return isChineseText(a.body_text ?? "", a.language);
+export function isKoreanBody(a: { language?: string | null; body_text?: string | null }): boolean {
+  return isKoreanText(a.body_text ?? "", a.language);
 }
 
 /** The complete Chinese translation an export (Markdown, full RSS) carries; a page also shows a partial one. */
 export function exportTranslation(a: { language?: string | null; body_text?: string | null; tr_html?: string | null; tr_complete?: boolean | null }): string | null {
-  return !isChineseBody(a) && a.tr_html && a.tr_complete ? a.tr_html : null;
+  return !isKoreanBody(a) && a.tr_html && a.tr_complete ? a.tr_html : null;
 }
 
 /**

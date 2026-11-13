@@ -1,15 +1,15 @@
-// Daily, weekly and monthly reports. Windows are Beijing calendar based and written into the report;
+// Daily, weekly and monthly reports. Windows are Seoul calendar based and written into the report;
 // missed schedule points are caught up; regeneration creates a revision. What every issue carries is
 // decided by rule: a daily from edition.ts without a model; a weekly or monthly is compiled from its
 // dailies and a model only writes its overview and introductions, from the brief in the industry pack
 // (industry/prompts/report-period*.md).
 import { z } from "zod";
 import { EDITION_TIMES, REPORTS, SITE } from "@aihot/site";
-import { PLAIN_TERMS, RELEASE } from "@aihot/industry/taxonomy";
+import { IDENTITY_LEXICON, PLAIN_TERMS, RELEASE } from "@aihot/industry/taxonomy";
 import { promptText, promptVersion } from "../editorial/prompts.ts";
 import { modelFor } from "../editorial/models.ts";
 import { ENTITIES, entityNames, isRelease } from "../editorial/vocabulary.ts";
-import { addDays, beijingAt, beijingDate, beijingTime, isoWeekLabel, isoWeekRange, monthRange } from "@aihot/contracts/time";
+import { addDays, seoulAt, seoulDate, seoulTime, isoWeekLabel, isoWeekRange, monthRange } from "@aihot/contracts/time";
 import { sql } from "../db.ts";
 import { logError } from "../lib/log-error.ts";
 import { chatJson } from "../providers/llm.ts";
@@ -74,17 +74,17 @@ async function saveReport(kind: ReportKind, key: string, start: Date, end: Date,
   });
 }
 
-/** "10 月 4 日 08:00": one end of a quiet issue's window, as its lead paragraph names it. */
+/** "10월 4일 08:00": the end of a quiet issue's window, as named in its lead paragraph. */
 function windowPoint(at: Date): string {
-  const day = beijingDate(at);
-  return `${Number(day.slice(5, 7))} 月 ${Number(day.slice(8, 10))} 日 ${beijingTime(at)}`;
+  const day = seoulDate(at);
+  return `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일 ${seoulTime(at)}`;
 }
 
-/** The highlights a daily's front page lists after its lead (今日看点). */
+/** The highlights a daily's front page lists after its lead. */
 const DAILY_HIGHLIGHTS = 3;
 
 /**
- * Daily report for Beijing date D covers the 24 hours up to the site's edition time on D (EDITION_TIMES).
+ * Daily report for Seoul date D covers the 24 hours up to the site's edition time on D (EDITION_TIMES).
  * Its most important entry leads, in its own words, and the next three are today's highlights; a thin issue
  * (a weekend's often carries a single entry) fills the rest with the window's best reports it left out
  * (`picks`, dailyPicks), which are neither entries nor counted in its metrics. A window the editors judged
@@ -93,7 +93,7 @@ const DAILY_HIGHLIGHTS = 3;
 export async function composeDaily(date: string, reason?: string): Promise<{ key: string; entries: number }> {
   const previous = await savedReport("daily", date);
   if (previous && reason === undefined) return { key: date, entries: previous.entries };
-  const end = beijingAt(date, EDITION_TIMES.daily);
+  const end = seoulAt(date, EDITION_TIMES.daily);
   const start = new Date(end.getTime() - 86400000);
   const edition = await dailyEdition(date, start, end);
   // Nothing judged in the window is a failure upstream, not a quiet day: the run fails and is caught up later.
@@ -132,8 +132,8 @@ const OVERVIEW_CHARS = { weekly: 240, monthly: 340 } as const;
 const INTRO_CHARS = 90;
 /** The brief's values for each kind: its name, its span and how long its overview should be. */
 const BRIEF = {
-  weekly: { kindName: "周报", span: "一周", sentences: "三句话", chars: "160" },
-  monthly: { kindName: "月报", span: "个月", sentences: "三到四句话", chars: "240" },
+  weekly: { kindName: "주간", span: "한 주", sentences: "세 문장", chars: "160" },
+  monthly: { kindName: "월간", span: "한 달", sentences: "세~네 문장", chars: "240" },
 } as const;
 
 export const PeriodSchema = z.object({
@@ -155,11 +155,15 @@ export function periodPrompt(kind: "weekly" | "monthly", startDate: string, endD
       sections: introduced.length ? promptText("report-period-sections", { columns: introduced.map((l) => `「${l}」`).join("") }) : promptText("report-period-no-sections"),
       sectionsExample: introduced.length ? `{"${introduced[0]}": "..."}` : "{}",
     }),
-    user: `本期：${startDate} 至 ${endDateInclusive}\n${list}`,
+    user: `이번 호: ${startDate}~${endDateInclusive}\n${list}`,
   };
 }
 
 const COMPANY_NAMES = Object.values(ENTITIES).map((e) => entityNames(e).map((n) => n.toLowerCase()));
+const KOREAN_COMPANY_PATTERNS = IDENTITY_LEXICON.map(({ id, patterns }) => ({
+  id,
+  patterns: patterns.filter((pattern) => /\p{Script=Hangul}/u.test(pattern.source)),
+})).filter(({ patterns }) => patterns.length > 0);
 /** Words a writer may use that name nothing in particular: the pack's plain terms and the site's name. */
 const PLAIN = new Set([...PLAIN_TERMS, SITE.name.toLowerCase()]);
 
@@ -167,7 +171,7 @@ const PLAIN = new Set([...PLAIN_TERMS, SITE.name.toLowerCase()]);
  * Whether written text names only what the listed items name: every capitalised or numbered Latin token
  * (Acme, Nova-2.5, X1), every figure of three or more digits or with a decimal point or percent (845,
  * 129.3, 40%) and every company of the vocabulary appears in the items' own words; a company may be named
- * in either language (谷歌 for Google).
+ * in either language (Google's localized Korean name, for example).
  */
 export function grounded(text: string, corpus: string): boolean {
   const known = corpus.toLowerCase();
@@ -176,14 +180,20 @@ export function grounded(text: string, corpus: string): boolean {
   const words = (text.match(/[A-Za-z][A-Za-z0-9.+-]*/g) ?? []).map((w) => w.replace(/[.+-]+$/, "")).filter((w) => /[A-Z0-9]/.test(w));
   const figures = (text.match(/\d+(?:\.\d+)?%?/g) ?? []).filter((f) => f.length >= 3 || /[.%]/.test(f));
   const lower = text.toLowerCase();
-  const mentioned = COMPANY_NAMES.filter((names) => names.some((n) => /\p{Script=Han}/u.test(n) && lower.includes(n)));
-  return words.every((w) => named(w.toLowerCase())) && figures.every((f) => known.includes(f)) && mentioned.every((names) => companies.includes(names));
+  const mentioned = COMPANY_NAMES.filter((names) => names.some((n) => /[\p{Script=Han}\p{Script=Hangul}]/u.test(n) && lower.includes(n)));
+  const mentionedKorean = KOREAN_COMPANY_PATTERNS.filter(({ patterns }) => patterns.some((pattern) => pattern.test(lower)));
+  const koreanGrounded = mentionedKorean.every(({ id, patterns }) => {
+    const names = ENTITIES[id] ? entityNames(ENTITIES[id]).map((name) => name.toLowerCase()) : [];
+    return names.some((name) => known.includes(name)) || patterns.some((pattern) => pattern.test(known));
+  });
+  return words.every((w) => named(w.toLowerCase())) && figures.every((f) => known.includes(f)) && mentioned.every((names) => companies.includes(names)) && koreanGrounded;
 }
 
 /** The leading whole sentences of a text that fit in `max` characters; null when not even the first does. */
 export function fitted(text: string, max: number): string | null {
   let out = "";
-  for (const sentence of text.trim().match(/[^。！？]+(?:[。！？]+[」”’）]*|$)/g) ?? []) {
+  const segments = [...new Intl.Segmenter("ko", { granularity: "sentence" }).segment(text.trim())].map(({ segment }) => segment);
+  for (const sentence of segments) {
     if ([...out + sentence].length > max) break;
     out += sentence;
   }
@@ -202,8 +212,8 @@ async function composePeriod(kind: "weekly" | "monthly", key: string, startDate:
   const previous = await savedReport(kind, key);
   if (previous && reason === undefined) return { key, entries: previous.entries };
   // The dailies' windows run from the edition time the day before the first to that time on the last.
-  const start = beijingAt(addDays(startDate, -1), EDITION_TIMES.daily);
-  const end = beijingAt(endDateInclusive, EDITION_TIMES.daily);
+  const start = seoulAt(addDays(startDate, -1), EDITION_TIMES.daily);
+  const end = seoulAt(endDateInclusive, EDITION_TIMES.daily);
   const { entries, issues, hasEntries } = await periodEntries(startDate, endDateInclusive);
   const top = entries.slice(0, PERIOD_EVENTS[kind]);
   if (!top.length) {
@@ -245,7 +255,7 @@ async function composePeriod(kind: "weekly" | "monthly", key: string, startDate:
   const [lead] = top as [Candidate, ...Candidate[]];
   const content = {
     kind,
-    title: kind === "weekly" ? `${SITE.name} 周报 · ${key}` : `${SITE.name} 月报 · ${key}`,
+    title: kind === "weekly" ? `${SITE.name} 주간 · ${key}` : `${SITE.name} 월간 · ${key}`,
     ...(kind === "weekly" ? { isoLabel: key } : { monthLabel: key }),
     periodStart: startDate,
     periodEnd: endDateInclusive,
@@ -274,24 +284,24 @@ export async function composeMonthly(label: string, reason?: string) {
   return composePeriod("monthly", label, range.start, range.end, reason);
 }
 
-/** The newest daily due by `now`: today's from its edition time (Beijing), yesterday's before. */
+/** The newest daily due by `now`: today's from its edition time (Seoul), yesterday's before. */
 export function dueDaily(now = new Date()): string {
-  const today = beijingDate(now);
-  return beijingTime(now) >= EDITION_TIMES.daily ? today : addDays(today, -1);
+  const today = seoulDate(now);
+  return seoulTime(now) >= EDITION_TIMES.daily ? today : addDays(today, -1);
 }
 
 /** The newest weekly due by `now`: the last complete ISO week from its edition time on Monday, the one before until then. */
 export function dueWeekly(now = new Date()): string {
-  const today = beijingDate(now);
+  const today = seoulDate(now);
   const dow = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7;
-  const due = dow > 0 || beijingTime(now) >= EDITION_TIMES.weekly;
+  const due = dow > 0 || seoulTime(now) >= EDITION_TIMES.weekly;
   return isoWeekLabel(addDays(today, -dow - (due ? 7 : 14)));
 }
 
 /** The newest monthly due by `now`: the last complete month from its edition time on the 1st, the one before until then. */
 export function dueMonthly(now = new Date()): string {
-  const [y, m, d] = beijingDate(now).split("-").map(Number) as [number, number, number];
-  const due = d > 1 || beijingTime(now) >= EDITION_TIMES.monthly;
+  const [y, m, d] = seoulDate(now).split("-").map(Number) as [number, number, number];
+  const due = d > 1 || seoulTime(now) >= EDITION_TIMES.monthly;
   const back = due ? 1 : 2;
   const month = (y * 12 + (m - 1) - back);
   return `${Math.floor(month / 12)}-${String((month % 12) + 1).padStart(2, "0")}`;

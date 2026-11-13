@@ -29,7 +29,7 @@ import { startWebServer, type WebServer } from "../apps/web/tests/web-server.ts"
 
 const at = "2026-10-04T08:00:00.000Z";
 const item: FeedItemSummary = { id: "metadata-fixture", title: "可核实的测试报道", summary: "报道摘要", reason: null, source: { name: "Fixture" }, publishedAt: at, timelineAt: at, category: "ai-models", tags: [], score: 80, selected: true, channel: "news", x: null };
-const detail: SiteItemDetail = { ...item, x: null, originalTitle: null, links: { original: "https://example.org/report" }, discoveredAt: at, story: null, readingMode: "full", author: null, body: { zh: "<p>可核实的测试正文。</p>", original: null, zhKind: "original", complete: true }, outline: [], relatedStories: [], topics: [], tagTopics: {}, daily: null, indexable: true, googleNoindex: false, markdownAvailable: true, group: null, hasTranslation: false, bodyLanguage: "zh", mentions: [] };
+const detail: SiteItemDetail = { ...item, x: null, originalTitle: null, links: { original: "https://example.org/report" }, discoveredAt: at, story: null, readingMode: "full", author: null, body: { zh: "<p>可核实的测试正文。</p>", original: null, zhKind: "original", complete: true }, outline: [], relatedStories: [], topics: [], tagTopics: {}, daily: null, indexable: true, googleNoindex: false, markdownAvailable: true, group: null, hasTranslation: false, bodyLanguage: "ko", mentions: [] };
 /** Article pages by id: the fixture, one kept from Google only, one kept from every engine. */
 const details: Record<string, SiteItemDetail> = {
   [item.id]: detail,
@@ -120,8 +120,8 @@ test("an event page stands in search once it gathers more than one report", asyn
   assert.equal(several("meta[name=googlebot]").length, 0);
 });
 
-// Chinese readers search issues by the date as they write it ("10月4日 AI 新闻"), not by the key.
-for (const [kind, label, date] of [["daily", "日报", "10月4日"], ["weekly", "周报", "9月28日—10月4日"], ["monthly", "月报", "2026年10月"]] as const) {
+// 한국어 독자는 날짜로 리포트를 검색하므로 날짜 라벨은 한국어 표기를 사용한다.
+for (const [kind, label, date] of [["daily", "日报", "10월 4일"], ["weekly", "周报", "9월 28일—10월 4일"], ["monthly", "月报", "2026년 10월"]] as const) {
   test(`${kind} issue metadata describes its visible lead and the permanent entry names the latest issue's date`, async () => {
     const r = report(kind);
     const $ = await page(`/${kind}/${r.key}`);
@@ -160,8 +160,8 @@ test("the latest issue is one page however its address is written", async () => 
 });
 
 test("an issue's date reads as Chinese readers write it, across months and years", () => {
-  assert.equal(reportDateLabel("daily", "2026-10-17"), "10月17日");
-  assert.equal(reportDateLabel("weekly", "2026-W42"), "10月12日—18日");
+  assert.equal(reportDateLabel("daily", "2026-10-17"), "10월 17일");
+  assert.equal(reportDateLabel("weekly", "2026-W42"), "10월 12일—18일");
   assert.equal(reportDateLabel("weekly", "2026-W53"), "12月28日—1月3日");
   assert.equal(reportDateLabel("monthly", "2026-01"), "2026年1月");
 });

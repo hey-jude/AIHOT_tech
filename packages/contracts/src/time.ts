@@ -1,50 +1,49 @@
-// Beijing (Asia/Shanghai, fixed UTC+8, no DST) calendar helpers shared by web and backend.
+// 서울 (Asia/Seoul, 고정 UTC+9, DST 없음) 달력 도우미 — 웹과 백엔드 공용
 
-const OFFSET_MS = 8 * 3600 * 1000;
+const OFFSET_MS = 9 * 3600 * 1000;
 
-/** YYYY-MM-DD of the instant in Beijing time. */
-export function beijingDate(instant: Date | string | number): string {
+/** 한국시간의 YYYY-MM-DD. */
+export function seoulDate(instant: Date | string | number): string {
   const d = new Date(new Date(instant).getTime() + OFFSET_MS);
   return d.toISOString().slice(0, 10);
 }
 
-/** HH:mm of the instant in Beijing time. */
-export function beijingTime(instant: Date | string | number): string {
+/** 한국시간의 HH:mm. */
+export function seoulTime(instant: Date | string | number): string {
   const d = new Date(new Date(instant).getTime() + OFFSET_MS);
   return d.toISOString().slice(11, 16);
 }
 
-/** The instant as ISO 8601 in Beijing time, to the millisecond: "2026-09-26T08:07:13.000+08:00". */
-export function beijingIso(instant: Date | string | number): string {
-  return `${new Date(new Date(instant).getTime() + OFFSET_MS).toISOString().slice(0, 23)}+08:00`;
+/** 한국시간 ISO 8601 밀리초 표기: "2026-09-26T08:07:13.000+09:00". */
+export function seoulIso(instant: Date | string | number): string {
+  return `${new Date(new Date(instant).getTime() + OFFSET_MS).toISOString().slice(0, 23)}+09:00`;
 }
 
 /**
- * "9月28日" of a calendar date (YYYY-MM-DD). Given `today` (YYYY-MM-DD, Beijing), a day of another year carries its
- * year, so an archived item is not read as this year's: "2019年2月19日".
+ * 날짜의 "9월 28일" 표기. `today`와 다른 연도의 날짜에는 연도를 붙여 과거 기록임을 나타낸다: "2019년 2월 19일".
  */
 export function monthDay(date: string, today?: string): string {
-  const year = today && date.slice(0, 4) !== today.slice(0, 4) ? `${date.slice(0, 4)}年` : "";
-  return `${year}${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
+  const year = today && date.slice(0, 4) !== today.slice(0, 4) ? `${date.slice(0, 4)}년 ` : "";
+  return `${year}${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일`;
 }
 
-/** "9月29日" in Beijing time. */
-export const beijingDay = (instant: Date | string | number) => monthDay(beijingDate(instant));
+/** 한국시간 날짜를 "9월 29일"로 표기한다. */
+export const seoulDay = (instant: Date | string | number) => monthDay(seoulDate(instant));
 
-/** "9月29日 13:40" in Beijing time. */
-export const beijingStamp = (instant: Date | string | number) => `${beijingDay(instant)} ${beijingTime(instant)}`;
+/** 한국시간을 "9월 29일 13:40"으로 표기한다. */
+export const seoulStamp = (instant: Date | string | number) => `${seoulDay(instant)} ${seoulTime(instant)}`;
 
-/** The zone's name, for whatever takes one (a scheduler, a report's metadata, SQL `AT TIME ZONE`). */
-export const BEIJING_TIMEZONE = "Asia/Shanghai" as const;
+/** 스케줄러, 리포트 메타데이터, SQL `AT TIME ZONE` 등에 쓰는 시간대 이름. */
+export const SEOUL_TIMEZONE = "Asia/Seoul" as const;
 
-/** UTC instant of 00:00 Beijing on the given calendar day. */
-export function beijingMidnight(date: string): Date {
-  return new Date(Date.parse(`${date}T00:00:00+08:00`));
+/** 해당 날짜 한국시간 자정의 UTC 시각. */
+export function seoulMidnight(date: string): Date {
+  return new Date(Date.parse(`${date}T00:00:00+09:00`));
 }
 
-/** UTC instant of an HH:mm Beijing time on the given calendar day. */
-export function beijingAt(date: string, time: string): Date {
-  return new Date(Date.parse(`${date}T${time}:00+08:00`));
+/** 해당 날짜 한국시간 HH:mm의 UTC 시각. */
+export function seoulAt(date: string, time: string): Date {
+  return new Date(Date.parse(`${date}T${time}:00+09:00`));
 }
 
 export function addDays(date: string, days: number): string {
@@ -52,17 +51,17 @@ export function addDays(date: string, days: number): string {
   return new Date(t).toISOString().slice(0, 10);
 }
 
-const WEEKDAYS = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+const WEEKDAYS = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 
-export function beijingWeekday(date: string): string {
+export function seoulWeekday(date: string): string {
   return WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()]!;
 }
 
-/** ISO week label (e.g. 2026-W38) of a calendar date. */
+/** 날짜의 ISO 주차 라벨(예: 2026-W38). */
 export function isoWeekLabel(date: string): string {
   const d = new Date(`${date}T00:00:00Z`);
-  const day = (d.getUTCDay() + 6) % 7; // Monday = 0
-  d.setUTCDate(d.getUTCDate() - day + 3); // Thursday of this week
+  const day = (d.getUTCDay() + 6) % 7; // 월요일 = 0
+  d.setUTCDate(d.getUTCDate() - day + 3); // 해당 주의 목요일
   const year = d.getUTCFullYear();
   const firstThursday = new Date(Date.UTC(year, 0, 4));
   const firstDay = (firstThursday.getUTCDay() + 6) % 7;
@@ -71,7 +70,7 @@ export function isoWeekLabel(date: string): string {
   return `${year}-W${String(week).padStart(2, "0")}`;
 }
 
-/** Monday..Sunday calendar dates of an ISO week label. */
+/** ISO 주차 라벨의 월요일부터 일요일까지 날짜. */
 export function isoWeekRange(label: string): { start: string; end: string } | null {
   const m = /^(\d{4})-W(\d{2})$/.exec(label);
   if (!m) return null;
@@ -88,7 +87,7 @@ export function isoWeekRange(label: string): { start: string; end: string } | nu
   return { start: startDate, end: addDays(startDate, 6) };
 }
 
-/** First and last day (YYYY-MM-DD) of a calendar month label such as 2026-09; null for anything else. */
+/** 2026-09 같은 월 라벨의 첫날과 마지막 날(YYYY-MM-DD). 유효하지 않은 라벨은 null. */
 export function monthRange(label: string): { start: string; end: string } | null {
   const m = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(label);
   if (!m) return null;

@@ -1,49 +1,49 @@
-// 站点身份和读者看得到的文案。换成你的行业时，先改这个文件。
-// 网页和后端都读它；改完重新构建（docker compose up --build）即可生效。
-// 域名不在这里：部署时用环境变量 SITE_URL 设置。
+// 사이트 정체성과 독자에게 표시되는 문구입니다. 업종을 바꿀 때 이 파일부터 수정하세요.
+// 웹과 백엔드가 함께 읽습니다. 수정 후 다시 빌드하면 적용됩니다.
+// 도메인은 배포 시 SITE_URL 환경 변수로 설정합니다.
 
 import type { Founder } from "@aihot/contracts/site-config";
 
 /**
- * 日报、周报、月报什么时候出（北京时间，HH:mm）：日报收这个时间之前的 24 小时，周报在每个自然周之后的周一出，
- * 月报在每月 1 日出。排程、成刊时间窗口、缺期告警和所有提到时间的文案都读它（public/ 里的文件写占位
- * {{dailyTime}}、{{weeklyTime}}、{{monthlyTime}}）；排程每半小时检查一次，所以写整点或半点。
+ * 일간·주간·월간 리포트 발행 시각(한국시간 Asia/Seoul, HH:mm)입니다. 일간은 발행 시각까지의 24시간을 다루고,
+ * 주간은 각 자연 주가 끝난 뒤 월요일에, 월간은 매월 1일에 발행합니다. 일정과 관련 문구가 이 값을 사용합니다.
+ * (public/ 파일의 {{dailyTime}}, {{weeklyTime}}, {{monthlyTime}} 치환에도 사용) 일정은 30분마다 확인하므로 정각이나 30분으로 설정하세요.
  */
 export const EDITION_TIMES = { daily: "08:00", weekly: "10:00", monthly: "10:30" };
 
-/** “每天 08:00”“每周一 10:00”“每月 1 日 10:30”：写进句子里的出刊时间。 */
+/** 문장에 표시할 발행 시각입니다. */
 export const EDITION_WHEN = {
-  daily: `每天 ${EDITION_TIMES.daily}`,
-  weekly: `每周一 ${EDITION_TIMES.weekly}`,
-  monthly: `每月 1 日 ${EDITION_TIMES.monthly}`,
+  daily: `매일 ${EDITION_TIMES.daily}`,
+  weekly: `매주 월요일 ${EDITION_TIMES.weekly}`,
+  monthly: `매월 1일 ${EDITION_TIMES.monthly}`,
 };
 
 export const SITE = {
   /** 站名：导航、页面标题、分享图、RSS、MCP、后台都用它。 */
-  name: "MyHOT",
+  name: "AIHOT Tech Korea",
   /**
    * 行业词：拼进默认说法里，比如“AI 日报”“AI 动态”。
    * 改成“法律”“HR”“黄金”之类，页面上就会变成“法律日报”“法律动态”。
    */
   subject: "AI",
   /** 首页的完整标题（浏览器标签、搜索结果）。 */
-  homeTitle: "MyHOT — AI 行业动态 · 每日精选与日报",
+  homeTitle: "AIHOT Tech Korea — AI 업계 동향과 엄선 뉴스",
   /** 主题目录页（/topics）的标题。 */
-  topicsTitle: "AI 主题：公司与模型、技术方向、内容形态的最新动态",
+  topicsTitle: "AI 주제별 최신 동향: 기업·모델·기술·콘텐츠",
   /** 反馈表单输入框里的示例。 */
-  feedbackExample: "例如：我在搜索某个关键词时遇到……我原本想……",
+  feedbackExample: "예: 특정 키워드를 검색할 때 이런 문제가 있었어요…",
   /** 反馈页标题下面的一句话。 */
-  feedbackLead: "发现 bug、想要的功能、看不顺眼的地方，都可以告诉我们。",
+  feedbackLead: "오류, 필요한 기능, 불편한 점을 알려주세요.",
   /** 反馈表单邮箱框里的提示。 */
-  feedbackEmailHint: "留下邮箱，我们可以回信联系你",
+  feedbackEmailHint: "답변을 받을 이메일 주소를 남겨 주세요",
   /** 一句话介绍：搜索引擎、分享卡片、RSS、llms.txt 会用。 */
-  description: `从一批 AI 信源里挑出值得看的动态，把同一件事的多篇报道归到一起，${EDITION_WHEN.daily} 出一份日报。`,
+  description: `AI 업계 신호원에서 주목할 동향을 골라 같은 사건의 보도를 묶고, ${EDITION_WHEN.daily} 일간 리포트를 발행합니다.`,
   /** llms.txt 里一句话介绍下面的一段详细介绍（选填）。 */
   llmsIntro: null as string | null,
   /** 一行小字：分享图、海报下方。 */
-  tagline: "值得关注的 AI 动态",
+  tagline: "주목할 AI 동향",
   /** 搜索引擎读到的关键词（首页结构化数据）。 */
-  keywords: ["AI 资讯", "AI 新闻", "AI 日报", "AI 行业动态"] as string[],
+  keywords: ["AI 소식", "AI 뉴스", "AI 일간 리포트", "AI 업계 동향"] as string[],
   /**
    * 搜索引擎站长平台的网站验证（选填）：meta 名 → 平台给的验证码，放在首页的 head 里。
    * 比如 "baidu-site-verification": "codeva-…"、"msvalidate.01": "…"。验证通过后也要留着，平台会定期复查。
@@ -52,16 +52,15 @@ export const SITE = {
   /** 网站开始收录的年份（结构化数据的时间范围，选填）。 */
   since: null as string | null,
   /** 界面语言（HTML lang、og:locale）。 */
-  locale: "zh-CN",
+  locale: "ko-KR",
   /** 默认域名，只在没设置 SITE_URL 时使用。 */
   defaultUrl: "http://localhost:3000",
   /** 标准图标（favicon.ico、icon.png、icon-192.png、apple-icon.png、logo.svg）以外也放在网站根目录的图标，site/brand/ 里的文件名（选填）；manifest.webmanifest 或外站引用了它们时用。 */
   rootIcons: [] as string[],
   /**
-   * MCP 工具名的前缀（小写字母、数字、下划线），工具会叫 myhot_get_latest、myhot_search……
-   * 已经有人接入后就不要再改。
+   * MCP 도구 이름의 접두사(소문자·숫자·밑줄)입니다. 사용자가 연동한 뒤에는 변경하지 마세요.
    */
-  mcpPrefix: "myhot",
+  mcpPrefix: "aihottechkorea",
   /**
    * 公开接口（MCP、OpenAPI、llms.txt）的版本号，只升不降。
    * 改了接口里已有的字段或含义时升主版本，并在部署说明里写清。
@@ -70,7 +69,7 @@ export const SITE = {
   /** 对外联系邮箱（选填）：llms.txt 和给 Agent 的使用说明里会写。 */
   contactEmail: null as string | null,
   /** 关于页底部的一行小字（选填）。 */
-  footerNote: "由 AIHOT 开源框架驱动",
+  footerNote: "AIHOT Tech Korea",
   /** 中国大陆网站的 ICP 备案号（选填），填了就显示在侧栏底部和“我的”页底部，并链接到工信部备案系统。 */
   icp: null as string | null,
   /** 中国大陆网站的公安备案信息（选填），填了显示在侧栏底部和“我的”页底部。 */
@@ -78,23 +77,23 @@ export const SITE = {
   /** 源码的 GitHub 仓库地址（选填），填了就在侧栏底部和“我的”页底部显示“GitHub 开源”。 */
   github: null as string | null,
   /** 页脚的“由 X 驱动”（选填）：填了就在侧栏底部和“我的”页底部显示，链到它的网址。默认链回上游 AIHOT，不想要就写 null。 */
-  poweredBy: { name: "AIHOT", url: "https://aihot.news" } as { name: string; url: string } | null,
+  poweredBy: null as { name: string; url: string } | null,
   /** 结构化数据里的网站运营者（搜索引擎用）。 */
   organization: {
-    name: "MyHOT",
+    name: "AIHOT Tech Korea",
     /** 创始人（选填）。 */
     founder: null as Founder | null,
   },
   /** 抓取信源时报上的名字和版本（User-Agent 里用），不要冒用别的站。 */
-  crawlerName: "MyHOTBot/1.0",
+  crawlerName: "AIHOTTechKoreaBot/1.0",
 } as const;
 
 /** 使用规则和隐私说明两页（正文在 pages/ 里）。 */
 export const POLICY = {
   terms: {
     /** 页面名：导航、页脚、页面标题都用它。 */
-    name: "使用规则",
-    description: "本站网页、RSS、公开 API 与 MCP 的使用规则。",
+    name: "이용 규칙",
+    description: "본 사이트 웹페이지·RSS·공개 API·MCP의 이용 규칙.",
     /** llms.txt 里对这一页的一句说明（选填）。 */
     covers: null as string | null,
     /** Agent 接入页的 RSS、API 两栏各自提醒的使用规则（选填）。 */
@@ -111,7 +110,7 @@ export const POLICY = {
     headers: null as null | Record<string, string>,
   },
   privacy: {
-    description: "本站如何处理浏览器本地数据、反馈资料与访问日志。",
+    description: "본 사이트의 브라우저 로컬 데이터·피드백 자료·접속 로그 처리 방식.",
     /** llms.txt 里对这一页的一句说明（选填）。 */
     covers: null as string | null,
   },
@@ -134,7 +133,7 @@ export const NAV = {
 /** 条目卡片和详情页上的几处说法和显示。 */
 export const ITEM_COPY = {
   /** 模型写的那句理由叫什么：卡片、详情页、Markdown 导出、给 Agent 的回答和群推送都用它。 */
-  reasonLabel: "推荐理由",
+  reasonLabel: "추천 이유",
   /** 读者在网页和分享图上看不看得到 AI 评分。只管显示：公开 API 和 MCP 的数据照样带 score，后台照常显示。 */
   showScore: true,
 };
@@ -150,20 +149,20 @@ interface ContactCard {
 
 /** 关于页的文案。数字（信源数、收录数、精选数、日报期数）来自站内实时统计，不用写在这里。 */
 export const ABOUT = {
-  kicker: `关于 ${SITE.name}`,
+  kicker: `${SITE.name} 소개`,
   /** 页面描述（搜索结果、分享卡片）。 */
-  description: `关于 ${SITE.name}：${SITE.description}`,
+  description: `${SITE.name} 소개: ${SITE.description}`,
   /** 大标题：第一行正常颜色，第二行强调色。 */
-  headline: ["AI 圈每天都有新动静，", "值得看的，只有几条。"] as [string, string],
+  headline: ["AI 업계의 새로운 소식은 매일 쏟아집니다.", "주목할 소식만 골라 전합니다."] as [string, string],
   /** 标题下面的一段话。{sources} 会换成实时的信源数（两边自动加空格，所以 {sources} 两边不写空格）；统计没取到时换成 sourcesFallback。 */
-  lead: `${SITE.name} 替你盯着{sources}个信源：抓取、归并、打分、精选，${EDITION_WHEN.daily} 出一份日报。免费，不用注册。`,
-  sourcesFallback: "十几",
+  lead: `${SITE.name}이(가) {sources}개의 신호원을 살펴보고, 수집·분류·평가해 엄선한 뒤 ${EDITION_WHEN.daily} 일간 리포트로 전합니다. 무료이며 가입이 필요 없습니다.`,
+  sourcesFallback: "십수",
   /** 信源河动画下面的四个环节。 */
   steps: {
-    collect: "官方博客、媒体和个人的订阅源都在看；更新越勤的源看得越勤，最快 15 分钟看一次。",
-    store: "抓到的都存下来，同一件事的报道归到一起，热点榜就是从这里算出来的。",
-    select: `模型先看是不是这个行业的事、有没有实际信息，再写中文标题、摘要和${ITEM_COPY.reasonLabel}；营销稿和重复转发进不来。`,
-    publish: `${EDITION_WHEN.daily} 出日报，${EDITION_WHEN.weekly} 出周报，${EDITION_WHEN.monthly} 出月报。`,
+    collect: "공식 블로그, 언론사와 개인의 피드를 살펴봅니다. 자주 갱신되는 신호원은 더 자주 확인하며, 가장 빠르면 15분마다 확인합니다.",
+    store: "수집한 내용을 저장하고 같은 사건을 다룬 보도를 묶습니다. 핫 뉴스 순위도 이 자료를 바탕으로 계산합니다.",
+    select: `업계 관련성과 실제 정보 여부를 살펴본 뒤 한국어 제목·요약과 ${ITEM_COPY.reasonLabel}을 작성합니다. 홍보성 글과 중복 전재는 제외합니다.`,
+    publish: `${EDITION_WHEN.daily} 일간, ${EDITION_WHEN.weekly} 주간, ${EDITION_WHEN.monthly} 월간 리포트를 발행합니다.`,
   },
   /**
    * 作者块（选填），null 就不显示。
@@ -178,7 +177,7 @@ export const ABOUT = {
     feishu?: ContactCard;
   },
   /** 页面底部的版权与下架说明，中间接“反馈页”的链接。 */
-  copyright: [`${SITE.name} 是聚合摘要和阅读索引，原文版权归各来源所有。如果你是来源方，希望更正、下架或调整展示方式，可以通过`, "联系我们。"] as [string, string],
+  copyright: [`${SITE.name}은(는) 요약과 읽기 링크를 제공합니다. 원문의 권리는 각 출처에 있습니다. 출처 관계자가 수정·삭제 또는 표시 방식 변경을 요청하려면`, "피드백 페이지로 연락해 주세요."] as [string, string],
   /** 页面底部“使用规则”链接的锚点 id（选填）：外部文档写死过这个锚点就填上，以后不要改。 */
   termsAnchor: null as string | null,
 } as const;
@@ -196,32 +195,32 @@ export const ADMIN = {
 /** Agent 接入页的示例。 */
 export const AGENT = {
   /** MCP 工具表里“搜索”一行：能搜什么、可以怎么问。 */
-  search: { scope: "按公司、产品、人物或话题搜最近 7 天", ask: "这家公司最近发了什么？" },
+  search: { scope: "회사·제품·인물·주제별 최근 7일 검색", ask: "이 회사가 최근에 발표한 소식은 무엇인가요?" },
 };
 
 /** 日报、周报、月报版面上的说法。 */
 export const REPORTS = {
   /** 报头下面的出版者一行。 */
-  imprint: SITE.name.toUpperCase(),
+  imprint: "AIHOT TECH KOREA",
   /** 报头旁边的一个词。 */
   motto: SITE.subject as string,
   /** 每种报告页面的描述（搜索结果、分享卡片），不带句号；llms.txt 介绍周报、月报时也用它。 */
   descriptions: {
-    daily: `${SITE.name} ${subjectAfter(`${EDITION_WHEN.daily}（北京时间）发布的`, "行业精编日报")}`,
-    weekly: subjectAfter("每周", "行业综合回顾"),
-    monthly: subjectAfter("每月", "行业盘点"),
+    daily: `${SITE.name} ${subjectAfter(`${EDITION_WHEN.daily} 발행`, "업계 엄선 일간 리포트")}`,
+    weekly: subjectAfter("매주 발행하는", "업계 주간 종합 리포트"),
+    monthly: subjectAfter("매월 발행하는", "업계 월간 결산"),
   },
   /**
    * 一期里的一条怎么称呼（“4 件大事”）：没有头条时的标题（“这一天的 4 件 AI 大事”）、报头和往期目录的条数、
    * 周报月报没有总述时的那句话，以及订阅说明里的“按栏目分好的大事”都用它。
    */
-  entry: { measure: "件", noun: "大事" },
+  entry: { measure: "건", noun: "큰 소식" },
   /** 报头上其余几个数字后面的说法；精选数和日报期数在关于页、主题页也这样写。 */
-  metricUnits: { sourcesCount: "个来源", firstPartyEvents: "件一手发布", selectedCount: "条精选", reportsCovered: "期日报" },
+  metricUnits: { sourcesCount: "개의 출처", firstPartyEvents: "건의 1차 발표", selectedCount: "건의 엄선", reportsCovered: "기 일간" },
   /** 报告分享图上“共几条”的说法。 */
-  shareUnit: "件大事",
+  shareUnit: "건의 큰 소식",
   /** 日报时段内有资料经过评判、但没有新大事时的标题与导语。 */
-  quiet: { title: "今日安静，无大事发生", paragraph: `${subjectAfter("北京时间 {start} 至 {end}，没有新的", "大事")}。` },
+  quiet: { title: "오늘은 조용합니다 — 큰 소식 없음", paragraph: `한국시간 {start}부터 {end}까지 새로운 주요 소식이 없었습니다.` },
 };
 
 /** 运维告警（只发给站长）里随部署而变的几处说法。 */
@@ -253,18 +252,18 @@ export const COMMUNITY_FEEDS: { dev: string[]; hn: string[] } = {
 
 /** 各页分享图（/og/pages/*.png）上的文字。主题目录页的那张按主题数自动生成。 */
 export const CARDS: Record<string, { kicker: string; title: string; subtitle: string; accent?: "hot" | "amber" }> = {
-  site: { kicker: subjectAfter("每日", "精选"), title: SITE.tagline, subtitle: SITE.description },
-  all: { kicker: subjectAfter("全部", "动态"), title: "所有信源的最新动态，一站看完", subtitle: "按时间汇总各信源的最新动态，可按类别与标签筛选。" },
-  hot: { kicker: "热点榜", title: "过去 48 小时，大家在讨论什么", subtitle: "热度指数、趋势与组成热度的公开来源。", accent: "hot" },
-  daily: { kicker: withSubject("日报"), title: subjectAfter(`每天 ${spokenTime(EDITION_TIMES.daily)}，一份读得完的`, "日报"), subtitle: `${subjectAfter("前一天值得关注的", "动态")}。` },
-  weekly: { kicker: withSubject("周报"), title: `一周${REPORTS.entry.noun}，一次看清`, subtitle: "本周的主线、重要发布与值得回看的讨论。" },
-  monthly: { kicker: withSubject("月报"), title: "一个月的变化", subtitle: "月度主线与关键事件回顾。" },
-  about: { kicker: "关于", title: `关于 ${SITE.name}`, subtitle: SITE.description },
-  terms: { kicker: "使用规则", title: `${SITE.name} 使用规则`, subtitle: "网页、API、RSS 与 MCP 的使用范围。" },
-  privacy: { kicker: "隐私说明", title: `${SITE.name} 隐私说明`, subtitle: "访问日志、浏览器本地数据与反馈资料的处理方式。" },
-  changelog: { kicker: "更新日志", title: `${SITE.name} 更新日志`, subtitle: "功能更新、优化、公告与下线记录。" },
-  feedback: { kicker: "反馈", title: "告诉我们哪里可以更好", subtitle: "内容、功能、接入，或来源方的更正与下架请求。" },
-  agent: { kicker: "Agent 接入", title: `把 ${SITE.name} 接进你的 Agent`, subtitle: "MCP、RSS、API 三种方式，匿名只读，无需 API Key。" },
+  site: { kicker: subjectAfter("매일", "엄선 뉴스"), title: SITE.tagline, subtitle: SITE.description },
+  all: { kicker: subjectAfter("전체", "동향"), title: "모든 신호원의 최신 동향을 한곳에서", subtitle: "신호원별 최신 소식을 시간순으로 모아 분류와 태그로 살펴봅니다." },
+  hot: { kicker: "핫 뉴스", title: "지난 48시간, 무엇이 화제였을까요?", subtitle: "화제 지수와 추이, 공개된 출처를 확인하세요.", accent: "hot" },
+  daily: { kicker: withSubject("일간 리포트"), title: `${spokenTime(EDITION_TIMES.daily)}에 읽는 하루 일간 리포트`, subtitle: "전날 주목할 만한 동향을 모았습니다." },
+  weekly: { kicker: withSubject("주간 리포트"), title: `한 주의 ${REPORTS.entry.noun}을 한눈에`, subtitle: "이번 주의 흐름과 주요 발표, 다시 볼 만한 논의를 정리했습니다." },
+  monthly: { kicker: withSubject("월간 리포트"), title: "한 달 동안의 변화", subtitle: "월간 주요 흐름과 핵심 사건을 돌아봅니다." },
+  about: { kicker: "소개", title: `${SITE.name} 소개`, subtitle: SITE.description },
+  terms: { kicker: "이용 규칙", title: `${SITE.name} 이용 규칙`, subtitle: "웹페이지·API·RSS·MCP 이용 범위입니다." },
+  privacy: { kicker: "개인정보 안내", title: `${SITE.name} 개인정보 안내`, subtitle: "접속 로그·브라우저 로컬 데이터·피드백 자료 처리 방식입니다." },
+  changelog: { kicker: "업데이트", title: `${SITE.name} 업데이트`, subtitle: "기능 업데이트, 최적화, 공지와 종료 기록입니다." },
+  feedback: { kicker: "피드백", title: "더 나은 서비스를 위해 의견을 들려주세요", subtitle: "콘텐츠·기능·연동 의견이나 출처 수정·삭제 요청을 받습니다." },
+  agent: { kicker: "Agent 연동", title: `${SITE.name}을(를) Agent에 연결하세요`, subtitle: "MCP·RSS·API로 익명 읽기 전용 연동이 가능하며 API Key가 필요 없습니다." },
 };
 
 /** 公开接口的访问约定里随部署而变的几处：给 Agent 的使用说明、llms.txt 会写。 */
@@ -320,21 +319,21 @@ export const PUBLIC_CATEGORIES = {
   feedLabels: {},
 } as const;
 
-/** “AI 日报”这类说法：行业词和名词之间，英文词加空格，中文词不加。 */
+/** 업종명과 명사 사이에 영문이면 공백을, 한글이면 공백을 넣지 않습니다. */
 export function withSubject(noun: string): string {
   return /[A-Za-z0-9]$/.test(SITE.subject) ? `${SITE.subject} ${noun}` : `${SITE.subject}${noun}`;
 }
 
-/** “按主题看 AI”“往期 AI 日报”这类说法：行业词接在中文后面，英文词前加空格，中文词不加；noun 照 withSubject 接上。 */
+/** 문구 뒤에 업종명을 붙일 때 영문 앞에는 공백을, 한글 앞에는 공백을 넣지 않습니다. */
 export function subjectAfter(text: string, noun?: string): string {
   const gap = /^[A-Za-z0-9]/.test(SITE.subject) ? " " : "";
   return `${text}${gap}${noun ? withSubject(noun) : SITE.subject}`;
 }
 
-/** “8 点”“10 点 30 分”：口语里的 HH:mm。 */
+/** HH:mm 시각을 한국어 구어체로 표시합니다. */
 function spokenTime(time: string): string {
   const [hour, minute] = time.split(":").map(Number) as [number, number];
-  return `${hour} 点${minute ? ` ${minute} 分` : ""}`;
+  return `${hour}시${minute ? ` ${minute}분` : ""}`;
 }
 
 /**
@@ -343,17 +342,17 @@ function spokenTime(time: string): string {
  */
 export const SEO_TITLES = {
   /** 热点榜（/hot）。 */
-  hot: `${withSubject("热点榜")}：今日热门事件排行`,
+  hot: `${withSubject("핫 뉴스 목록")}: 오늘 인기 이벤트 순위`,
   /** 全部动态（/all），不含搜索和筛选结果。 */
-  all: `${subjectAfter("最新", "动态")}：实时更新`,
+  all: `${subjectAfter("최신", "동향")}: 실시간 업데이트`,
   /** Agent 接入页（/agent）。 */
-  agent: `${withSubject("资讯")} API、MCP 与 RSS：接进你的 Agent`,
+  agent: `${withSubject("뉴스")} API·MCP·RSS: Agent 연동`,
   /** 关于页（/about）的完整标题，已含站名。 */
-  about: `关于 ${SITE.name}：${SITE.tagline}`,
+  about: `${SITE.name} 소개: ${SITE.tagline}`,
   /** 日报、周报、月报的最新一期（/daily、/weekly、/monthly）；date 是这一期的日期：“11月7日”“10月26日—11月1日”“2026年10月”。 */
   latestReport: (kind: "daily" | "weekly" | "monthly", date: string): string =>
-    ({ daily: `${withSubject("日报")}：${subjectAfter("每日", "新闻")}（${date}）`, weekly: `${withSubject("周报")}：一周大事回顾（${date}）`, monthly: `${withSubject("月报")}：${date} 大事回顾` })[kind],
+    ({ daily: `${withSubject("일간 리포트")}: ${date} 주요 뉴스`, weekly: `${withSubject("주간 리포트")}: ${date} 한 주 돌아보기`, monthly: `${withSubject("월간 리포트")}: ${date} 주요 소식 돌아보기` })[kind],
   /** 主题页第一页：公司搜“最新消息”，方向和内容类型搜“最新进展”；updated 是最新一篇精选的日期（“11月7日”），没有时为 null。 */
   topic: (name: string, group: "company" | "field" | "genre", updated: string | null): string =>
-    `${name} ${group === "company" ? "最新消息与动态" : "最新动态与进展"}${updated ? `（${updated}更新）` : ""}`,
+    `${name} ${group === "company" ? "최신 소식과 동향" : "최신 동향과 진전"}${updated ? `(${updated} 업데이트)` : ""}`,
 };

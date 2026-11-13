@@ -11,8 +11,8 @@ import { FeedItem } from "./FeedItem";
 import { IconChevronDown } from "../../components/icons";
 import { RingMark } from "@aihot/site/brand/Logo.tsx";
 import { EmptyState } from "../../components/ui/Page";
-import { beijingDate, beijingTime, beijingWeekday, monthDay } from "@aihot/contracts/time";
-import { byBeijingDay, weekdayShort } from "../../lib/format";
+import { seoulDate, seoulTime, seoulWeekday, monthDay } from "@aihot/contracts/time";
+import { bySeoulDay, weekdayShort } from "../../lib/format";
 import { isHydrated } from "../../lib/hydration";
 import { markRead, setUnreadOnly, useReadSet, useUnreadOnly } from "../../lib/local-state";
 import { filterParams, listPath } from "../../lib/seo";
@@ -40,7 +40,7 @@ function fromResponse(r: TimelineResponse): ListState {
  */
 export function DayHeader({ day, today, count, collapsed, onToggle, aside, asideOnPhone = true }: { day: string; today: string; count: number | null; collapsed?: boolean; onToggle?: () => void; aside?: React.ReactNode; asideOnPhone?: boolean }) {
   const date = monthDay(day, today);
-  const weekday = beijingWeekday(day);
+  const weekday = seoulWeekday(day);
   const short = weekdayShort(day);
   const phoneRow = (
     <>
@@ -117,7 +117,7 @@ export function TimelineSlot({ at, children, fresh = false, delay = 0, dataKey }
       {/* Phones: the row without the rail (the item shows its time); a hairline between rows. */}
       <div className="grid grid-cols-[minmax(0,1fr)] border-b border-line-soft py-3.5 group-last/slot:border-b-0 lg:grid-cols-[64px_22px_minmax(0,1fr)] lg:border-b-0 lg:py-0 lg:pb-3 lg:group-last/slot:pb-0">
         <time dateTime={at} className="mono hidden text-ink-3 lg:block lg:pt-[17px] lg:text-[12.5px] lg:font-semibold lg:leading-6">
-          {beijingTime(at)}
+          {seoulTime(at)}
         </time>
         <span aria-hidden="true" className="relative hidden lg:block">
           <span className="absolute -bottom-[41px] left-[10.5px] top-[29px] w-px bg-line-strong group-last/slot:hidden" />
@@ -269,7 +269,7 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
     return () => io.disconnect();
   }, [state.nextCursor, state.batches, loadMore]);
 
-  const today = beijingDate(Date.now());
+  const today = seoulDate(Date.now());
   // 只看未读 hides cards read in this browser: an ordinary card by its own id, a reading group by any
   // of its selected reports, so a read representative does not hide the unread reports behind it.
   // A group kept that way is not drawn as read; its expansion marks which reports are unread.
@@ -278,7 +278,7 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
     [readSet],
   );
   const days = useMemo(
-    () => byBeijingDay(unreadOnly ? state.cards.filter(unreadVisible) : state.cards, (c) => c.anchorAt),
+    () => bySeoulDay(unreadOnly ? state.cards.filter(unreadVisible) : state.cards, (c) => c.anchorAt),
     [state.cards, unreadOnly, unreadVisible],
   );
 

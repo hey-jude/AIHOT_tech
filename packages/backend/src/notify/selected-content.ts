@@ -4,7 +4,7 @@ import { itemUrl } from "../publication/links.ts";
 import { publicSourceName } from "../publication/rules.ts";
 import { dingtalkMarkdown, type DingtalkContent } from "./dingtalk.ts";
 import { type CategoryKey } from "@aihot/contracts/taxonomy";
-import { beijingDay } from "@aihot/contracts/time";
+import { seoulDay } from "@aihot/contracts/time";
 import { CATEGORIES } from "@aihot/industry/taxonomy";
 import { ITEM_COPY, SITE } from "@aihot/site";
 
@@ -32,7 +32,7 @@ interface Row {
 }
 
 /** The original's publication date, so a launch introduced again weeks later does not read as today's. */
-const published = (at: Date) => `${beijingDay(at)}发布`;
+const published = (at: Date) => `${seoulDay(at)} 발행`;
 
 /** Model-written words go into card markdown: its markup characters are shown as written. */
 const literal = (text: string) => text.replace(/[&<>*_~`[\]]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -55,7 +55,7 @@ function card(r: Row) {
         { tag: "markdown", text_size: "notation", content: `<font color='grey'>${literal(publicSourceName(r.source_name))} · ${published(r.published_at!)}</font>` },
         { tag: "markdown", content: literal(r.summary ?? "") },
         ...(r.reason ? [{ tag: "markdown", text_size: "notation", content: `<font color='grey'>**${ITEM_COPY.reasonLabel}**　${literal(r.reason)}</font>` }] : []),
-        { tag: "column_set", horizontal_spacing: "8px", columns: [link(`在 ${SITE.name} 阅读`, itemUrl(r.article_id), "primary"), link("原文", r.url, "default")] },
+        { tag: "column_set", horizontal_spacing: "8px", columns: [link(`${SITE.name}에서 읽기`, itemUrl(r.article_id), "primary"), link("원문", r.url, "default")] },
       ],
     },
   };

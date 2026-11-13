@@ -6,7 +6,7 @@ import { PillTabs } from "../../components/ui/Tabs";
 import { areaPath, curvePath, type Pt } from "../hot/curve";
 
 const HOUR = 3600 * 1000;
-const BEIJING = 8 * HOUR;
+const SEOUL = 9 * HOUR;
 
 function niceStep(max: number): number {
   const raw = max / 4;
@@ -45,16 +45,16 @@ function distinctRanges(points: HeatPoint[]) {
 }
 
 /**
- * Time labels on whole Beijing hours: the finest step that leaves at most six; midnight reads as the
+ * Time labels on whole Seoul hours: the finest step that leaves at most six; midnight reads as the
  * date. Beyond four, a phone shows every other one (`wide`: only from sm up).
  */
 function timeTicks(t0: number, t1: number): Array<{ t: number; label: string; wide: boolean }> {
   const span = (t1 - t0) / HOUR;
   const step = ([1, 2, 3, 6, 12, 24, 48].find((s) => span / s <= 6) ?? 72) * HOUR;
   const out: Array<{ t: number; label: string; wide: boolean }> = [];
-  for (let t = Math.ceil((t0 + BEIJING) / step) * step - BEIJING; t <= t1; t += step) {
+  for (let t = Math.ceil((t0 + SEOUL) / step) * step - SEOUL; t <= t1; t += step) {
     const [day, time] = monthDayTime(new Date(t).toISOString()).split(" ");
-    out.push({ t, label: time === "00:00" ? day! : time!, wide: Math.round((t + BEIJING) / step) % 2 === 1 });
+    out.push({ t, label: time === "00:00" ? day! : time!, wide: Math.round((t + SEOUL) / step) % 2 === 1 });
   }
   if (out.length <= 4) for (const tick of out) tick.wide = false;
   return out;

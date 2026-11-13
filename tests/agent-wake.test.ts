@@ -85,7 +85,7 @@ test('outward valve and missing credentials cannot send wakes',async()=>{
  process.env.FEISHU_INTERNAL_ENABLED='true';delete process.env.WEBHOOK_HUB_KEY;await checkAlerts();assert.equal(hits.length,0);
 });
 
-test('the 09:00 digest dispatches follow-ups once per Beijing day, including agent-only work',async()=>{
+test('the 09:00 digest dispatches follow-ups once per Seoul day, including agent-only work',async()=>{
  const now=Date.parse('2026-10-18T01:00:00Z');found=[quiet];await sendDigest(now);await sendDigest(now+60_000);
  assert.deepEqual(hits.map(h=>h.body.type),['alert.digest']);assert.equal(hits[0]!.body.subject,'digest:2026-10-18');
  await sendDigest(now+86400_000);assert.equal(hits.length,2);

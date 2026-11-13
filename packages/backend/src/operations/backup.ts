@@ -7,7 +7,7 @@ import { createReadStream } from "node:fs";
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { beijingDate, beijingWeekday } from "@aihot/contracts/time";
+import { seoulDate, seoulWeekday } from "@aihot/contracts/time";
 import { config } from "../config.ts";
 import { sql } from "../db.ts";
 import { screenshotsForwarded } from "./feedback.ts";
@@ -129,8 +129,8 @@ export async function runBackup(now = new Date()) {
     filesError = String(typeof stderr === "string" && stderr.trim() ? stderr.trim() : error instanceof Error ? error.message : error).slice(0, 300);
   }
   const out: Array<{ key: string; bytes: number; sha256: string }> = [];
-  const today = beijingDate(now);
-  const prefix = today.endsWith("-01") ? "monthly" : beijingWeekday(today) === "星期日" ? "weekly" : "daily";
+  const today = seoulDate(now);
+  const prefix = today.endsWith("-01") ? "monthly" : seoulWeekday(today) === "일요일" ? "weekly" : "daily";
   for (const file of kept.length && !filesError ? [dump, files] : [dump]) {
     const size = (await stat(file)).size;
     const sha = await fileSha256(file);

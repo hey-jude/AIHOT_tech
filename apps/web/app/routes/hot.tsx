@@ -2,7 +2,7 @@ import { useLoaderData } from "react-router";
 import type { Route } from "./+types/hot";
 import { IntentLink } from "../components/ui/IntentLink";
 import type { HotEntryView, HotResponse } from "@aihot/contracts/site";
-import { beijingDate } from "@aihot/contracts/time";
+import { seoulDate } from "@aihot/contracts/time";
 import { shortAddresses } from "@aihot/contracts/addresses";
 import { SEO_TITLES, subjectAfter, withSubject } from "@aihot/site";
 import { cachedPage, loadOr404 } from "../lib/api.server";
@@ -34,7 +34,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
   const entries = hot?.entries ?? [];
   // A search result answers "what is hot today" with the three events the page leads with, dated by the ranking.
   const lead = hot?.computedAt && entries.length
-    ? `${subjectAfter(monthDay(beijingDate(hot.computedAt)), "热点")}：${entries.slice(0, 3).map((e) => e.story.title).join("；")}。`
+    ? `${subjectAfter(monthDay(seoulDate(hot.computedAt)), "热点")}：${entries.slice(0, 3).map((e) => e.story.title).join("；")}。`
     : "";
   return pageMeta({
     title: SEO_TITLES.hot,

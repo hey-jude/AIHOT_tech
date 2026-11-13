@@ -15,7 +15,7 @@ import { sanitizeBody, textToHtml } from "../content/sanitize.ts";
 import { rebaseTranslation } from "../content/presentation.ts";
 import { chatJson } from "../providers/llm.ts";
 import { completeReceipt, failureKind, ProviderRejectedError, rejectReceivedResponse } from "../providers/receipts.ts";
-import { collapseWhitespace, isChineseText } from "../lib/text.ts";
+import { collapseWhitespace, isKoreanText } from "../lib/text.ts";
 import { isEmptyOrLinkOnly, xArticleBody } from "../content/posts.ts";
 import { sha256 } from "../lib/ids.ts";
 import { modelFor } from "./models.ts";
@@ -198,7 +198,7 @@ export async function translateArticle(articleId: string, expectedRevision?: num
     const text = String(row.x_post?.text ?? row.body_text ?? "").trim();
     if (isEmptyOrLinkOnly(text)) return result({ status: "skipped", reason: "no text to translate" });
     const meaningful = collapseWhitespace(text.replace(/https?:\/\/\S+/g, ""));
-    if (isChineseText(text, row.language)) return result({ status: "skipped", reason: "already Chinese" });
+    if (isKoreanText(text, row.language)) return result({ status: "skipped", reason: "already Korean" });
     if (meaningful.length < X_MIN_CHARS) return result({ status: "skipped", reason: "short post" });
     const translated = await translateAll(articleId, row.revision, [text], SYSTEM_POST);
     const [t] = translated.translations;
@@ -208,7 +208,7 @@ export async function translateArticle(articleId: string, expectedRevision?: num
   }
 
   const source = article ? xArticleBody(String(row.x_post?.text ?? ""), article.html!) : row.body_html;
-  if (!source || isChineseText(article ? article.text! : row.body_text ?? "", row.language)) return result({ status: "skipped", reason: "no foreign-language body" });
+  if (!source || isKoreanText(article ? article.text! : row.body_text ?? "", row.language)) return result({ status: "skipped", reason: "no foreign-language body" });
   const $ = cheerio.load(source, null, false);
   const blocks = segmentsOf($);
   if (!blocks.length) return result({ status: "skipped", reason: "no translatable text" });
@@ -267,7 +267,7 @@ async function store(articleId: string, revision: number, title: string, html: s
     }
     const changed = await tx`
       INSERT INTO translations (article_id, lang, revision, title, body_html, body_text, complete, origin)
-      VALUES (${articleId}, 'zh', ${revision}, ${title}, ${html}, ${text}, ${complete}, 'model')
+      VALUES (${articleId}, 'ko', ${revision}, ${title}, ${html}, ${text}, ${complete}, 'model')
       ON CONFLICT (article_id, lang) DO UPDATE SET revision = EXCLUDED.revision, title = EXCLUDED.title, body_html = EXCLUDED.body_html,
         body_text = EXCLUDED.body_text, complete = EXCLUDED.complete, origin = 'model', created_at = now()
       WHERE translations.origin <> 'source' AND translations.revision <= EXCLUDED.revision
@@ -295,7 +295,7 @@ export async function importBodyTranslation(input: { articleId: string; sourceHt
 /** A quoted post worth translating: at least a few letters beyond its links, and not already Chinese. */
 function quoteTranslatable(text: string): boolean {
   const words = collapseWhitespace(text.replace(/https?:\/\/\S+/g, " "));
-  return words.length >= 10 && (words.match(/\p{L}/gu) ?? []).length >= 2 && !isChineseText(words);
+  return words.length >= 10 && (words.match(/\p{L}/gu) ?? []).length >= 2 && !isKoreanText(words);
 }
 
 /**
@@ -307,7 +307,7 @@ export async function translateQuotes(opts: { days?: number; limit?: number; bud
   const started = Date.now();
   const rows = await sql<{ tweet_id: string; text: string; text_hash: string | null; own_zh: string | null }[]>`
     SELECT DISTINCT ON (q.tweet_id) q.tweet_id, a.x_post->'quoted'->>'text' AS text, qt.text_hash,
-      (SELECT tr.body_text FROM articles o JOIN translations tr ON tr.article_id = o.id AND tr.lang = 'zh' AND tr.revision >= o.revision
+      (SELECT tr.body_text FROM articles o JOIN translations tr ON tr.article_id = o.id AND tr.lang = 'ko' AND tr.revision >= o.revision
        WHERE o.identity_key = 'x:' || q.tweet_id AND tr.complete AND coalesce(tr.body_text, '') <> ''
          -- A post with a saved long article is translated as that article: its translation is not the post's words.
          AND coalesce(o.x_article->>'text', '') = '') AS own_zh
@@ -377,7 +377,7 @@ export async function translatePending(opts: { limit?: number; budgetMs?: number
     SELECT p.article_id,a.revision,a.language,
       CASE WHEN p.channel='x' THEN coalesce(nullif(a.x_article->>'text',''),a.x_post->>'text',a.body_text) ELSE a.body_text END AS text
     FROM publications p JOIN articles a ON a.id = p.article_id
-    LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'zh'
+    LEFT JOIN translations tr ON tr.article_id = p.article_id AND tr.lang = 'ko'
     WHERE p.selected AND p.visibility = 'public' AND p.body_mode = 'full'
       AND (p.channel='x' OR a.body_html IS NOT NULL)
       AND (p.discovered_at > now() - interval '3 days'
@@ -390,7 +390,7 @@ export async function translatePending(opts: { limit?: number; budgetMs?: number
     ORDER BY p.discovered_at DESC`;
   // Reconsider language skips with the shared rule. Filter before taking the batch so Chinese
   // originals do not occupy every slot and starve foreign-language bodies behind them.
-  const rows = pending.filter(row => !isChineseText(row.text ?? "", row.language)).slice(0, opts.limit ?? 30);
+  const rows = pending.filter(row => !isKoreanText(row.text ?? "", row.language)).slice(0, opts.limit ?? 30);
   const done: TranslateResult[] = [];
   for (const r of rows) {
     if (Date.now() - started > (opts.budgetMs ?? 4 * 60_000) || shutdownSignal.signal.aborted) break;

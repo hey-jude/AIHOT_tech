@@ -106,7 +106,7 @@ export async function previewSource(draft: Pick<SourceRow, "id" | "kind" | "conf
   const reads = await enrichDetails(candidates, source, known, { budget: Number(source.config.detail?.maxFetches ?? 0), datedOut: {}, retries: {}, admits });
   // A page that fails keeps its listing data, as in collection; when none can be read, the rules are what fails.
   if (reads.failures.length && reads.failures.length === reads.attempts) {
-    throw new FetchError(`原文页全部读取失败（${reads.failures.length} 页）：${reads.failures.map((f) => `${f.url}（${f.error}）`).join("；")}`);
+    throw new FetchError(`모든 원문 페이지 읽기에 실패했습니다(${reads.failures.length}페이지): ${reads.failures.map((f) => `${f.url}(${f.error})`).join("; ")}`);
   }
   candidates = candidates.filter(admits);
   return {
@@ -117,7 +117,7 @@ export async function previewSource(draft: Pick<SourceRow, "id" | "kind" | "conf
 }
 
 /** A class of the industry pack (industry/selection.ts), or none. */
-const SelectionClass = z.string().refine((c) => Object.hasOwn(SELECTION.classes, c), { message: "不是行业包里的信源类别" }).nullable();
+const SelectionClass = z.string().refine((c) => Object.hasOwn(SELECTION.classes, c), { message: "업계 설정에 없는 출처 분류입니다." }).nullable();
 
 const EDITABLE = z
   .object({
@@ -158,15 +158,15 @@ async function saveSource(id: string, patch: z.infer<typeof EDITABLE>, input: { 
     if (patch.config) await tx`SELECT pg_advisory_xact_lock(hashtext('admin-source-identity'))`;
     const [before] = await tx`SELECT * FROM sources WHERE id = ${id} FOR UPDATE`;
     if (!before) return null;
-    if (new Date(before.updated_at as Date).toISOString() !== input.version) throw new Conflict("信源已被其他操作修改，请刷新后再改");
+    if (new Date(before.updated_at as Date).toISOString() !== input.version) throw new Conflict("출처가 다른 작업에서 수정되었습니다. 새로고침한 뒤 다시 수정하세요.");
     const kindChanged = patch.kind !== undefined && patch.kind !== before.kind;
-    if (patch.kind !== undefined && !patch.config) throw new UnsupportedConfig("调整采集方式须同时提供完整采集配置");
+    if (patch.kind !== undefined && !patch.config) throw new UnsupportedConfig("수집 방식을 변경하려면 전체 수집 설정을 함께 제공해야 합니다.");
     if (kindChanged) {
-      if (!(REPLACEABLE_SOURCE_KINDS as readonly string[]).includes(String(before.kind))) throw new UnsupportedConfig("仅 RSS、网页列表和 JSON 列表之间可调整采集方式");
+      if (!(REPLACEABLE_SOURCE_KINDS as readonly string[]).includes(String(before.kind))) throw new UnsupportedConfig("RSS, 웹 목록, JSON 목록 사이에서만 수집 방식을 변경할 수 있습니다.");
       assertReplacementConfig(patch.kind!, patch.config!);
       const boundary = (before.config as Record<string, unknown>).publishedAfter;
       if (boundary) {
-        if (patch.config!.publishedAfter !== undefined && Date.parse(String(patch.config!.publishedAfter)) < Date.parse(String(boundary))) throw new UnsupportedConfig("调整采集方式不能扩大既有发布时间范围");
+        if (patch.config!.publishedAfter !== undefined && Date.parse(String(patch.config!.publishedAfter)) < Date.parse(String(boundary))) throw new UnsupportedConfig("수집 방식 변경으로 기존 게시 시각 범위를 넓힐 수 없습니다.");
         patch.config!.publishedAfter ??= boundary;
       }
     }
@@ -179,7 +179,7 @@ async function saveSource(id: string, patch: z.infer<typeof EDITABLE>, input: { 
       // feed on purpose, with different filters, keep editing their other settings.)
       const moved = kindChanged || sourceIdentity(nextKind, patch.config) !== sourceIdentity(String(before.kind), before.config as Record<string, unknown>);
       const dup = moved ? await findDuplicateSource(nextKind, patch.config, id, tx) : null;
-      if (dup) throw new Conflict(`与已有信源重复：${dup.name}（${dup.id}）`);
+      if (dup) throw new Conflict(`기존 출처와 중복됩니다: ${dup.name}(${dup.id})`);
     }
     const keys = Object.keys(patch) as Array<keyof typeof patch>;
     if (!keys.length) return before;
@@ -226,8 +226,8 @@ function assertReplacementConfig(kind: string, config: Record<string, unknown>):
   try {
     const url = new URL(String(address ?? ""));
     if (!/^https?:$/.test(url.protocol) || url.username || url.password) throw new Error();
-  } catch { throw new UnsupportedConfig("完整采集配置须包含有效的 HTTP(S) 地址"); }
-  if (kind === "json_list" && (!Array.isArray(config.titlePaths) || !config.titlePaths.length || !config.titlePaths.every(p => typeof p === "string" && p.trim()) || !(config.urlTemplate || config.urlTemplateFallback))) throw new UnsupportedConfig("JSON 列表须提供标题路径和文章地址模板");
+  } catch { throw new UnsupportedConfig("전체 수집 설정에 유효한 HTTP(S) 주소가 있어야 합니다."); }
+  if (kind === "json_list" && (!Array.isArray(config.titlePaths) || !config.titlePaths.length || !config.titlePaths.every(p => typeof p === "string" && p.trim()) || !(config.urlTemplate || config.urlTemplateFallback))) throw new UnsupportedConfig("JSON 목록에는 제목 경로와 기사 URL 템플릿이 필요합니다.");
 }
 
 const CreateSchema = z
@@ -286,7 +286,7 @@ export async function createSource(input: unknown, actor: string): Promise<Befor
     VALUES (${s.id}, ${s.name}, ${s.kind}, ${tx.json(s.config as never)}, ${s.tier}, ${s.selection_class}, ${s.participation_mode}, ${s.uses}, ${s.interval_minutes}, ${s.first_party}, ${s.tags},
             ${s.site_fulltext}, ${s.syndicate_fulltext}, now())
     ON CONFLICT (id) DO NOTHING RETURNING *`;
-    if (!row) throw new Conflict(`信源 ID ${s.id} 已存在`);
+    if (!row) throw new Conflict(`출처 ID ${s.id}가 이미 존재합니다.`);
     await audit(actor, "source.create", `source:${s.id}`, null, null, s, { db: tx });
     return { created: true as const, source: row };
   });

@@ -477,14 +477,14 @@ test("a selected X long article is translated as its page shows it: the article,
   assert.match(tr!.body_html, /价格是二十美元/, 'the long article itself is translated');
   assert.match(tr!.body_html, /<img [^>]*long-/, 'its pictures stay in place');
   const page = (await app.inject({method:'GET',url:`/api/site/items/${long}`})).json();
-  assert.equal(page.bodyLanguage, 'zh');
+  assert.equal(page.bodyLanguage, 'ko');
   assert.equal(page.hasTranslation, true);
   assert.match(page.body.zh, /价格是二十美元/);
   const original = (await app.inject({method:'GET',url:`/api/site/items/${long}/original`})).json();
   assert.match(original.body.original, /The price is twenty dollars/);
   assert.ok(!original.body.original.includes('x.com/i/article'), 'the article stands for its link');
   const md = (await app.inject({method:'GET',url:`/items/${long}/markdown`})).body;
-  assert.match(md, /## 正文 · 中文译文[\s\S]*价格是二十美元[\s\S]*## 正文 · 原文[\s\S]*The price is twenty dollars/);
+  assert.match(md, /## 본문 · 한국어 번역[\s\S]*价格是二十美元[\s\S]*## 본문 · 원문[\s\S]*The price is twenty dollars/);
   assert.ok((await app.inject({method:'GET',url:'/feed/full.xml'})).body.includes('价格是二十美元'), 'the full feed carries the complete translation');
 });
 

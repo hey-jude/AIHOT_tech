@@ -4,11 +4,11 @@ import { ITEM_COPY, SITE } from "@aihot/site";
 import { bodyToMarkdown } from "../content/markdown.ts";
 import { withCover, type Cover } from "../content/cover.ts";
 import { sql } from "../db.ts";
-import { isChineseText, stripTagMarkup } from "../lib/text.ts";
+import { isKoreanText, stripTagMarkup } from "../lib/text.ts";
 import { proxyBodyImages } from "../media/imgproxy.ts";
 import { textToHtml } from "../content/sanitize.ts";
 import { xArticleBody } from "../content/posts.ts";
-import { eventPageCondition, exportTranslation, isChineseBody, ITEM_COLUMNS, ITEM_FROM, seatHolders, showsPost, thinPageCondition, toItemSummary, xView, type ItemRow } from "./items.ts";
+import { eventPageCondition, exportTranslation, isKoreanBody, ITEM_COLUMNS, ITEM_FROM, seatHolders, showsPost, thinPageCondition, toItemSummary, xView, type ItemRow } from "./items.ts";
 import { evidenceCondition, listedCondition } from "./scope.ts";
 import { itemUrl, siteUrl } from "./links.ts";
 import { hasItemPage, publicSourceName } from "./rules.ts";
@@ -65,17 +65,17 @@ async function loadRow(id: string, now = new Date()): Promise<DetailRow | null> 
  * the HTML shown into what is sent, with its outline.
  */
 function readingBody(
-  language: "zh" | "original",
+  language: "ko" | "original",
   zh: { html: string; kind: "translation" | "original" } | null,
   original: string | null,
   complete: boolean,
   page: (html: string) => { html: string; outline: OutlineEntry[] },
 ): Pick<SiteItemDetail, "body" | "outline" | "hasTranslation" | "bodyLanguage"> {
-  const bodyLanguage = language === "original" && original ? "original" : zh?.html ? "zh" : "original";
-  const shown = bodyLanguage === "zh" ? zh!.html : original;
+  const bodyLanguage = language === "original" && original ? "original" : zh?.html ? "ko" : "original";
+  const shown = bodyLanguage === "ko" ? zh!.html : original;
   const sent = shown ? page(shown) : { html: shown, outline: [] };
   return {
-    body: { zh: bodyLanguage === "zh" ? sent.html : null, original: bodyLanguage === "original" ? sent.html : null, zhKind: zh?.kind ?? null, complete },
+    body: { zh: bodyLanguage === "ko" ? sent.html : null, original: bodyLanguage === "original" ? sent.html : null, zhKind: zh?.kind ?? null, complete },
     outline: sent.outline,
     hasTranslation: zh?.kind === "translation" && !!zh.html && !!original,
     bodyLanguage,
@@ -87,7 +87,7 @@ function readingBody(
  * lists leave out (low relevance, merged duplicates, no Chinese summary yet) keep a noindex page;
  * withdrawn and hot_signal items are a 404.
  */
-export async function loadItemDetail(id: string, language: "zh" | "original" = "zh", now = new Date()): Promise<DetailResult> {
+export async function loadItemDetail(id: string, language: "ko" | "original" = "ko", now = new Date()): Promise<DetailResult> {
   const row = await loadRow(id, now);
   if (!row || !hasItemPage({ visibility: row.visibility, sourceMode: row.source_mode })) return { kind: "not_found" };
 
@@ -135,7 +135,7 @@ export async function loadItemDetail(id: string, language: "zh" | "original" = "
       // A long X Article reads as an article: what the post says besides its link, then the article as
       // its author laid it out, with pictures and an outline; selected, it is in Chinese as an article is.
       const html = xArticleBody(String(row.x_post?.text ?? ""), row.x_article_html);
-      const chinese = isChineseText(row.x_article?.text ?? "", row.language);
+      const chinese = isKoreanText(row.x_article?.text ?? "", row.language);
       const zh = chinese ? { html, kind: "original" as const } : row.tr_html ? { html: row.tr_html, kind: "translation" as const } : null;
       reading = readingBody(language, zh, chinese ? null : html, chinese ? true : row.tr_complete ?? false, (shown) => withOutline(proxyBodyImages(shown)));
     } else {
@@ -143,9 +143,9 @@ export async function loadItemDetail(id: string, language: "zh" | "original" = "
       // A post's text is sent as written: its headings make the outline, without anchors. One written in
       // Chinese is the Chinese text, as an article's own Chinese body is.
       const own = text.trim() ? textToHtml(text) : null;
-      // Judged on what the author wrote, not on the 【X 长文】 mark joined to it.
+      // Judged on what the author wrote, not on the X Article marker joined to it.
       const written = row.x_article?.text ?? String(row.x_post?.text ?? row.body_text ?? "");
-      const chinese = !post?.translation && !!own && isChineseText(written, row.language);
+      const chinese = !post?.translation && !!own && isKoreanText(written, row.language);
       if (post?.translation || own) reading = readingBody(language, post?.translation ? { html: textToHtml(post.translation), kind: "translation" } : chinese ? { html: own!, kind: "original" } : null, chinese ? null : own, true,
         (html) => ({ html, outline: withOutline(html).outline }));
     }
@@ -160,7 +160,7 @@ export async function loadItemDetail(id: string, language: "zh" | "original" = "
       };
     }
   } else if (row.body_mode === "full" && row.body_html) {
-    const chinese = isChineseBody(row);
+    const chinese = isKoreanBody(row);
     const zh = chinese ? { html: row.body_html, kind: "original" as const } : row.tr_html ? { html: row.tr_html, kind: "translation" as const } : null;
     reading = readingBody(language, zh, chinese ? null : row.body_html, chinese ? true : row.tr_complete ?? false,
       (html) => withOutline(proxyBodyImages(withCover(html, row.cover, row.body_html))));
@@ -223,13 +223,13 @@ export async function exportMarkdown(id: string): Promise<{ filename: string; bo
   if (!row || !markdownAvailable(row)) return null;
   const lines: string[] = [];
   lines.push(`# ${row.title}`, "");
-  if (row.original_title) lines.push(`> 原标题：${row.original_title}`, "");
-  lines.push(`- 来源：${publicSourceName(row.source_name)}`);
+  if (row.original_title) lines.push(`## 원제목\n\n${row.original_title}`, "");
+  lines.push(`- 출처: ${publicSourceName(row.source_name)}`);
   // Without a reliable date from the original, the time it was collected says so.
-  lines.push(row.published_at ? `- 发布时间：${row.published_at.toISOString()}` : `- 收录时间：${row.discovered_at.toISOString()}`);
-  lines.push(`- ${SITE.name}：${itemUrl(row.id)}`);
-  lines.push(`- 原文：${row.url}`, "");
-  if (row.summary) lines.push("## 摘要", "", row.summary, "");
+  lines.push(row.published_at ? `- 게시 시각: ${row.published_at.toISOString()}` : `- 수집 시각: ${row.discovered_at.toISOString()}`);
+  lines.push(`- ${SITE.name}: ${itemUrl(row.id)}`);
+  lines.push(`- 원문: ${row.url}`, "");
+  if (row.summary) lines.push("## 요약", "", row.summary, "");
   if (row.selected && row.seat && row.reason) lines.push(`## ${ITEM_COPY.reasonLabel}`, "", row.reason, "");
   if (showsPost(row) && row.x_post) {
     const post = xView(row);
@@ -237,21 +237,21 @@ export async function exportMarkdown(id: string): Promise<{ filename: string; bo
       // As an article's body is exported: a complete translation first, then the article as its page reads it.
       const written = { language: row.language, body_text: row.x_article?.text ?? "" };
       const translation = exportTranslation({ ...written, tr_html: row.tr_html, tr_complete: row.tr_complete });
-      if (translation) lines.push("## 正文 · 中文译文", "", bodyToMarkdown(translation, row.url), "");
-      lines.push(isChineseBody(written) ? "## 正文" : "## 正文 · 原文", "", bodyToMarkdown(xArticleBody(String(row.x_post.text ?? ""), row.x_article_html), row.url), "");
-    } else if (post?.text) lines.push("## 正文", "", post.text, "");
-    if (post?.translation) lines.push("## 中文译文", "", post.translation, "");
+      if (translation) lines.push("## 본문 · 한국어 번역", "", bodyToMarkdown(translation, row.url), "");
+      lines.push(isKoreanBody(written) ? "## 본문" : "## 본문 · 원문", "", bodyToMarkdown(xArticleBody(String(row.x_post.text ?? ""), row.x_article_html), row.url), "");
+    } else if (post?.text) lines.push("## 본문", "", post.text, "");
+    if (post?.translation) lines.push("## 한국어 번역", "", post.translation, "");
     for (const media of post?.media ?? []) {
       const url = media.url.startsWith("/") ? siteUrl(media.url) : media.url;
-      lines.push(media.kind === "image" ? `![${media.alt ?? ""}](${url})` : `[视频](${url})`, "");
+      lines.push(media.kind === "image" ? `![${media.alt ?? ""}](${url})` : `[동영상](${url})`, "");
     }
     const q = post?.quoted;
-    if (q?.text) lines.push(`## 引用 @${q.handle ?? ""}`, "", ...String(q.text).split("\n").map((l) => `> ${l}`), "", ...(q.url ? [q.url, ""] : []));
-    if (q?.text && q.translation) lines.push("### 引用中文译文", "", ...q.translation.split("\n").map((l) => `> ${l}`), "");
+    if (q?.text) lines.push(`## 인용 @${q.handle ?? ""}`, "", ...String(q.text).split("\n").map((l) => `> ${l}`), "", ...(q.url ? [q.url, ""] : []));
+    if (q?.text && q.translation) lines.push("### 인용 게시물 한국어 번역", "", ...q.translation.split("\n").map((l) => `> ${l}`), "");
   } else if (row.body_mode === "full" && row.body_html) {
     const translation = exportTranslation(row);
-    if (translation) lines.push("## 正文 · 中文译文", "", bodyToMarkdown(withCover(translation, row.cover, row.body_html), row.url), "");
-    lines.push(isChineseBody(row) ? "## 正文" : "## 正文 · 原文", "", bodyToMarkdown(withCover(row.body_html, row.cover, row.body_html), row.url), "");
+    if (translation) lines.push("## 본문 · 한국어 번역", "", bodyToMarkdown(withCover(translation, row.cover, row.body_html), row.url), "");
+    lines.push(isKoreanBody(row) ? "## 본문" : "## 본문 · 원문", "", bodyToMarkdown(withCover(row.body_html, row.cover, row.body_html), row.url), "");
   }
   return { filename: `${SITE.mcpPrefix}-${row.id}.md`, body: lines.join("\n").replace(/\n{3,}/g, "\n\n") };
 }

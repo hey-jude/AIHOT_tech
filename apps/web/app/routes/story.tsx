@@ -10,8 +10,8 @@ import { MentionText } from "../components/ui/MentionText";
 import { cachedPage, loadOr404 } from "../lib/api.server";
 import { pageReuse } from "../lib/page-reuse";
 import { breadcrumbLd, pageMeta, storyLd, titled } from "../lib/seo";
-import { beijingDate, beijingTime } from "@aihot/contracts/time";
-import { byBeijingDay, monthDay, monthDayTime, relativeTime } from "../lib/format";
+import { seoulDate, seoulTime } from "@aihot/contracts/time";
+import { bySeoulDay, monthDay, monthDayTime, relativeTime } from "../lib/format";
 import { useCurrentSection } from "../lib/motion";
 import { HeatChart } from "../features/story/HeatChart";
 import { sessionCache } from "../lib/session-cache";
@@ -105,7 +105,7 @@ function TimelineRow({ r }: { r: StoryReportView }) {
   return (
     <li className="grid gap-x-3 border-b border-line-soft py-4 last:border-b-0 lg:grid-cols-[48px_minmax(0,1fr)]">
       <time dateTime={r.publishedAt} className="mono text-[12px] leading-[20px] text-ink-4">
-        {beijingTime(r.publishedAt)}
+        {seoulTime(r.publishedAt)}
       </time>
       <div className="min-w-0">
         <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-[12px] leading-[20px] text-ink-4 lg:mt-0">
@@ -168,7 +168,7 @@ export default function StoryPage() {
   const days = useMemo(() => {
     const list = story.timeline.filter((r) => (filter === "official" ? r.source.firstParty : filter === "selected" ? r.selected : true));
     const sorted = [...list].sort((a, b) => (order === "desc" ? Date.parse(b.publishedAt) - Date.parse(a.publishedAt) : Date.parse(a.publishedAt) - Date.parse(b.publishedAt)));
-    return byBeijingDay(sorted, (r) => r.publishedAt);
+    return bySeoulDay(sorted, (r) => r.publishedAt);
   }, [story.timeline, filter, order]);
   const developments = useMemo(() => [...story.developments].sort((a, b) =>
     order === "desc" ? Date.parse(b.firstReportAt) - Date.parse(a.firstReportAt) : Date.parse(a.firstReportAt) - Date.parse(b.firstReportAt)
@@ -217,7 +217,7 @@ export default function StoryPage() {
             <span className="inline-flex items-center gap-1.5">
               <IconCalendar size={15} className="text-ink-4" />
               <b className="num font-semibold text-ink">
-                <time dateTime={story.firstReportAt}>{monthDay(beijingDate(story.firstReportAt))}</time>
+                <time dateTime={story.firstReportAt}>{monthDay(seoulDate(story.firstReportAt))}</time>
               </b>
               首报
             </span>

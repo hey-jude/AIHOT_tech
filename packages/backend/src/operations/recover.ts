@@ -14,7 +14,7 @@ import { markStaleDeliveries } from "../notify/deliver.ts";
 import { awaitingRelease, markStalePendingReceipts, releaseUnknownReceipt } from "../providers/receipts.ts";
 
 const AUTO_RELEASE_AFTER_MS = 30 * 60_000;
-export const AUTO_RELEASE_NOTE = "自动放行：结果未知超过 30 分钟，未核对是否计费";
+export const AUTO_RELEASE_NOTE = "자동 허용: 결과가 30분 넘게 불명확하며 결제 여부는 확인되지 않음";
 
 async function release(id: number, error: string, actor: string, note: string, billed: boolean | null) {
   return sql.begin(async (tx) => {
@@ -32,9 +32,9 @@ export async function releaseReceipt(id: number, input: { billed: boolean | null
   if (input.billed !== null && typeof input.billed !== "boolean") throw new Error("billed must be true, false or null");
   const [row] = await sql<{ status: string }[]>`SELECT status FROM receipts WHERE id = ${id}`;
   if (!row) return null;
-  if (row.status !== "unknown") throw new Conflict("只有结果未知的回执需要人工核对");
-  const error = input.billed === null ? `人工放行：计费未知，按授权恢复。${input.note}`
-    : `人工核对：${input.billed ? "供应商已计费但结果未取回" : "供应商未计费"}。${input.note}`;
+  if (row.status !== "unknown") throw new Conflict("결과가 불명확한 영수증만 수동으로 확인할 수 있습니다.");
+  const error = input.billed === null ? `수동 허용: 결제 여부를 알 수 없어 권한에 따라 복구합니다. ${input.note}`
+    : `수동 확인: ${input.billed ? "공급업체가 청구했지만 결과를 받지 못함" : "공급업체가 청구하지 않음"}. ${input.note}`;
   return release(id, error, actor, input.note, input.billed);
 }
 
@@ -52,7 +52,7 @@ export async function autoReleaseUnknownReceipts(now = Date.now()) {
   let released = 0;
   let requeued = 0;
   for (const r of rows) {
-    const done = await release(r.id, AUTO_RELEASE_NOTE, "ops.recover", "结果未知，自动放行一次", null);
+    const done = await release(r.id, AUTO_RELEASE_NOTE, "ops.recover", "결과 불명확으로 한 번 자동 허용", null);
     if (done) released += 1;
     if (done?.requeued) requeued += 1;
   }

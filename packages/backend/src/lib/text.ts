@@ -4,12 +4,12 @@ export function collapseWhitespace(s: string): string {
   return s.replace(/\s+/g, " ").trim();
 }
 
-/** A declared language wins; otherwise Han text is Chinese only without Japanese or Korean script. */
-export function isChineseText(text: string, language?: string | null): boolean {
+/** 선언된 언어를 우선하고, 그 외에는 한글이 포함되어 있는지 확인한다. */
+export function isKoreanText(text: string, language?: string | null): boolean {
   const declared = language?.toLowerCase().split(/[-_]/)[0];
-  if (declared === "zh") return true;
+  if (declared === "ko") return true;
   if (declared && !["und", "unknown", "other", "zxx"].includes(declared)) return false;
-  return /\p{Script=Han}/u.test(text) && !/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(text);
+  return /[\uAC00-\uD7AF]/u.test(text);
 }
 
 export function truncate(s: string, max: number, ellipsis = "…"): string {
@@ -112,17 +112,17 @@ export function escapeXml(s: string): string {
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
 }
 
-/** Share of CJK characters among letters; used to decide whether a title needs translation. */
+/** 한글과 한자 비율. 제목 번역 여부를 판단하는 데 사용한다. */
 export function cjkRatio(s: string): number {
   const letters = s.match(/[\p{L}]/gu) ?? [];
   if (letters.length === 0) return 0;
-  const cjk = s.match(/[㐀-鿿豈-﫿]/g) ?? [];
+  const cjk = s.match(/[\u3400-\u9fff\uf900-\ufaff\uAC00-\uD7AF]/g) ?? [];
   return cjk.length / letters.length;
 }
 
-export function guessLanguage(s: string): "zh" | "en" | "other" {
+export function guessLanguage(s: string): "ko" | "en" | "other" {
   const ratio = cjkRatio(s);
-  if (ratio > 0.3) return "zh";
+  if (ratio > 0.3) return "ko";
   if (/[a-z]/i.test(s)) return "en";
   return "other";
 }

@@ -19,7 +19,7 @@
 - **站点地址不在 `site.ts` 里**：部署时用环境变量 `SITE_URL` 设置（`SITE.defaultUrl` 只是没设 `SITE_URL` 时的本地兜底）。
 - **一起改的名字**：改 `SITE.name` 时顺手把 `SITE.organization.name`（给搜索引擎看的结构化数据）一起改掉；`SITE.crawlerName` 写你自己的抓取标识，别冒用别人的站名。
 - **上线或有人接入后不要再改的标识**：`SITE.mcpPrefix`（MCP 工具名前缀）、`PUBLIC_CATEGORIES`（公开接口与订阅源的类别合并和改名）、`ABOUT.termsAnchor`（外部写死过的锚点）；`SITE.interfaceVersion` 只升不降，改了已有公开字段或含义时升主版本。
-- **出刊时间写整点或半点**：`EDITION_TIMES`（北京时间 `HH:mm`）由每半小时一次的排程检查，日报窗口、缺期告警和各处时间文案都读它。
+- **出刊时间写整点或半点**：`EDITION_TIMES`（한국시간(Asia/Seoul) `HH:mm`）由每半小时一次的排程检查，日报窗口、缺期告警和各处时间文案都读它。
 - **导航隐藏的范围**：`NAV.hidden` 目前只开放 `"/hot"` 和 `"/topics"`（一并处理侧栏、底栏、“我的”页、返回链接、面包屑，以及隐藏 `"/hot"` 时的首页热点条和事件页名次；直接打开地址仍能访问）。
 - **限流说明与实际一致**：前面的反向代理真的按 IP 限流了，再填 `ACCESS.ratePerMinute`。
 

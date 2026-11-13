@@ -11,10 +11,10 @@ const WORKER_STALE_MS = 30 * 60_000;
 const WORKER_DOWN: Finding = {
   key: "worker",
   level: "now",
-  title: "后台处理服务停了，网站不会出现新内容",
-  impact: "新内容的采集、处理、推送和日报全部暂停，网站停在旧内容上",
-  heals: "系统自动重启没有成功",
-  action: "把这条发给 AI 排查重启",
+  title: "백그라운드 처리 서비스 중단으로 사이트에 새 콘텐츠가 표시되지 않습니다",
+  impact: "새 콘텐츠 수집·처리·전송과 일간 브리핑이 모두 중단되어 사이트에 기존 콘텐츠만 표시됩니다.",
+  heals: "자동 재시작에 실패했습니다.",
+  action: "이 알림을 AI에 전달해 원인을 확인하고 재시작하세요.",
 };
 
 /**
@@ -36,7 +36,7 @@ export async function checkWorkerHeartbeat(): Promise<void> {
     if (stale) {
       const woken = await wakeAgent({ ...WORKER_DOWN, since: hb.updated_at }, now);
       const shown = woken
-        ? { ...WORKER_DOWN, action: "已自动通知 AI 排查重启；如果半小时还没收到“已恢复”再问 AI" }
+        ? { ...WORKER_DOWN, action: "AI에 자동으로 점검 및 재시작을 요청했습니다. 30분 안에 복구 알림이 없으면 AI에 다시 문의하세요." }
         : WORKER_DOWN;
       const msg = formatAlert(shown, hb.updated_at, now);
       await sendAlert(msg.title, msg.lines);

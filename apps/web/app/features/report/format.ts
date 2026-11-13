@@ -1,6 +1,6 @@
 // Names, dates and grouping for daily, weekly and monthly reports.
 import { REPORT_NAMES, type ReportNavigationEntry, type ReportKind } from "@aihot/contracts/site";
-import { beijingDate, beijingWeekday, isoWeekLabel, isoWeekRange, monthDay as engineMonthDay } from "@aihot/contracts/time";
+import { seoulDate, seoulWeekday, isoWeekLabel, isoWeekRange, monthDay as engineMonthDay } from "@aihot/contracts/time";
 import { EDITION_WHEN, REPORTS, SITE, subjectAfter } from "@aihot/site";
 import { RELEASE } from "@aihot/industry/taxonomy";
 import { monthDay, weekdayShort } from "../../lib/format.ts";
@@ -23,20 +23,20 @@ export function reportPath(kind: ReportKind, key: string): string {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-const { measure, noun } = REPORTS.entry;
-/** "件大事": what an issue counts its entries in, in the site's words (REPORTS.entry). */
-export const ENTRIES_UNIT = `${measure}${noun}`;
+const { measure } = REPORTS.entry;
+/** Count unit for the entries shown in the report masthead. */
+export const ENTRIES_UNIT = measure;
 
 /** "这一天的 4 件 AI 大事" / "本周的 12 件 AI 大事" / "8 月的 20 件 AI 大事" (the subject and REPORTS.entry from site/site.ts). */
 export function headline(kind: ReportKind, key: string, count: number): string {
-  if (kind === "daily") return subjectAfter(`这一天的 ${count} ${measure}`, noun);
-  if (kind === "weekly") return subjectAfter(`本周的 ${count} ${measure}`, noun);
-  return subjectAfter(`${Number(key.slice(5, 7))} 月的 ${count} ${measure}`, noun);
+  if (kind === "daily") return subjectAfter(`오늘의 주요 소식 ${count}${measure}`);
+  if (kind === "weekly") return subjectAfter(`이번 주 주요 소식 ${count}${measure}`);
+  return subjectAfter(`${Number(key.slice(5, 7))}월 주요 소식 ${count}${measure}`);
 }
 
 /** "09.16" for a story inside a week or month. */
 export function shortDay(iso: string): string {
-  return beijingDate(iso).slice(5).replace("-", ".");
+  return seoulDate(iso).slice(5).replace("-", ".");
 }
 
 export interface ArchiveGroup {
@@ -105,7 +105,7 @@ export function issueNumber(index: ReportNavigationEntry[], key: string): number
 
 /** The masthead's date block: a large figure and two small lines beside it. */
 export function dateMark(kind: ReportKind, key: string): { figure: string; top: string; bottom: string } {
-  if (kind === "daily") return { figure: key.slice(8, 10), top: `${key.slice(0, 4)} 年 ${Number(key.slice(5, 7))} 月`, bottom: beijingWeekday(key) };
+  if (kind === "daily") return { figure: key.slice(8, 10), top: `${key.slice(0, 4)} 年 ${Number(key.slice(5, 7))} 月`, bottom: seoulWeekday(key) };
   if (kind === "weekly") {
     const { start, end } = isoWeekRange(key)!;
     return { figure: key.slice(6), top: `${key.slice(0, 4)} 年第 ${Number(key.slice(6))} 周`, bottom: `${start.slice(5).replace("-", ".")} — ${end.slice(5).replace("-", ".")}` };
@@ -134,7 +134,7 @@ export function metricItems(metrics: Record<string, number>): Array<{ value: num
   return METRICS.filter(([k]) => typeof metrics[k] === "number" && (k !== "modelsReleased" || metrics[k]! > 0)).map(([k, unit]) => ({ value: metrics[k]!, unit }));
 }
 
-/** "前一日 · 9月25日", "上一期 · 第 37 周", "下一期 · 7 月". A day of another year than `now` (Beijing) carries its year. */
+/** "前一日 · 9月25日", "上一期 · 第 37 周", "下一期 · 7 月". A day of another year than `now` (Seoul) carries its year. */
 export function neighbourLabel(kind: ReportKind, key: string, direction: "prev" | "next", now: number = Date.now()): string {
   if (kind === "daily") return `${direction === "prev" ? "前一日" : "后一日"} · ${monthDay(key, now)}`;
   const which = direction === "prev" ? "上一期" : "下一期";

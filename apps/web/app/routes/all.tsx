@@ -3,7 +3,7 @@ import { Link, redirect, useLoaderData, useNavigation, useSearchParams } from "r
 import type { Route } from "./+types/all";
 import type { PoolResponse } from "@aihot/contracts/site";
 import { SEO_TITLES, SITE, subjectAfter } from "@aihot/site";
-import { beijingTime } from "@aihot/contracts/time";
+import { seoulTime } from "@aihot/contracts/time";
 import { cachedPage, loadOr404 } from "../lib/api.server";
 import { pageReuse } from "../lib/page-reuse";
 import { filterParams, hasFeedFilters, itemListLd, listPath, pageMeta, readFilters } from "../lib/seo";
@@ -85,7 +85,7 @@ export default function AllPage() {
     return `/all?${sp}`;
   };
   const title = f.q ? `搜索“${f.q}”` : f.tag ? `#${f.tag}` : null;
-  const updated = beijingTime(data.freshness);
+  const updated = seoulTime(data.freshness);
   // Searches are remembered in this browser for the phone search (listed in the privacy notice).
   useEffect(() => {
     if (f.q) addRecentSearch(f.q);

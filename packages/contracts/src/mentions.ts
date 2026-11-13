@@ -86,7 +86,7 @@ interface Span {
 /**
  * The names a text mentions, in order and never overlapping: of two starting together the longer wins. A
  * name that may not link where it stands still holds its place, so a shorter name inside it does not link
- * instead ("阿里" in "阿里巴巴 Qwen").
+ * instead ("Ali" in "Alibaba Qwen").
  */
 function spans(text: string, names: readonly Name[]): Span[] {
   const sk = skeleton(text);

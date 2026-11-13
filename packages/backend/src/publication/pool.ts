@@ -1,6 +1,6 @@
 // Public pool (/all) with numeric pages, and search in its two orderings.
 import type { PoolResponse, TimelineFilters } from "@aihot/contracts/site";
-import { beijingDate, beijingMidnight } from "@aihot/contracts/time";
+import { seoulDate, seoulMidnight } from "@aihot/contracts/time";
 import { one, sql, withCustomPlans, type Db } from "../db.ts";
 import { cachedByKey, sharedSearch } from "../lib/cache.ts";
 import {
@@ -57,8 +57,8 @@ export async function withSearchCapacity<T>(fn: (db: Db) => Promise<T>): Promise
 export function searchTerms(q: string): string[] {
   return q
     .toLowerCase()
-    // "多模态RAG" means 多模态 and rag: split where Han meets a Latin word. Digits alone stay attached,
-    // so "10月" is still one term rather than 10 and 月.
+    // "multimodalRAG" splits where Han text meets a Latin word. Digits stay attached to the word,
+    // so "October10" remains one term rather than October and 10.
     .replace(/(\p{Script=Han})(?=[a-z])/gu, "$1 ")
     .replace(/([a-z][a-z0-9]*)(?=\p{Script=Han})/gu, "$1 ")
     .split(/\s+/)
@@ -225,10 +225,10 @@ async function queryPool(query: PoolQuery, now: Date): Promise<PoolResponse> {
   };
 
   const { rows, total } = q ? await withSearchCapacity(run) : await run(sql);
-  const today = beijingDate(now);
+  const today = seoulDate(now);
   const meta = one(await sql<{ today_count: number; updated_at: Date | null }[]>`
     SELECT (SELECT count(*) FROM publications p
-      WHERE ${browsedCondition(now)} AND p.timeline_at >= ${beijingMidnight(today)} ${filters}) AS today_count,
+      WHERE ${browsedCondition(now)} AND p.timeline_at >= ${seoulMidnight(today)} ${filters}) AS today_count,
       (SELECT max(p.updated_at) FROM publications p WHERE p.eligible) AS updated_at`);
 
   const holders = await seatHolders(rows, now);

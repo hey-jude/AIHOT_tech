@@ -249,8 +249,8 @@ const paragraph = (lines: string[]) => `<p>${lines.map(inline).join("<br>")}</p>
 
 /**
  * One blank-line separated block: fenced code, a quote, a heading, or lines. Two or more list lines in a
- * row are a list ("亮点：" and its "- " lines under it); the lines around them stay paragraphs, and a single
- * numbered line stays text (a section title such as "1. 股票代码ANT").
+ * row are a list (a heading and its "- " lines under it); the lines around them stay paragraphs, and a single
+ * numbered line stays text (a section title such as "1. TickerANT").
  */
 function block(para: string): string {
   if (para.startsWith("```")) {

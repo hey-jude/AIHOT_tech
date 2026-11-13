@@ -1,19 +1,19 @@
-// A page of reports grouped by Beijing day with the same rail and rows as the home timeline
+// A page of reports grouped by Seoul day with the same rail and rows as the home timeline
 // (全部动态, topics, search results).
 import { IntentLink } from "../../components/ui/IntentLink";
 import { useMemo } from "react";
 import type { FeedItemSummary } from "@aihot/contracts/site";
 import { IconChevronRight } from "../../components/icons";
-import { beijingDate } from "@aihot/contracts/time";
-import { byBeijingDay } from "../../lib/format";
+import { seoulDate } from "@aihot/contracts/time";
+import { bySeoulDay } from "../../lib/format";
 import { markRead, useReadSet } from "../../lib/local-state";
 import { DayHeader, TimelineSlot } from "./Timeline";
 import { FeedItem } from "./FeedItem";
 
 export function DayList({ items, todayCount = null, headerAside }: { items: FeedItemSummary[]; todayCount?: number | null; headerAside?: React.ReactNode }) {
   const readSet = useReadSet();
-  const today = beijingDate(Date.now());
-  const days = useMemo(() => byBeijingDay(items, (it) => it.timelineAt), [items]);
+  const today = seoulDate(Date.now());
+  const days = useMemo(() => bySeoulDay(items, (it) => it.timelineAt), [items]);
   return (
     <div>
       {days.map(({ day, entries: list }, i) => (

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { after, test } from "node:test";
-import { beijingDate, beijingTime } from "@aihot/contracts/time";
+import { seoulDate, seoulTime } from "@aihot/contracts/time";
 
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
 after(() => {
@@ -24,7 +24,7 @@ async function reader(starred: unknown[] = []) {
   return { state, values };
 }
 
-const displayDate = (value: string) => `${beijingDate(value)} ${beijingTime(value)}`;
+const displayDate = (value: string) => `${seoulDate(value)} ${seoulTime(value)}`;
 
 test("import keeps bookmarks with invalid dates and persists displayable replacements", async () => {
   const invalid = ["broken", "", "999999-01-01", "+275760-09-13T00:00:00.000Z", null, 42, {}];
@@ -57,7 +57,7 @@ test("stored bookmarks with damaged dates remain readable, exportable and remova
 });
 
 test("valid dates are preserved and an import cannot replace an existing bookmark", async () => {
-  const existing = { id: "valid", title: "Original", savedAt: "2026-09-29T08:30:00+08:00", publishedAt: "2026-09-28T23:00:00Z" };
+  const existing = { id: "valid", title: "Original", savedAt: "2026-09-29T08:30:00+09:00", publishedAt: "2026-09-28T23:00:00Z" };
   const { state } = await reader([existing]);
   const report = state.importBundle(JSON.stringify({ version: 1, starred: [{ ...existing, title: "Replacement", savedAt: "broken" }] }));
   assert.equal(report.starredAdded, 0);

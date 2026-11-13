@@ -172,13 +172,13 @@ function periodOverview(content: Record<string, any>, kind: "weekly" | "monthly"
   if (!changed && typeof content.overview === "string" && content.overview) return content.overview;
   const shown = leadCandidates(content, "periodic").filter((e) => !e.itemId || !gone.has(String(e.itemId)));
   if (!shown.length) return null;
-  return `${kind === "weekly" ? "本周" : "本月"} ${shown.length} ${REPORTS.entry.measure}${REPORTS.entry.noun}，最受关注的是：${shown.slice(0, 3).map((e) => e.title).join("；")}。`;
+  return `${kind === "weekly" ? "이번 주" : "이번 달"} 주요 소식 ${shown.length}${REPORTS.entry.measure}. 가장 주목받은 소식: ${shown.slice(0, 3).map((e) => e.title).join("; ")}.`;
 }
 
-/** A weekly or monthly's own headline; the composer's "<site name> 周报 · 2026-W38" names the issue, not its news. */
+/** 주간·월간 브리핑의 고유 제목. 편집기의 "<사이트 이름> 주간 · 2026-W38"은 소식이 아니라 발행 호를 가리킨다. */
 function periodicHeadline(content: Record<string, any>): string | null {
   const text = String(content.headline ?? content.title ?? "");
-  const issueName = text.startsWith(`${SITE.name} `) && /^[周月]报 · /.test(text.slice(SITE.name.length + 1));
+  const issueName = text.startsWith(`${SITE.name} `) && /^(주간|월간) · /.test(text.slice(SITE.name.length + 1));
   return text && !issueName ? text : null;
 }
 
@@ -389,8 +389,8 @@ export async function loadReport(kind: ReportKind, key: string): Promise<ReportD
     ? (named ? { title: named.title, leadParagraph: (kind === "daily" ? named.leadParagraph : overview) ?? "" } : null)
     : kind === "daily" ? c.lead ?? null
       : c.lead ? { ...c.lead, leadParagraph: overview ?? "" } : (headline ? { title: headline, leadParagraph: overview ?? "" } : null);
-  const title = kind === "daily" ? `${withSubject("日报")} · ${key}`
-    : String((hasCitedLead && c.title === headline ? named?.title : c.title) ?? (kind === "weekly" ? `${SITE.name} 周报 · ${key}` : `${SITE.name} 月报 · ${key}`));
+  const title = kind === "daily" ? `${withSubject("일간")} · ${key}`
+    : String((hasCitedLead && c.title === headline ? named?.title : c.title) ?? (kind === "weekly" ? `${SITE.name} 주간 · ${key}` : `${SITE.name} 월간 · ${key}`));
   return {
     kind,
     key,
@@ -519,7 +519,7 @@ export async function dailyWithNotes(date: string | "latest") {
   const links = (i: any) => ({ aihot: i.itemId ? itemUrl(i.itemId) : null, original: metadata(i).sourceUrl });
   const url = dailyUrl(r.key);
   const lead = c.lead || c.leadItemId ? issueLead(c, "daily", goneIn(avail)) : null;
-  // 今日看点 as the page lists them after the lead: the entries its highlights name and the reports a thin
+  // Today's highlights as the page lists them after the lead: the entries its highlights name and the reports a thin
   // issue was filled with (picks), else its first entries; withdrawn ones are left out, as everywhere in v1.
   const named: string[] = c.highlights?.length ? c.highlights : items.slice(0, 3).map((i: any) => i.itemId);
   const highlights = named.map((id) => [...items, ...picks].find((i: any) => i.itemId === id))

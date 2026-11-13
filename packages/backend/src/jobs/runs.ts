@@ -76,7 +76,7 @@ export async function closeInterruptedRuns(): Promise<{ jobs: number; fetches: n
   for (const { owner } of owners) {
     const birth = await processBirth(owner.pid);
     if (birth === undefined || birth === owner.birth) continue;
-    const reason = "执行进程已退出，未记录完成；仅结束运行记录，不重跑业务";
+    const reason = "실행 프로세스가 종료되어 완료 기록이 없습니다. 실행 기록만 종료하고 작업은 재실행하지 않습니다.";
     await sql.begin(async tx => {
       for (const table of ["job_runs", "fetch_runs"] as const) {
         const rows = await tx`SELECT * FROM ${tx(table)} WHERE status = 'running' AND detail->'owner' = ${tx.json(owner as never)} FOR UPDATE`;

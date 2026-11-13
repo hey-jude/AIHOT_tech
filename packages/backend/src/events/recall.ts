@@ -3,12 +3,12 @@
 // sides (without an embedding key, by their shared character bigrams), plus the same URL and the X
 // post it replies to or quotes. A membership counts as evidence only when its report is not a
 // composite or explicitly withdrawn (groupingEvidenceCondition). Selected reports are reading context
-// for READING_DAYS: a reader who saw a launch in 精选 still knows it when its maker introduces it again.
+// for READING_DAYS: a reader who saw a launch in selected items still knows it when its maker introduces it again.
 // A discussion post is also compared with the posts already attached to a fact that still count for
 // its heat (recallFactsByPosts): posts about one happening paraphrase each other more closely than
 // they paraphrase its reports.
 import { sql } from "../db.ts";
-import { beijingDate } from "@aihot/contracts/time";
+import { seoulDate } from "@aihot/contracts/time";
 import { sha256 } from "../lib/ids.ts";
 import { embeddingsAvailable, ensureEmbeddings } from "../providers/embeddings.ts";
 import { GROUP_BODY_CHARS, lexicalSimilarity, reportText, signalText, type CandidateView, type ReportView, type ReadingContext } from "./relate.ts";
@@ -289,7 +289,7 @@ export async function candidateViews(recalled: Recalled[]): Promise<CandidateVie
     const row = byFact.get(r.factId);
     if (!row) return [];
     // Identity uses the eligible reports above. For reading value show exactly the representative
-    // already visible in 精选; a merely scored or still-pending report is not prior reader coverage.
+    // already visible in selected items; a merely scored or still-pending report is not prior reader coverage.
     const selectedMembers = selectedRows.filter((p) => Number(p.fact_id) === r.factId);
     const selected = selectedMembers.length ? pickRepresentative(selectedMembers) : null;
     return [{
@@ -303,7 +303,7 @@ export async function candidateViews(recalled: Recalled[]): Promise<CandidateVie
       selectedReport: selected ? { title: selected.title, summary: selected.summary, source: selected.source, firstParty: selected.first_party, at: selected.at, publicationTime: selected.publicationTime } : null,
       report: {
         title: row.title, source: row.source, firstParty: row.first_party, at: row.at, publicationTime: row.publicationTime, summary: row.summary,
-        frame: { subject: row.subject, action: row.action, object: row.object, occurredAt: row.occurred_at ? beijingDate(row.occurred_at) : null },
+        frame: { subject: row.subject, action: row.action, object: row.object, occurredAt: row.occurred_at ? seoulDate(row.occurred_at) : null },
       },
     }];
   });

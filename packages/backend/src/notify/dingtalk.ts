@@ -31,12 +31,12 @@ export function dingtalkMarkdown(c: DingtalkContent): { title: string; text: str
     `${escape(c.sourceName)} · ${c.published}`,
     c.summary ? escape(c.summary) : null,
     c.reason ? `**${escape(c.reasonLabel)}**　${escape(c.reason)}` : null,
-    `[${escape(`在 ${SITE.name} 阅读`)}](${href(itemUrl(c.articleId))}) ｜ [${escape("原文")}](${href(c.url)})`,
+    `[${escape(`${SITE.name}에서 읽기`)}](${href(itemUrl(c.articleId))}) | [${escape("원문")}](${href(c.url)})`,
   ].filter(Boolean).join("\n\n");
   return { title: c.title, text };
 }
 
-/** The robot's secret (加签): without one the webhook URL goes out as configured. */
+/** 서명용 로봇 비밀키. 없으면 설정된 웹훅 URL을 그대로 사용한다. */
 function signedUrl(url: string): string {
   const secret = credential("integrations", "DINGTALK_PUSH_SECRET");
   if (!secret) return url;

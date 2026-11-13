@@ -29,7 +29,7 @@ afterEach(async () => {
   await sql`DELETE FROM settings WHERE key = 'baidu-push.state'`;
 });
 
-// 10:00, 11:00 and the next day 10:00 in Beijing.
+// 10:00, 11:00 and the next day 10:00 in Seoul.
 const DAY1 = new Date('2026-10-09T02:00:00Z');
 const DAY1_LATER = new Date('2026-10-09T03:00:00Z');
 const DAY2 = new Date('2026-10-10T02:00:00Z');

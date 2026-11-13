@@ -1,4 +1,4 @@
-// 1200×630 share images. satori lays out text with Noto Sans SC (assets/og-fonts) and emits glyphs
+// 1200×630 share images. satori lays out text with Noto Sans SC and Noto Sans KR (assets/og-fonts) and emits glyphs
 // as paths, so rasterising with sharp needs no system fonts. Output is cached on disk by content.
 import { readdirSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
@@ -9,7 +9,7 @@ import sharp from "sharp";
 import { config, REPO_ROOT } from "../config.ts";
 import { SITE } from "@aihot/site";
 
-export const OG_TEMPLATE_VERSION = "og-2026-09-29.1";
+export const OG_TEMPLATE_VERSION = "og-2026-11-13.2";
 const WIDTH = 1200;
 const HEIGHT = 630;
 const CACHE_DIR = path.join(config.dataDir, "ogcache");
@@ -34,7 +34,7 @@ const FONT_DIR = path.join(REPO_ROOT, "assets/og-fonts");
  * takes a glyph the first font has no outline for from the next one, so they come after Noto Sans SC.
  */
 export function fallbackFontFiles(files: string[]): string[] {
-  return files.filter((f) => /^.+-(400|700)\.ttf$/.test(f) && !f.startsWith("noto-sans-sc-")).sort();
+  return files.filter((f) => /^.+-(400|700)\.ttf$/.test(f) && !f.startsWith("noto-sans-sc-") && !f.startsWith("noto-sans-kr-")).sort();
 }
 
 /** None by default: the share images and their cache keys are then what they were without this. */
@@ -44,10 +44,14 @@ function fonts() {
   fontsPromise ??= Promise.all([
     readFile(path.join(FONT_DIR, "noto-sans-sc-400.ttf")),
     readFile(path.join(FONT_DIR, "noto-sans-sc-700.ttf")),
+    readFile(path.join(FONT_DIR, "noto-sans-kr-400.ttf")),
+    readFile(path.join(FONT_DIR, "noto-sans-kr-700.ttf")),
     ...FALLBACK_FONTS.map((f) => readFile(path.join(FONT_DIR, f))),
-  ]).then(([regular, bold, ...more]) => [
+  ]).then(([regular, bold, koreanRegular, koreanBold, ...more]) => [
     { name: "Noto Sans SC", data: regular!, weight: 400, style: "normal" },
     { name: "Noto Sans SC", data: bold!, weight: 700, style: "normal" },
+    { name: "Noto Sans KR", data: koreanRegular!, weight: 400, style: "normal" },
+    { name: "Noto Sans KR", data: koreanBold!, weight: 700, style: "normal" },
     ...more.map((data, i) => ({ name: FALLBACK_FONTS[i]!.replace(/-(400|700)\.ttf$/, ""), data, weight: (FALLBACK_FONTS[i]!.endsWith("-700.ttf") ? 700 : 400) as 400 | 700, style: "normal" as const })),
   ]);
   return fontsPromise;

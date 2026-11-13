@@ -120,7 +120,7 @@ export function providerAccessRefused(service: string, error: string): boolean {
     if (["Throttling.AllocationQuota", "insufficient_quota"].includes(code) && message.trim() === "Free allocated quota exceeded.") return true;
   }
   // A bare quota/limit/insufficient word is not evidence that buying capacity is required.
-  return /\binsufficient (?:account |credit )?balance\b|\b(?:credit )?balance (?:is )?(?:exhausted|insufficient)\b|账户.*欠费|余额不足/i.test(message);
+  return /\binsufficient (?:account |credit )?balance\b|\b(?:credit )?balance (?:is )?(?:exhausted|insufficient)\b|\u8d26\u6237.*\u6b20\u8d39|\u4f59\u989d\u4e0d\u8db3/i.test(message);
 }
 
 /**

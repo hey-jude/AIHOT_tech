@@ -385,13 +385,13 @@ export async function updatePresentation(db: Db, articleId: string, next: { html
   if (html === a.body_html && xHtml === a.x_html && stableJson(media) === stableJson(a.media)) return false;
   if (html !== a.body_html || xHtml !== a.x_html) {
     const [tr] = await db<{ body_html: string; origin: string }[]>`
-      SELECT body_html,origin FROM translations WHERE article_id=${articleId} AND lang='zh' AND revision=${a.revision} FOR UPDATE`;
+      SELECT body_html,origin FROM translations WHERE article_id=${articleId} AND lang='ko' AND revision=${a.revision} FOR UPDATE`;
     // A publisher's translation is independently supplied, so only model translations share the source layout.
     if (tr?.origin === "model" && tr.body_html) {
       const previous = a.x_html ? xArticleBody(a.x_text ?? "", a.x_html) : a.body_html ?? "";
       const current = xHtml ? xArticleBody(a.x_text ?? "", xHtml) : html ?? "";
       const translated = rebaseTranslation(previous, current, tr.body_html);
-      await db`UPDATE translations SET body_html=${translated} WHERE article_id=${articleId} AND lang='zh'`;
+      await db`UPDATE translations SET body_html=${translated} WHERE article_id=${articleId} AND lang='ko'`;
     }
   }
   await db`UPDATE articles SET body_html=${html},media=${db.json(media as never)},updated_at=now(),

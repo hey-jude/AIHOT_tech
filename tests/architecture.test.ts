@@ -163,32 +163,32 @@ test("every environment variable the code reads is listed in a template, and eve
   assert.deepEqual([...listed].filter((name) => !readAnywhere.has(name)), [], "no code reads it: remove it from the template");
 });
 
-// Beijing time is worked out in packages/contracts/src/time.ts. Written out by hand it drifted apart: one
+// Seoul time is worked out in packages/contracts/src/time.ts. Written out by hand it drifted apart: one
 // copy kept milliseconds and one did not, one threw on a 13th month, one formatted through a locale.
 // Caught: offset arithmetic, a zone glued onto an interpolated date or time, Intl or SQL given the zone's
 // name. A fixed instant written with its zone, or a parser's default zone, converts nothing.
-const convertsBeijingTime = (line: string) =>
-  /(?<![\d.])8 ?\* ?(?:3_?600|60 ?\* ?60)/.test(line)
-  || (line.includes("+08:00") && line.includes("${"))
-  || /(?:timeZone:|AT TIME ZONE) ?["']Asia\/Shanghai/.test(line);
-const CONVERTS_BEIJING_TIME: Record<string, string> = {
+const convertsSeoulTime = (line: string) =>
+  /(?<![\d.])9 ?\* ?(?:3_?600|60 ?\* ?60)/.test(line)
+  || (line.includes("+09:00") && line.includes("${"))
+  || /(?:timeZone:|AT TIME ZONE) ?["']Asia\/Seoul/.test(line);
+const CONVERTS_SEOUL_TIME: Record<string, string> = {
   "packages/contracts/src/time.ts": "the conversions themselves",
   "packages/backend/src/editorial/analyze.ts": "the score input keeps the form its prompt was tuned on (whole seconds without .000)",
-  "packages/backend/src/editorial/writing.ts": "a beijingDate written out, left to the next change of editorial/",
-  "site/changelog/FeatureRelease.tsx": "a changelog entry's Beijing date and time with its zone, to the minute, in dateTime",
+  "packages/backend/src/editorial/writing.ts": "a seoulDate written out, left to the next change of editorial/",
+  "site/changelog/FeatureRelease.tsx": "a changelog entry's Seoul date and time with its zone, to the minute, in dateTime",
   "clients/watchdog/watchdog.mjs": "installed as one file away from the repository, so it cannot import time.ts",
   "clients/mp-watch/articles.ts": "installed away from the repository with only its module's contracts, so it cannot import time.ts",
 };
 
-test("Beijing time is converted only in contracts/time.ts", () => {
+test("Seoul time is converted only in contracts/time.ts", () => {
   const code = ["*.ts", "*.tsx", "*.mjs", "*.js"].flatMap(tracked).filter((file) => !/(^|\/)tests\/|\.test\.ts$|^reference\//.test(file));
   const lines = (file: string) => readFileSync(path.join(ROOT, file), "utf8").split("\n")
     .map((line, i) => ({ at: `${file}:${i + 1}`, line: line.replace(/\s\/\/.*$/, "") }))
     .filter(({ line }) => !/^\s*(\/\/|\/\*|\*)/.test(line));
-  const found = code.filter((file) => !(file in CONVERTS_BEIJING_TIME)).flatMap((file) => lines(file).filter(({ line }) => convertsBeijingTime(line)).map(({ at }) => at));
-  assert.deepEqual(found, [], "use packages/contracts/src/time.ts, or add the file to CONVERTS_BEIJING_TIME with its reason");
-  const stale = Object.keys(CONVERTS_BEIJING_TIME).filter((file) => existsSync(path.join(ROOT, file)) && !lines(file).some(({ line }) => convertsBeijingTime(line)));
-  assert.deepEqual(stale, [], "converts nothing any more: take it off CONVERTS_BEIJING_TIME");
+  const found = code.filter((file) => !(file in CONVERTS_SEOUL_TIME)).flatMap((file) => lines(file).filter(({ line }) => convertsSeoulTime(line)).map(({ at }) => at));
+  assert.deepEqual(found, [], "use packages/contracts/src/time.ts, or add the file to CONVERTS_SEOUL_TIME with its reason");
+  const stale = Object.keys(CONVERTS_SEOUL_TIME).filter((file) => existsSync(path.join(ROOT, file)) && !lines(file).some(({ line }) => convertsSeoulTime(line)));
+  assert.deepEqual(stale, [], "converts nothing any more: take it off CONVERTS_SEOUL_TIME");
 });
 
 // A module can use the engine, but it does not reach into another module; the site composes capabilities.

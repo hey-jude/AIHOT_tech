@@ -28,10 +28,10 @@ export function meta() {
 }
 
 const KIND_DOT: Record<Release["kind"], string> = {
-  更新: "bg-accent",
-  优化: "bg-ok",
-  公告: "bg-amber",
-  下线: "bg-ink-4",
+  업데이트: "bg-accent",
+  최적화: "bg-ok",
+  공지: "bg-amber",
+  종료: "bg-ink-4",
 };
 
 const KINDS = Object.keys(KIND_DOT) as Release["kind"][];

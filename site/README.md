@@ -1,13 +1,13 @@
-# 站点
+# 사이트
 
-这个站自己的东西：名字、文案、品牌、页面，以及启用哪些模块。步骤见 [把它改成你的行业](../docs/customize.md)。
+이 사이트만의 것: 이름, 문구, 브랜드, 페이지, 그리고 사용을 켰는 모듈. 단계는 [업계로 바꾸기](../docs/customize.md)를 참고하십시오.
 
-| 文件 | 内容 |
+| 파일 | 내용 |
 |---|---|
-| `site.ts` | 站名、行业词、出刊时间、首页和关于页文案、分享图文字、条目与日报周报月报上的说法、公开接口的分类、备案号 |
-| `models.ts` | 具名的模型和每一步默认用哪个（没写的步骤用 `.env` 里配的那一个） |
-| `brand/` | 图标、Logo（`Logo.tsx`）、分享图和海报上的字标（`wordmark.svg`、`wordmark-dark.svg`，可选）、日报周报月报的报头字（`nameplates/`）、关于页的二维码（`contact/`，可选） |
-| `pages/` | 使用规则、隐私说明（模板，上线前按实际情况改写） |
-| `public/` | 发布在网站根目录的固定文件（站名、地址等占位符替换后发布）：`robots.txt`、`manifest.webmanifest`、`openapi-v1.json`，以及可选的 `.well-known/security.txt` |
-| `changelog.json` | 更新日志 |
-| `modules/` | 启用哪些模块：`index.ts`、`server.ts`、`web.ts` 三份清单，列出仓库根目录 `modules/<名字>/` 里要用的模块，默认都为空，见 [架构](../docs/architecture.md#模块) 的“模块” |
+| `site.ts` | 사이트명, 업계 단어, 출간 시간, 홈/어바웃 문구, 공유 이미지 문구, 항목과 일간·주간·월간 리포트 표기, 공개 인터페이스의 카테고리, 비안호(备案) 번호 |
+| `models.ts` | 이름 있는 모델과 각 단계에서 기본으로 쓰는 모델 (쓰지 않은 단계는 `.env`에서 설정한 것 하나를 씁니다) |
+| `brand/` | 아이콘, Logo(`Logo.tsx`), 공유 이미지와 포스터 글자 로고(`wordmark.svg`, `wordmark-dark.svg`, 선택), 일간·주간·월간 리포트 명판 글자(`nameplates/`), 어바웃 페이지의 QR 코드(`contact/`, 선택) |
+| `pages/` | 이용 규칙, 개인정보 처리방침(템플릿 — 배포 전에 실제 상황에 맞게 수정) |
+| `public/` | 사이트 루트에 배포되는 고정 파일(사이트명, 주소 등의 플레이스홀더를 치환한 뒤 배포): `robots.txt`, `manifest.webmanifest`, `openapi-v1.json`, 그리고 선택적인 `.well-known/security.txt` |
+| `changelog.json` | 업데이트 로그 |
+| `modules/` | 사용할 모듈 목록: `index.ts`, `server.ts`, `web.ts` 세 매니페스트가 저장소 루트 `modules/<이름>/` 안에서 쓸 모듈을 나열하며, 기본은 전부 비어 있음. [아키텍처](../docs/architecture.md#模块)의 “모듈” 참고 |

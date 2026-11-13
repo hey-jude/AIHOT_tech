@@ -48,7 +48,7 @@ export interface XPostView {
   avatarSrcSet?: string;
   text: string;
   translation: string | null;
-  /** translation: Chinese translation of the quoted post, when it is in another language. */
+  /** 원문이 다른 언어일 때 인용 게시물의 한국어 번역. */
   quoted: { authorName: string; handle: string; text: string; url: string; translation: string | null } | null;
   media: MediaView[];
   /** The post publishes a long X Article: its page reads like an article, under a headline. */
@@ -86,8 +86,8 @@ export interface FeedItemSummary extends Pick<ItemSummary, "id" | "title" | "sum
     quoted: Omit<NonNullable<XPostView["quoted"]>, "url"> | null;
   }) | null;
   /**
-   * A selected report whose fact is represented by another report (全部动态 and search): that report,
-   * so the card can say "同一件事，精选收录的是《…》" instead of claiming a seat of its own.
+   * A selected report whose fact is represented by another report in the full feed or search.
+   * The card can then identify the report already selected for the same event instead of claiming its own seat.
    */
   sameEvent?: { id: string; title: string } | null;
 }
@@ -154,13 +154,13 @@ export interface OutlineEntry {
 }
 
 /**
- * An article page (/api/site/items/:id) in one language: Chinese (the article itself or its translation)
+ * An article page (/api/site/items/:id) in one language: Korean (the article itself or its translation)
  * unless …/original asks for the original. Only the body shown is sent, with its outline.
  */
 export interface SiteItemDetail extends ItemSummary {
   /** The post with all its media; its text is the body, and the post it quotes is set as that body is. */
   x: (Omit<XPostView, "text" | "translation" | "quoted"> & { quoted: QuotedPostView | null }) | null;
-  /** Selected, but its fact's seat is held by this report: marked 同事件, without a reason of its own. */
+  /** Selected, but its fact's seat is held by this report: marked as the same event, without its own reason. */
   sameEvent?: { id: string; title: string } | null;
   readingMode: "full" | "summary-only";
   author: string | null;
@@ -180,12 +180,12 @@ export interface SiteItemDetail extends ItemSummary {
   markdownAvailable: boolean;
   group: GroupInfo | null;
   hasTranslation: boolean;
-  bodyLanguage: "zh" | "original";
+  bodyLanguage: "ko" | "original";
   /** The pages its summary names (mentions.ts). */
   mentions: MentionTarget[];
 }
 
-/** A fact's public reports under the list's filters: what "另外 N 家也报道了" opens. */
+/** Public reports for a fact under the list's filters: the reports opened from the other-source count. */
 export interface GroupReport {
   id: string;
   title: string;
@@ -309,15 +309,15 @@ export interface StoryDetail {
 
 export type ReportKind = "daily" | "weekly" | "monthly";
 
-/** What each kind of report is called. */
-export const REPORT_NAMES: Record<ReportKind, string> = { daily: "日报", weekly: "周报", monthly: "月报" };
+/** 각 리포트를 부르는 이름. */
+export const REPORT_NAMES: Record<ReportKind, string> = { daily: "일간", weekly: "주간", monthly: "월간" };
 
-/** An issue's date as Chinese readers write and search it: "10月17日", "10月12日—18日" (or "9月28日—10月4日"), "2026年10月". */
+/** 한국어 독자가 쓰고 검색하는 형태: “11월 13일”, “11월 12일—18일” (또는 “9월 28일—10월 4일”), “2026년 11월” */
 export function reportDateLabel(kind: ReportKind, key: string): string {
   if (kind === "daily") return monthDay(key);
-  if (kind === "monthly") return `${key.slice(0, 4)}年${Number(key.slice(5, 7))}月`;
+  if (kind === "monthly") return `${key.slice(0, 4)}년 ${Number(key.slice(5, 7))}월`;
   const { start, end } = isoWeekRange(key)!;
-  return `${monthDay(start)}—${start.slice(5, 7) === end.slice(5, 7) ? `${Number(end.slice(8, 10))}日` : monthDay(end)}`;
+  return `${monthDay(start)}—${start.slice(5, 7) === end.slice(5, 7) ? `${Number(end.slice(8, 10))}일` : monthDay(end)}`;
 }
 
 export interface ReportCitation {
@@ -346,7 +346,7 @@ export interface ReportCitation {
 export interface ReportDetail {
   kind: ReportKind;
   key: string;
-  /** The issue's place among the existing issues of its kind, oldest first ("第 N 期"). */
+  /** The issue's ordinal position among existing reports of its kind, oldest first. */
   issueNumber: number;
   title: string;
   generatedAt: string;
@@ -403,7 +403,7 @@ export interface SiteMeta {
 export interface ChangelogRelease {
   date: string;
   time: string;
-  kind: "更新" | "优化" | "公告" | "下线";
+  kind: "업데이트" | "최적화" | "공지" | "종료";
   title: string;
   body: string[];
   /** A notice readers must act on: drawn in the warning red so it cannot be skimmed past. */
@@ -437,11 +437,11 @@ export interface SiteStats {
   items: number;
   selected: number;
   dailies: number;
-  /** The last 24 hours: items found (heat-only sources included), and items that made 精选 (by their place on the timeline). */
+  /** Items found in the last 24 hours (including heat-only sources), and selected items by timeline position. */
   day: { collected: number; selected: number };
   /** Enabled sources in a daily shuffle, for the about page's river: one line per source. */
   sampleSources: Array<{ name: string; kind: string; heatOnly: boolean }>;
-  /** The latest 精选, newest first. */
+  /** The latest selected items, newest first. */
   latest: Array<{ id: string; title: string; source: string }>;
 }
 

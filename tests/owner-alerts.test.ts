@@ -74,9 +74,9 @@ test("with the hub set up, an alert goes to the hub's /tell with the source key,
 
 test("a long report reaches him in pieces, in order, each under its own key", async () => {
   const lines = Array.from({ length: 1200 }, (_, i) => `第 ${i} 行：某个信源这一周的抓取情况和处理结果`);
-  assert.equal(await sendAlert("📊 信源周报", lines), "sent");
+  assert.equal(await sendAlert("📊 출처 주간 보고", lines), "sent");
   assert.ok(told.length > 1);
-  assert.equal(unlabelled(told.map((piece) => piece.text).join("")), ["📊 信源周报", ...lines].join("\n"));
+  assert.equal(unlabelled(told.map((piece) => piece.text).join("")), ["📊 출처 주간 보고", ...lines].join("\n"));
   assert.equal(new Set(told.map((piece) => piece.key)).size, told.length);
   assert.ok(told.every((piece) => [...piece.text].length <= 20_000), "each piece is within what the hub takes");
   assert.deepEqual(grouped, []);
@@ -100,10 +100,10 @@ test("when the hub takes the first piece of a long report and then refuses, the 
     grouped.length = 0;
     hub = "takes one";
     if (group === "bot webhook") process.env.FEISHU_ALERT_WEBHOOK_URL = `https://open.feishu.cn/open-apis/bot/v2/hook/test-${T}`;
-    assert.equal(await sendAlert("📊 信源周报", lines), "sent");
+    assert.equal(await sendAlert("📊 출처 주간 보고", lines), "sent");
     assert.equal(told.length, 2, group);
     assert.ok(grouped.length > 0, group);
-    assert.equal(unlabelled(told[0]!.text + grouped.join("")), ["📊 信源周报", ...lines].join("\n"), group);
+    assert.equal(unlabelled(told[0]!.text + grouped.join("")), ["📊 출처 주간 보고", ...lines].join("\n"), group);
   }
 });
 

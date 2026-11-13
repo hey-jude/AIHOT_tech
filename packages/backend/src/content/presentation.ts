@@ -21,10 +21,10 @@ function textBlocks($: cheerio.CheerioAPI) {
 export function rebaseTranslation(previous: string, next: string, translated: string): string {
   const old = cheerio.load(previous, null, false);
   const current = cheerio.load(next, null, false);
-  const zh = cheerio.load(translated, null, false);
-  const oldBlocks = textBlocks(old), newBlocks = textBlocks(current), translatedBlocks = textBlocks(zh);
+  const translatedDoc = cheerio.load(translated, null, false);
+  const oldBlocks = textBlocks(old), newBlocks = textBlocks(current), translatedBlocks = textBlocks(translatedDoc);
   if (oldBlocks.length !== newBlocks.length || oldBlocks.length !== translatedBlocks.length) {
-    throw new PresentationMismatch("正文段落结构已变化，需要正常重翻，不能只刷新展示");
+    throw new PresentationMismatch("본문 단락 구조가 변경되었습니다. 표시만 새로고침하지 말고 다시 번역해야 합니다.");
   }
   const shell = (html: string) => {
     const $ = cheerio.load(html, null, false);
@@ -35,9 +35,9 @@ export function rebaseTranslation(previous: string, next: string, translated: st
   oldBlocks.forEach((block, i) => {
     const fresh = newBlocks[i]!;
     if (shell(old(block).html() ?? "") !== shell(current(fresh).html() ?? "")) {
-      throw new PresentationMismatch(`第 ${i + 1} 段的文字或内联结构已变化，需要正常重翻，不能只刷新展示`);
+      throw new PresentationMismatch(`${i + 1}번째 단락의 텍스트 또는 인라인 구조가 변경되었습니다. 표시만 새로고침하지 말고 다시 번역해야 합니다.`);
     }
-    const rendered = cheerio.load(zh(translatedBlocks[i]!).html() ?? "", null, false);
+    const rendered = cheerio.load(translatedDoc(translatedBlocks[i]!).html() ?? "", null, false);
     const links = current(fresh).find("a").toArray();
     const oldLinks = old(block).find("a").toArray();
     const zhLinks = rendered("a").toArray();
@@ -45,7 +45,7 @@ export function rebaseTranslation(previous: string, next: string, translated: st
     const oldMedia = old(block).find(MEDIA).toArray().filter(el => !old(el).parentsUntil(block, MEDIA).length);
     const zhMedia = rendered(MEDIA).toArray().filter(el => !rendered(el).parents(MEDIA).length);
     if (links.length !== zhLinks.length || media.length !== zhMedia.length || oldLinks.some((link, k) => link.attribs.href !== zhLinks[k]?.attribs.href)) {
-      throw new PresentationMismatch(`第 ${i + 1} 段的译文链接或图片无法对应，需要正常重翻`);
+      throw new PresentationMismatch(`${i + 1}번째 단락의 번역 링크 또는 이미지에 대응하는 원문을 찾을 수 없습니다. 다시 번역해야 합니다.`);
     }
     zhLinks.forEach((link, k) => { link.attribs = { ...links[k]!.attribs }; });
     // The model may move media tokens within a sentence. Match the original token, never its
@@ -54,13 +54,13 @@ export function rebaseTranslation(previous: string, next: string, translated: st
     oldMedia.forEach((el, k) => {
       const key = old.html(el), replacement = current.html(media[k]!);
       const matches = replacements.get(key) ?? [];
-      if (matches.some(value => value !== replacement)) throw new PresentationMismatch(`第 ${i + 1} 段的重复图片无法唯一对应，需要正常重翻`);
+      if (matches.some(value => value !== replacement)) throw new PresentationMismatch(`${i + 1}번째 단락의 중복 이미지에 고유하게 대응할 수 없습니다. 다시 번역해야 합니다.`);
       matches.push(replacement);
       replacements.set(key, matches);
     });
     zhMedia.forEach(el => {
       const replacement = replacements.get(rendered.html(el))?.shift();
-      if (replacement === undefined) throw new PresentationMismatch(`第 ${i + 1} 段的译文图片无法对应，需要正常重翻`);
+      if (replacement === undefined) throw new PresentationMismatch(`${i + 1}번째 단락의 번역 이미지에 대응하는 원문을 찾을 수 없습니다. 다시 번역해야 합니다.`);
       rendered(el).replaceWith(replacement);
     });
     current(fresh).html(rendered.html());

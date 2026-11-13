@@ -1,10 +1,10 @@
-// Baidu's push interface (搜索资源平台 · 普通收录 · API提交) takes newly published links only: resubmitting
+// Baidu's regular URL-submission API takes newly published links only: resubmitting
 // known ones spends the daily quota, and Baidu lowers the quota or withdraws the interface for it. So the
 // first run records the discovery inventory as it is (those pages reach Baidu through the sitemap) and later
 // runs submit URLs that joined it since, each once. A request over the remaining quota is refused and voids
 // the rest of the day, so a request never asks for more than Baidu's previous reply said is left; the first
-// request of a Beijing day carries one URL to learn that number.
-import { beijingDate } from "@aihot/contracts/time";
+// request of a Seoul day carries one URL to learn that number.
+import { seoulDate } from "@aihot/contracts/time";
 import { config } from "../config.ts";
 import { sql } from "../db.ts";
 import { siteUrl } from "../publication/links.ts";
@@ -40,7 +40,7 @@ export async function submitBaiduPush(now = new Date()) {
   const token = config.baiduPushToken;
   if (!config.baiduPushEnabled || !token) return { status: "disabled" as const, urls: 0, more: true };
 
-  const today = beijingDate(now);
+  const today = seoulDate(now);
   let remain = row.value.day === today ? row.value.remain : null;
   // Paths that left the inventory are dropped, so the list stays as long as the inventory; one that comes
   // back later (a page withdrawn and restored) is new to Baidu again. Progress is saved after every reply,

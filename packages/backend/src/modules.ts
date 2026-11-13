@@ -12,7 +12,7 @@ import type { QueueOptions } from "./jobs/queue.ts";
 import type { Finding } from "./notify/feishu.ts";
 import type { Topic, TopicMember } from "./publication/topics.ts";
 
-/** A cron schedule (Asia/Shanghai), recorded in job_runs like the engine's (apps/worker/src/schedules.ts). */
+/** A cron schedule (Asia/Seoul), recorded in job_runs like the engine's (apps/worker/src/schedules.ts). */
 export interface Scheduled {
   name: string;
   cron: string;
@@ -39,7 +39,7 @@ export interface ModelStep {
 export interface AgentAbility {
   /** Address under /api/v1/agent: "/status". */
   path: string;
-  /** Named in the guide's first sentence, after the engine's abilities: "服务状态". */
+  /** Named in the guide's first sentence, after the engine's abilities: service status. */
   title: string;
   /** The guide's table row: what the user wants to know. */
   ask: string;
@@ -63,7 +63,7 @@ export interface AgentAbility {
 export interface LlmsLines {
   /** The public API list, after the engine's news endpoints. */
   api?: string[];
-  /** Polling rhythm, a clause each, before the RSS one ("X 每 10 分钟读一次 …；"). */
+  /** Polling rhythm, a clause each, before the RSS one (for example, read X every ten minutes). */
   pace?: string[];
   /** The site's main pages, after the topics. */
   pages?: string[];
@@ -173,9 +173,9 @@ export interface ServerModule {
   http?: (app: FastifyInstance) => void;
   agent?: {
     abilities?: AgentAbility[];
-    /** The guide's "目前查不到的" list, after the engine's first entry. */
+    /** The guide's unavailable-items list, after the engine's first entry. */
     unavailable?: string[];
-    /** The guide's "请求" list (how to ask), after the engine's first entry. */
+    /** The guide's request instructions, after the engine's first entry. */
     requests?: string[];
   };
   llms?: () => Promise<LlmsLines> | LlmsLines;

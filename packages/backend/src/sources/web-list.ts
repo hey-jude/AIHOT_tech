@@ -90,7 +90,7 @@ async function fetchListingText(source: SourceRow): Promise<{ text: string; viaJ
 }
 
 /** A listing title that is no headline: a label that swallowed its summary, or a call to action. */
-export const isCallToActionTitle = (title: string) => /^(read more|read the blog|learn more|continue reading|more|阅读全文|阅读更多|查看详情|了解更多)$/i.test(title.trim());
+export const isCallToActionTitle = (title: string) => /^(read more|read the blog|learn more|continue reading|more|\u9605\u8bfb\u5168\u6587|\u9605\u8bfb\u66f4\u591a|\u67e5\u770b\u8be6\u60c5|\u4e86\u89e3\u66f4\u591a)$/i.test(title.trim());
 export const needsTitle = (title: string) => title.length > 100 || isCallToActionTitle(title);
 
 /** Image destinations may contain balanced parentheses, including inside a linked card. */
@@ -181,11 +181,11 @@ export function fromHtml(html: string, base: string, source: SourceRow): Candida
   return out;
 }
 
-/** A changelog heading that is only a date, bare or after a short label: "时间: 2026-09-10", "时间：2024-05-17". */
-const DATE_HEADING = /^(?:[^\d:：]{1,12}[:：])?\s*(\d{4})[-/.年](\d{1,2})[-/.月](\d{1,2})日?$/;
+/** A changelog heading that consists only of a date, with or without a short label. */
+const DATE_HEADING = /^(?:[^\d:\uFF1A]{1,12}[:\uFF1A])?\s*(\d{4})[-/.\u5e74](\d{1,2})[-/.\u6708](\d{1,2})\u65e5?$/;
 
-/** The day a date heading names, at midnight in the source's offset (Date.parse would read "时间: …" in the host's zone). */
-function headingDate(title: string, utcOffset = "+08:00"): PublicationDate | undefined {
+/** The day a date heading names, at midnight in the source's offset. */
+function headingDate(title: string, utcOffset = "+09:00"): PublicationDate | undefined {
   const m = DATE_HEADING.exec(title);
   if (!m) return undefined;
   return readPublicationDate(`${m[1]}/${m[2]}/${m[3]}`, utcOffset);
@@ -198,7 +198,7 @@ function fromIntercomChangelog(html: string, base: string, source: SourceRow): C
   $("article .intercom-interblocks-subheading3:has(h3[id]), article .intercom-interblocks-subheading:has(h2[id])").each((_i, node) => {
     const block = $(node);
     const heading = block.find("h2[id], h3[id]").first();
-    const date = readPublicationDate(heading.text(), source.config.publishedAtUtcOffset ?? "+00:00");
+    const date = readPublicationDate(heading.text(), source.config.publishedAtUtcOffset ?? "+09:00");
     if (!date.publishedAt) return;
     const parts: string[] = [];
     const titles: string[] = [];
@@ -303,7 +303,7 @@ function scriptString(literal: string): string {
 
 /**
  * mimo.xiaomi.com (config.adapter "mimo_home"). The homepage's post rows navigate by script: its HTML has
- * their titles but no links, so the generic parse found only the menu (MiMo Desktop, 简体中文, #paper).
+ * their titles but no links, so the generic parse found only the menu (MiMo Desktop, 중국어 간체, #paper).
  * The rows are a prop of the homepage's own chunk, `sectionTitle:"Blog", … blogs:[{title:"…",
  * link:"/blog/…", desc:"…"}, …]`; the site's route table names the chunks of path "/" and the runtime's
  * chunk map their files, both in the scripts the homepage loads. A homepage that no longer looks like

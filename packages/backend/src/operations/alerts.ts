@@ -14,7 +14,7 @@
 // woken for what is the owner's alone (owner "only"). While the channel to the agent fails, the owner hears everything again.
 // The shared hub owns serial execution and retry; accepted events are never dispatched again here.
 // Delivery goes through sendAlert (alert webhook or ops chat, internal-chat fallback; off unless FEISHU_INTERNAL_ENABLED).
-import { addDays, beijingAt, beijingDate, beijingDay, beijingStamp, isValidDate } from "@aihot/contracts/time";
+import { addDays, seoulAt, seoulDate, seoulDay, seoulStamp, isValidDate } from "@aihot/contracts/time";
 import { ALERTS, EDITION_TIMES } from "@aihot/site";
 import { audit } from "../audit.ts";
 import { sql } from "../db.ts";
@@ -101,14 +101,14 @@ async function contentCollection(now: number, open: AlertState): Promise<Finding
   return [{
     key: "content.collect",
     level: "now",
-    title: "网站停止收录新文章",
-    impact: last?.at ? `读者看不到新文章：最后一篇收录于 ${beijingStamp(last.at)}` : "读者看不到新文章：一天内没有收录任何文章",
-    heals: ALERTS.usualFlow ? `没有，${ALERTS.usualFlow}` : "没有",
-    action: "把这条发给 AI 排查处理",
+    title: "사이트에서 새 기사를 수집하지 않습니다",
+    impact: last?.at ? `독자에게 새 기사가 표시되지 않습니다. 마지막 수집: ${seoulStamp(last.at)}` : "하루 동안 수집된 기사가 없어 독자에게 새 기사가 표시되지 않습니다.",
+    heals: ALERTS.usualFlow ? `자동 복구되지 않습니다. ${ALERTS.usualFlow}` : "자동 복구되지 않습니다.",
+    action: "이 알림을 AI에 전달해 원인을 확인하고 처리하세요.",
     agentFirst: true,
     detail: quietFor <= QUIET_FETCHING_MINUTES * 60_000
-      ? `editorial articles.discovered_at 超过 ${QUIET_MINUTES} 分钟没有新值，期间没有一次成功的 editorial fetch_runs（热度信号单独评估）；查 worker、sources.schedule、出网代理与采集失败`
-      : `editorial articles.discovered_at 超过 ${QUIET_FETCHING_MINUTES} 分钟没有新值（采集仍成功也算）；查采集结果为何一直是 new_count=0：解析、去重与入库`,
+      ? `editorial articles.discovered_at에 ${QUIET_MINUTES}분 넘게 새 값이 없습니다. 이 기간 editorial fetch_runs 성공도 없었습니다(화제 신호는 별도 평가). worker, sources.schedule, 외부 연결 프록시와 수집 실패를 확인하세요.`
+      : `editorial articles.discovered_at에 ${QUIET_FETCHING_MINUTES}분 넘게 새 값이 없습니다(수집 성공 여부와 무관). new_count=0이 계속되는 이유를 확인하세요: 파싱, 중복 제거, 저장.`,
     since: last?.at ?? undefined,
   }];
 }
@@ -140,11 +140,11 @@ async function sourcesFailing(now: number, open: AlertState): Promise<Finding[]>
   return [{
     key: "content.fetch",
     level: "now",
-    title: "大量信源抓取失败，这些信源的新文章进不来",
-    impact: `最近抓取过的 ${r.fetched} 个信源里，${r.failing} 个最近一次抓取失败，读者暂时看不到它们的新文章`,
-    heals: "服务器连外网的线路恢复后会按排程重新抓取，这段时间的新文章会晚到；线路不恢复就一直进不来",
-    action: "转给 AI 检查出网代理和抓取错误",
-    detail: `失败信源占 ${Math.round((r.failing / r.fetched) * 100)}%（门槛 ${FAILING_SHARE * 100}% 且至少 ${FAILING_SOURCES} 个）；常见错误：${errors.slice(0, 3).map((e) => `${e.error || "（无）"} ×${e.n}`).join("；")}`,
+    title: "다수 출처 수집 실패로 새 기사가 들어오지 않습니다",
+    impact: `최근 수집한 출처 ${r.fetched}곳 중 ${r.failing}곳에서 마지막 수집이 실패해 새 기사가 표시되지 않습니다.`,
+    heals: "서버의 외부 연결이 복구되면 일정에 따라 다시 수집합니다. 그동안의 새 기사는 늦게 들어옵니다. 연결이 복구되지 않으면 계속 실패합니다.",
+    action: "AI에 전달해 외부 연결 프록시와 수집 오류를 확인하세요.",
+    detail: `실패 출처 비율 ${Math.round((r.failing / r.fetched) * 100)}%(기준 ${FAILING_SHARE * 100}%, 최소 ${FAILING_SOURCES}곳). 주요 오류: ${errors.slice(0, 3).map((e) => `${e.error || "(없음)"} ×${e.n}`).join("; ")}`,
     since: new Date(Math.min(...errors.map((e) => e.first.getTime()))),
   }];
 }
@@ -161,12 +161,12 @@ async function selectedGrouping(now: number, open: AlertState): Promise<Finding[
   return [{
     key: "content.grouping",
     level: "now",
-    title: "有精选新闻卡在去重确认，暂未发布",
-    impact: `${waiting.length} 条已达到精选条件的新闻仍未完成去重确认，还没进入精选，读者可能晚看到这些更新`,
-    heals: manual ? `${manual} 条需要人工处理后才能恢复${manual < waiting.length ? "；其余仍在自动恢复" : ""}`
-      : receipt ? "仍在等待自动恢复；付费结果未知的请求会在 30 分钟后自动放行一次" : "还会自动重试，但等待已经超过正常范围",
-    action: manual ? "转给 AI 处理；核对计费，或在已有恢复授权内如实记录计费未知后放行" : "转给 AI 检查等待原因，避免继续积压",
-    detail: waiting.slice(0, 8).map((item) => `${item.articleId}${item.receiptId ? ` 回执 #${item.receiptId}` : ""}${item.error ? `：${item.error.slice(0, 120)}` : ""}`).join("；"),
+    title: "엄선 대상 기사가 중복 확인 단계에서 멈춰 아직 발행되지 않았습니다",
+    impact: `엄선 기준을 충족한 기사 ${waiting.length}건이 중복 확인을 마치지 못해 엄선 목록에 들어가지 않았습니다. 독자가 새 소식을 늦게 볼 수 있습니다.`,
+    heals: manual ? `${manual}건은 수동 처리해야 복구됩니다${manual < waiting.length ? "; 나머지는 자동 복구 중입니다" : ""}`
+      : receipt ? "자동 복구 대기 중입니다. 결제 여부가 불명확한 요청은 30분 후 한 번 자동 허용됩니다." : "자동 재시도 중이나 대기 시간이 정상 범위를 넘었습니다.",
+    action: manual ? "AI에 전달해 처리하세요. 결제 여부를 확인하거나, 기존 복구 권한에 따라 결제 불명 상태를 기록한 뒤 허용하세요." : "AI에 전달해 대기 원인을 확인하고 적체를 방지하세요.",
+    detail: waiting.slice(0, 8).map((item) => `${item.articleId}${item.receiptId ? ` 영수증 #${item.receiptId}` : ""}${item.error ? `: ${item.error.slice(0, 120)}` : ""}`).join("; "),
     since: waiting[0]!.since,
   }];
 }
@@ -191,20 +191,20 @@ async function contentProcessing(now: number, open: AlertState): Promise<Finding
     FROM articles WHERE ${unfinished}`;
   if (p!.waiting < 10 && p!.failed < 20 && !(incident && p!.waiting + p!.failed > 0)) return [];
   const errors = await sql<{ error: string; n: number }[]>`
-    SELECT left(coalesce(processing_error, '（无）'), 120) AS error, count(*)::int AS n FROM articles
+    SELECT left(coalesce(processing_error, '(없음)'), 120) AS error, count(*)::int AS n FROM articles
     WHERE (${unfinished}) AND processing_error IS NOT NULL
     GROUP BY 1 ORDER BY 2 DESC LIMIT 3`;
   return [{
     key: "content.process",
     level: "now",
-    title: "新内容卡住了，进不了网站",
-    impact: [p!.waiting > 0 && `${p!.waiting} 篇积压文章仍在等待处理`, p!.failed > 0 && `${p!.failed} 篇处理失败的文章仍未补齐`]
+    title: "새 콘텐츠 처리 지연으로 사이트에 표시되지 않습니다",
+    impact: [p!.waiting > 0 && `처리를 기다리는 기사 ${p!.waiting}건`, p!.failed > 0 && `처리에 실패한 미복구 기사 ${p!.failed}건`]
       .filter(Boolean)
-      .join("；") + "，精选和热点会缺内容",
-    heals: p!.failed > 0 ? "已失败的文章需要恢复处理；服务恢复不代表积压已经补齐" : "排队中的文章会继续处理，仍需核实是否完成",
-    action: "转给 AI 处理",
+      .join("; ") + "(엄선 소식과 화제 목록에 콘텐츠가 누락될 수 있습니다)",
+    heals: p!.failed > 0 ? "실패한 기사를 복구 처리해야 합니다. 서비스가 복구되어도 적체가 모두 해소된 것은 아닙니다." : "대기 중인 기사는 계속 처리되지만 완료 여부를 확인해야 합니다.",
+    action: "AI에 전달해 처리하세요.",
     // Article age is useful detail; incident duration starts at first detection.
-    detail: [p!.oldest && `最老的一篇 ${beijingStamp(p!.oldest)} 收进`, errors.map((e) => `${e.error}（${e.n}）`).join("；") || "没有记录错误"].filter(Boolean).join("；"),
+    detail: [p!.oldest && `가장 오래된 기사 수집 시각 ${seoulStamp(p!.oldest)}`, errors.map((e) => `${e.error}(${e.n})`).join("; ") || "기록된 오류 없음"].filter(Boolean).join("; "),
   }];
 }
 
@@ -222,10 +222,10 @@ async function refusedDeliveries(now: number, open: AlertState): Promise<Finding
   return [{
     key: "deliveries.failed",
     level: "today",
-    title: `${refused!.target ?? "内容群"}有推送没发出去`,
-    impact: `${refused!.n} 条通知尚未确认送达${refused!.target ?? "内容群"}`,
-    heals: "不会自动重发",
-    action: "转给 AI 处理；如果推送机器人被移出了群，需要你把它加回去",
+    title: `${refused!.target ?? "콘텐츠 그룹"} 푸시 발송에 실패했습니다.`,
+    impact: `${refused!.target ?? "콘텐츠 그룹"}에 알림 ${refused!.n}건이 도착했는지 확인되지 않았습니다.`,
+    heals: "자동으로 재전송하지 않습니다.",
+    action: "AI에 전달해 처리하세요. 푸시 봇이 그룹에서 제거됐다면 다시 초대해야 합니다.",
     detail: refused!.response ?? "",
   }];
 }
@@ -241,21 +241,21 @@ async function backupAge(now: number): Promise<Finding[]> {
   const lastOk = Math.max(runs?.last_ok?.getTime() ?? 0, b?.value.uploaded ? Date.parse(b.value.at) : 0);
   const since = lastOk || runs?.first_attempt?.getTime() || now;
   const age = now - since;
-  const state = b?.value.filesError ? `数据库已上传，附件打包失败：${b.value.filesError}` : b?.value.uploaded === false ? "未上传" : "";
+  const state = b?.value.filesError ? `데이터베이스는 업로드됐지만 첨부 파일 압축에 실패했습니다: ${b.value.filesError}` : b?.value.uploaded === false ? "업로드되지 않음" : "";
   if (age > 50 * 3600_000) {
     return [{
       key: "backup.failed",
       level: "today",
-      title: "数据库备份连续两天没成功",
-      impact: lastOk ? `万一服务器出事，最近 ${duration(age)} 的数据可能无法完整恢复` : "还没有成功的完整备份，服务器出事时可能无法恢复数据",
-      heals: "不会",
-      action: "转给 AI 处理",
-      detail: `${lastOk ? "最近一次成功" : "首次备份尝试"} ${beijingStamp(since)}${state ? `；${state}` : ""}；看 ops.backup 的运行记录`,
+      title: "이틀 연속 데이터베이스 백업에 실패했습니다.",
+      impact: lastOk ? `서버 장애 발생 시 최근 ${duration(age)} 동안의 데이터를 완전히 복구하지 못할 수 있습니다.` : "성공한 전체 백업이 없습니다. 서버 장애 발생 시 데이터를 복구하지 못할 수 있습니다.",
+      heals: "자동 복구되지 않습니다.",
+      action: "AI에 전달해 처리하세요.",
+      detail: `${lastOk ? "최근 성공" : "최초 백업 시도"} ${seoulStamp(since)}${state ? `; ${state}` : ""}. ops.backup 실행 기록을 확인하세요.`,
       since: new Date(since),
     }];
   }
   if (!b || !b.value.uploaded || age > 30 * 3600_000) {
-    return [{ key: "backup.stale", level: "later", title: "数据库备份超过一天没成功", detail: b ? `最近一次 ${beijingStamp(b.value.at)}${state ? `（${state}）` : ""}；看 ops.backup` : "还没有成功的备份记录" }];
+    return [{ key: "backup.stale", level: "later", title: "하루 넘게 데이터베이스 백업에 성공하지 못했습니다.", detail: b ? `최근 실행 ${seoulStamp(b.value.at)}${state ? `(${state})` : ""}. ops.backup을 확인하세요.` : "성공한 백업 기록이 없습니다." }];
   }
   return [];
 }
@@ -275,8 +275,8 @@ async function baiduPushFailing(now: number): Promise<Finding[]> {
   return [{
     key: "seo.baidu-push",
     level: "later",
-    title: "百度主动推送一天没成功",
-    detail: `从 ${beijingStamp(r.since)} 起 seo.baidu-push 一直失败，最近一次：${(r.error ?? "").slice(0, 200)}；401 是令牌失效（百度搜索资源平台 · 普通收录 · API提交 重新取，写进生产 backend.env 的 BAIDU_PUSH_TOKEN），400 site error 是站点掉了验证（首页的 baidu-site-verification 标签）`,
+    title: "Baidu URL 제출이 하루 동안 성공하지 못했습니다.",
+    detail: `${seoulStamp(r.since)}부터 seo.baidu-push가 계속 실패했습니다. 최근 오류: ${(r.error ?? "").slice(0, 200)}. 401은 토큰 만료일 수 있으므로 Baidu 검색 리소스 플랫폼의 일반 URL 제출 API에서 새 토큰을 발급받아 운영 backend.env의 BAIDU_PUSH_TOKEN에 설정하세요. 400 site error는 사이트 인증 실패일 수 있으므로 홈페이지의 baidu-site-verification 태그를 확인하세요.`,
     since: r.since,
   }];
 }
@@ -295,8 +295,8 @@ async function moduleAlerts(now: number): Promise<Finding[]> {
 async function sourceFollowUps(now: number): Promise<Finding[]> {
   if (!collecting()) return [];
   return (await sourceHealth(now)).flatMap(group => SOURCE_PROBLEMS.flatMap(p => group[p.problem].map((s): Finding => ({
-    key: `sources.${p.problem}.${s.id}`, level: "later", title: `${group.name}信源「${s.name}」${p.title}`,
-    detail: `${s.id}：${p.describe(s)}；${p.action}`, observedAt: p.observedAt(s) ?? undefined,
+    key: `sources.${p.problem}.${s.id}`, level: "later", title: `${group.name} 출처 ‘${s.name}’ ${p.title}`,
+    detail: `${s.id}: ${p.describe(s)}; ${p.action}`, observedAt: p.observedAt(s) ?? undefined,
   }))));
 }
 
@@ -306,13 +306,13 @@ async function unknownOutcomes(): Promise<Finding[]> {
 
   const [r] = await sql<{ receipts: number; services: string | null; deliveries: number; targets: string | null }[]>`
     SELECT (SELECT count(*)::int FROM receipts WHERE ${awaitingRelease()}) AS receipts,
-           (SELECT string_agg(DISTINCT service || '/' || purpose, '、') FROM receipts WHERE ${awaitingRelease()}) AS services,
+           (SELECT string_agg(DISTINCT service || '/' || purpose, ', ') FROM receipts WHERE ${awaitingRelease()}) AS services,
            (SELECT count(*)::int FROM deliveries WHERE status = 'unknown') AS deliveries,
-           (SELECT string_agg(DISTINCT t.note, '、') FROM deliveries d JOIN notify_targets t ON t.key = d.target_key WHERE d.status = 'unknown') AS targets`;
+           (SELECT string_agg(DISTINCT t.note, ', ') FROM deliveries d JOIN notify_targets t ON t.key = d.target_key WHERE d.status = 'unknown') AS targets`;
   if (r!.receipts > 0) {
-    out.push({ key: "receipts.unknown", level: "later", title: `${r!.receipts} 个付费请求的结果尚未确认`, detail: `${r!.services}；仍挡住内容发布的请求需核对计费或按已有授权放行` });
+    out.push({ key: "receipts.unknown", level: "later", title: `유료 요청 ${r!.receipts}건의 결과가 아직 확인되지 않았습니다.`, detail: `${r!.services}; 콘텐츠 발행을 막고 있는 요청은 결제를 확인하거나 기존 권한에 따라 허용해야 합니다.` });
   }
-  if (r!.deliveries > 0) out.push({ key: "deliveries.unknown", level: "later", title: `${r!.deliveries} 条内容群推送不确定是否送达`, detail: `核对${r!.targets ?? "内容群"}里有没有发出，再标记或补发` });
+  if (r!.deliveries > 0) out.push({ key: "deliveries.unknown", level: "later", title: `콘텐츠 그룹 푸시 ${r!.deliveries}건의 도착 여부가 불확실합니다.`, detail: `${r!.targets ?? "콘텐츠 그룹"}에서 도착 여부를 확인한 뒤 상태를 기록하거나 다시 보내세요.` });
   return out;
 }
 
@@ -322,7 +322,7 @@ async function waitingQueues(now: number): Promise<Finding[]> {
     SELECT name, count(*)::int AS n, min(start_after) AS oldest FROM pgboss.job
     WHERE state IN ('created', 'retry') AND start_after <= now() AND name NOT LIKE 'cron.%' GROUP BY 1`;
   return queues.filter((q) => now - q.oldest.getTime() > 2 * 3600_000).map((q): Finding => (
-    { key: `queue.${q.name}`, level: "later", title: `后台任务排队超过 2 小时：${q.name}`, detail: `${q.n} 个等待，最早的等了 ${duration(now - q.oldest.getTime())}` }));
+    { key: `queue.${q.name}`, level: "later", title: `백그라운드 작업 대기 2시간 초과: ${q.name}`, detail: `${q.n}건 대기 중이며 가장 오래된 작업은 ${duration(now - q.oldest.getTime())} 대기했습니다.` }));
 }
 
 /** The site's modules' follow-ups. */
@@ -335,25 +335,25 @@ async function moduleFollowUps(now: number): Promise<Finding[]> {
 /** Current routing describes possible impact; recent failed calls do not prove every step has stopped. */
 async function modelStops(service: string, models?: ReadonlySet<string>): Promise<string> {
   const steps = await stepsOnService(service, models);
-  return steps.length ? `${steps.join("、")}可能受影响` : "当前没有处理步骤使用这家模型服务";
+  return steps.length ? `${steps.join(", ")}에 영향이 있을 수 있습니다.` : "현재 이 모델 서비스를 사용하는 처리 단계가 없습니다.";
 }
 /** `stops` is for the services that are not models; a model service's follows from the steps that use it. */
 const PROVIDERS: Record<string, { name: string; where: string; stops?: string }> = {
-  llm: { name: "默认模型服务", where: "模型服务商的控制台" },
-  zhipu: { name: "智谱", where: "智谱开放平台" },
-  dashscope: { name: "阿里云百炼", where: "阿里云百炼控制台" },
-  deepseek: { name: "DeepSeek", where: "DeepSeek 开放平台" },
-  mimo: { name: "小米 MiMo", where: "小米 MiMo 开放平台" },
-  socialdata: { name: "SocialData", stops: "X（推特）上的新内容收不到", where: "SocialData 后台" },
-  jina: { name: "Jina", stops: "部分文章取不到正文", where: "Jina 后台" },
-  dajiala: { name: "极致了（Dajiala）", stops: "公众号新文章收不到", where: "极致了后台" },
+  llm: { name: "기본 모델 서비스", where: "모델 제공업체 콘솔" },
+  zhipu: { name: "Zhipu", where: "Zhipu 개방 플랫폼" },
+  dashscope: { name: "Alibaba Cloud Bailian", where: "Alibaba Cloud Bailian 콘솔" },
+  deepseek: { name: "DeepSeek", where: "DeepSeek 개방 플랫폼" },
+  mimo: { name: "Xiaomi MiMo", where: "Xiaomi MiMo 개방 플랫폼" },
+  socialdata: { name: "SocialData", stops: "X의 새 콘텐츠를 가져오지 못함", where: "SocialData 관리 페이지" },
+  jina: { name: "Jina", stops: "일부 기사 본문을 가져오지 못함", where: "Jina 관리 페이지" },
+  dajiala: { name: "Dajiala", stops: "WeChat 공중계정의 새 기사를 가져오지 못함", where: "Dajiala 관리 페이지" },
 };
 export const providerName = (service: string) => PROVIDERS[service]?.name ?? service;
 export const providerStops = async (service: string, models?: ReadonlySet<string>): Promise<string> => {
   const p = PROVIDERS[service];
-  return p ? (p.stops ?? modelStops(service, models)) : "相关功能停了";
+  return p ? (p.stops ?? modelStops(service, models)) : "관련 기능이 중단되었습니다.";
 };
-export const providerConsole = (service: string) => PROVIDERS[service]?.where ?? `${service} 后台`;
+export const providerConsole = (service: string) => PROVIDERS[service]?.where ?? `${service} 관리 페이지`;
 
 const REFUSED_PREFIX = "provider.refused.";
 
@@ -400,11 +400,11 @@ async function providerFindings(now: number, open: AlertState): Promise<Finding[
       key,
       level: unused ? "later" : "today",
       ...(unused ? {} : { owner: true as const }),
-      title: unused ? `${providerName(service)} 的旧模型限制尚未验证` : `${providerName(service)} 拒绝调用，需要核对账号或额度`,
-      impact: unused ? "当前处理步骤未使用这些受限模型；旧限制仍未验证" : await providerStops(service, p.models),
-      heals: "需先恢复访问，再确认失败任务已接续",
-      action: `去${providerConsole(service)}看余额、套餐和消费上限；充值或恢复后让 AI 核实调用并补跑刚才失败的任务（后台看着都正常的话，也把这条发给 AI 查原因）`,
-      detail: `${p.models ? `模型 ${[...p.models].join("、")}；` : ""}最近一次成功后被拒 ${p.n} 次，尚未取得后续成功调用：${p.last}`,
+      title: unused ? `${providerName(service)}의 이전 모델 제한이 아직 검증되지 않았습니다.` : `${providerName(service)}에서 요청을 거부했습니다. 계정 또는 한도를 확인하세요.`,
+      impact: unused ? "현재 처리 단계에서 제한된 모델을 사용하지 않지만 이전 제한은 아직 검증되지 않았습니다." : await providerStops(service, p.models),
+      heals: "먼저 접근을 복구한 뒤 실패한 작업이 재개됐는지 확인해야 합니다.",
+      action: `${providerConsole(service)}에서 잔액, 요금제, 사용 한도를 확인하세요. 충전 또는 복구 후 AI에 요청해 호출을 확인하고 실패 작업을 다시 실행하세요. 관리 화면에 문제가 없어 보이면 이 알림을 AI에 전달해 원인을 조사하세요.`,
+      detail: `${p.models ? `모델 ${[...p.models].join(", ")}; ` : ""}최근 성공 이후 ${p.n}회 거부됐으며 이후 성공 호출이 없습니다: ${p.last}`,
     });
   }
   const capped = await sql<{ service: string; per_day: number; used: number }[]>`
@@ -415,11 +415,11 @@ async function providerFindings(now: number, open: AlertState): Promise<Finding[
     out.push({
       key: `budget.day.${c.service}`,
       level: "later",
-      title: `${providerName(c.service)} 过去 24 小时的调用额度用完了`,
-      impact: `${await providerStops(c.service)}，直到额度随时间腾出来`,
-      heals: "会，额度按 24 小时滚动恢复",
-      action: "这次不用处理；如果经常出现，再决定要不要调高额度",
-      detail: `24 小时内 ${c.used} 次，上限 ${c.per_day}（budgets 表）`,
+      title: `${providerName(c.service)}의 최근 24시간 호출 한도를 모두 사용했습니다.`,
+      impact: `${await providerStops(c.service)}. 시간이 지나 한도가 회복될 때까지 계속됩니다.`,
+      heals: "예. 한도는 24시간 기준으로 순차 회복됩니다.",
+      action: "이번에는 조치할 필요가 없습니다. 자주 발생하면 한도 상향을 검토하세요.",
+      detail: `24시간 사용 ${c.used}회, 한도 ${c.per_day}회(budgets 테이블)`,
     });
   }
   return out;
@@ -432,8 +432,8 @@ interface AlertState {
 const DAILY_PREFIX = "report.daily:";
 const dailyDate = (key: string) => key.startsWith(DAILY_PREFIX) && isValidDate(key.slice(DAILY_PREFIX.length))
   ? key.slice(DAILY_PREFIX.length) : undefined;
-/** Missing dailies are looked for, and announced ones followed, over the last seven Beijing calendar days. */
-const dailyScanFrom = (now: number) => addDays(beijingDate(now), -6);
+/** Missing dailies are looked for, and announced ones followed, over the last seven Seoul calendar days. */
+const dailyScanFrom = (now: number) => addDays(seoulDate(now), -6);
 
 async function alertState(): Promise<AlertState> {
   const [row] = await sql<{ value: AlertState }[]>`SELECT value FROM settings WHERE key = 'alerts.state'`;
@@ -456,7 +456,7 @@ async function savedHolds(): Promise<Record<string, HeldAlert>> {
 
 /**
  * The agent looked at an incident it was handed and judged it not a fault (10-25: a quiet Saturday morning
- * escalated as "停止收录"): the owner is not told of that incident before `until`, a day at most. Past it, or
+ * escalated as "collection stopped"): the owner is not told of that incident before `until`, a day at most. Past it, or
  * for a later incident, the handoff runs as before. Audited.
  */
 export async function holdAlert(key: string, reason: string, until: Date, actor: string, now = Date.now()): Promise<HeldAlert> {
@@ -479,11 +479,11 @@ export async function holdAlert(key: string, reason: string, until: Date, actor:
 
 async function dailyReportFindings(now: number, open: AlertState): Promise<Finding[]> {
   if (!collecting() || !modelsOn()) return [];
-  const today = beijingDate(now);
+  const today = seoulDate(now);
   const [activity] = await sql<{ first_report: string | null; first_attempt: Date | null }[]>`
     SELECT (SELECT min(key) FROM reports WHERE kind = 'daily') AS first_report,
            (SELECT min(started_at) FROM job_runs WHERE job = 'reports.compose') AS first_attempt`;
-  const starts = [activity?.first_report, activity?.first_attempt && beijingDate(activity.first_attempt)]
+  const starts = [activity?.first_report, activity?.first_attempt && seoulDate(activity.first_attempt)]
     .filter((date): date is string => !!date && isValidDate(date)).sort();
   const start = starts[0] ?? today;
   // New gaps and announced editions alike are followed for the scan window; settleDailies closes older ones.
@@ -492,15 +492,15 @@ async function dailyReportFindings(now: number, open: AlertState): Promise<Findi
   for (let date = from; date <= today; date = addDays(date, 1)) {
     if (date >= start) dates.add(date);
   }
-  const overdue = [...dates].filter(date => now >= beijingAt(date, EDITION_TIMES.daily).getTime() + 2 * 3600_000).sort();
+  const overdue = [...dates].filter(date => now >= seoulAt(date, EDITION_TIMES.daily).getTime() + 2 * 3600_000).sort();
   if (!overdue.length) return [];
   const published = new Set((await sql<{ key: string }[]>`SELECT key FROM reports WHERE kind = 'daily' AND key IN ${sql(overdue)}`).map(r => r.key));
   return overdue.filter(date => !published.has(date)).map(date => ({
     key: `${DAILY_PREFIX}${date}`, level: "now",
-    title: `${date} 的日报还没生成`, impact: `读者看不到 ${date} 的日报`,
-    heals: "尚未补齐；需查看运行记录确认是否需要人工补做",
-    action: "把这条发给 AI 排查补跑",
-    detail: `reports daily ${date} 不存在；看 reports.compose 的运行记录`,
+    title: `${date} 일간 브리핑이 아직 생성되지 않았습니다.`, impact: `독자가 ${date} 일간 브리핑을 볼 수 없습니다.`,
+    heals: "아직 복구되지 않았습니다. 실행 기록을 확인해 수동 생성이 필요한지 판단하세요.",
+    action: "이 알림을 AI에 전달해 조사하고 작업을 다시 실행하세요.",
+    detail: `reports daily ${date}가 없습니다. reports.compose 실행 기록을 확인하세요.`,
   }));
 }
 
@@ -521,7 +521,7 @@ async function settleDailies(open: AlertState, found: Set<string>, now: number):
       missing.add(key);
       continue;
     }
-    await sendAlert(`${date} 的日报没能补出，停止提醒`, [`读者看不到 ${date} 的日报；缺期从 ${beijingStamp(new Date(open[key]!.since))} 起，已超出七天的检查范围`]);
+    await sendAlert(`${date} 일간 브리핑을 생성하지 못해 알림을 종료합니다.`, [`독자가 ${date} 일간 브리핑을 볼 수 없습니다. 누락은 ${seoulStamp(new Date(open[key]!.since))}부터이며 7일 확인 범위를 벗어났습니다.`]);
     sent.push(`${key}:expired`);
     delete open[key];
   }
@@ -583,9 +583,9 @@ export async function checkAlerts(now = Date.now()) {
     }
     // A problem the agent has had and not closed: the owner learns it is the agent's, and for how long.
     const shown = handing && !f.owner && open?.handedAt
-      ? { ...f, heals: `AI 接手 ${duration(now - Date.parse(open.handedAt))} 还没解决`, action: "问问 AI 卡在哪了；需要你动手的它会说明" }
+      ? { ...f, heals: `AI가 ${duration(now - Date.parse(open.handedAt))} 전에 맡았지만 아직 해결하지 못했습니다.`, action: "AI에 진행 상황을 물어보세요. 직접 조치가 필요하면 안내할 것입니다." }
       : woken
-        ? { ...f, action: "已自动通知 AI 排查处理，修不好或要你拍板时会再找你；恢复后会再发一条通知" }
+        ? { ...f, action: "AI에 자동으로 점검 및 처리를 요청했습니다. 해결되지 않거나 결정이 필요하면 다시 알립니다. 복구 후에도 알림을 보냅니다." }
         : f;
     const msg = formatAlert(shown, since, now, !!open?.sentAt);
     await sendAlert(msg.title, msg.lines);
@@ -606,7 +606,7 @@ export async function checkAlerts(now = Date.now()) {
       WHERE d.status IN ('failed','skipped') AND d.updated_at>${new Date(Date.parse(open.since)-86400_000)}
         AND EXISTS(SELECT 1 FROM audit_log a WHERE a.action='delivery.drop' AND a.subject='delivery:' || d.id AND a.created_at>=d.updated_at)` : [];
     const msg = formatRecovery(open.title, new Date(open.since), now);
-    if (dropped?.n) await sendAlert(`已结束跟进：${open.title}`, [`${dropped.n} 条旧通知已决定不再补发，未确认送达`]);
+    if (dropped?.n) await sendAlert(`후속 조치 종료: ${open.title}`, [`이전 알림 ${dropped.n}건은 재전송하지 않기로 했으며 도착 여부는 확인되지 않았습니다.`]);
     else await sendAlert(msg.title, msg.lines);
     sent.push(`${key}:${dropped?.n ? "closed" : "recovered"}`);
     delete state[key];
@@ -697,9 +697,9 @@ export async function sendDigest(now = Date.now()) {
   const lines = items.map((f, i) => `${i + 1}. ${f.title}${f.detail ? `\n   ${f.detail}` : ""}`);
   // Once the hub has the list, the agent works through it alone and passes on what is still the owner's. Without
   // an agent, or when the list did not get through, the owner gets it as before.
-  const taken = found.some(f => !dismissed[f.key]) && await wakeDigest(beijingDate(now), lines.length || found.length);
+  const taken = found.some(f => !dismissed[f.key]) && await wakeDigest(seoulDate(now), lines.length || found.length);
   const toldOwner = lines.length > 0 && !taken;
-  if (toldOwner) await sendAlert(`📋 系统日报 · ${beijingDay(now)}`, ["以下事项需要跟进，具体影响见各条说明；可把整条转给 AI 处理。", ...lines]);
+  if (toldOwner) await sendAlert(`📋 시스템 운영 보고 · ${seoulDay(now)}`, ["다음 항목을 확인하세요. 구체적인 영향은 각 설명을 참고하고, 알림 전체를 AI에 전달해 처리할 수 있습니다.", ...lines]);
   await flushAgentEvents();
   return { items: lines.length, toldOwner };
 }

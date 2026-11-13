@@ -4,13 +4,13 @@
 //   otherwise than the site names issues, or calls itself the lead of an issue that leads with another;
 // - an article's tags send readers and crawlers to filtered lists that search engines are kept from although
 //   a topic page covers the tag, or a tag repeats the topic chip beside it;
-// - an event page shows no date of its own: when it was first reported, in Beijing time, and of which year
+// - an event page shows no date of its own: when it was first reported, in Seoul time, and of which year
 //   when not this one.
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import * as cheerio from "cheerio";
 import type { SiteItemDetail, StoryDetail } from "@aihot/contracts/site";
-import { beijingDate } from "@aihot/contracts/time";
+import { seoulDate } from "@aihot/contracts/time";
 import { ITEM_COPY, withSubject } from "@aihot/site";
 import { fakeApi, FIXTURE_AT, itemDetail, startWebServer, type WebServer } from "../apps/web/tests/web-server.ts";
 
@@ -84,8 +84,8 @@ test("a tag that is a topic's own leads to the topic page, and not beside that t
   assert.equal($("a[href^='/all?tag=Agent']").length, 0);
 });
 
-test("an event page says when it was first reported, by the Beijing day and its year when not this one", async () => {
-  const day = beijingDate(recent);
+test("an event page says when it was first reported, by the Seoul day and its year when not this one", async () => {
+  const day = seoulDate(recent);
   for (const [id, date, at] of [["links-this-year", `${Number(day.slice(5, 7))}月${Number(day.slice(8, 10))}日`, recent], ["links-last-year", "2025年12月31日", "2025-12-30T17:00:00.000Z"]] as const) {
     const header = (await page(`/story/${id}`))("h1").closest("header");
     const line = header.text();

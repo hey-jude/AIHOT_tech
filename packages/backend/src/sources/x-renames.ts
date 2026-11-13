@@ -71,7 +71,7 @@ export async function followXRenames(opts: { now?: number; pauseMs?: number } = 
     const name = s.name.replace(handle, `$1${to}`);
     await sql.begin(async (tx) => {
       await tx`UPDATE sources SET config = jsonb_set(config, '{query}', to_jsonb(${query}::text)), name = ${name}, updated_at = now() WHERE id = ${s.id}`;
-      await audit("system", "source.update", `source:${s.id}`, `X 账号 @${from} 已改名 @${to}（已存帖子作者的现名）`,
+      await audit("system", "source.update", `source:${s.id}`, `X 계정 @${from}의 이름이 @${to}(저장된 게시물 작성자의 현재 이름)로 변경됨`,
         { name: s.name, config: { query: s.query } }, { name, config: { query } }, { db: tx });
       await requestRepublish(tx, s.id, "system");
     });

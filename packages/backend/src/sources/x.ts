@@ -145,7 +145,7 @@ export function xArticleHtml(article: SdArticle, postUrl: string): string | null
               const src = (mp4.findLast((v) => (v.bit_rate ?? 0) <= 832_000) ?? mp4[0])?.url;
               const preview = info.preview_image;
               const poster = preview?.original_img_url ? ` poster="${escHtml(preview.original_img_url)}"` : "";
-              const label = "在 X 查看原视频";
+              const label = "X에서 원본 동영상 보기";
               parts.push(src
                 ? `<figure><video src="${escHtml(src)}"${poster}${size(preview)}></video><a href="${original}">${label}</a></figure>`
                 : `<figure><a href="${original}">${picture(preview)}${label}</a></figure>`);
@@ -179,7 +179,7 @@ export function tweetToCandidate(t: SdTweet): Candidate {
     author: t.user.screen_name,
     language: t.lang ?? null,
     publishedAt: new Date(t.tweet_created_at),
-    bodyText: [post.text, post.quoted ? `\n\n【引用 @${post.quoted.handle}】${post.quoted.text}` : ""].join("").trim(),
+    bodyText: [post.text, post.quoted ? `\n\n【인용 @${post.quoted.handle}】${post.quoted.text}` : ""].join("").trim(),
     // A linked X Article is the post's real body: extraction fetches it (jobs/content.ts route).
     bodyStatus: linksXArticle(post.text) ? "pending" : "ok",
     xPost: post,

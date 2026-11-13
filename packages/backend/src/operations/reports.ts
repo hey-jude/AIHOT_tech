@@ -1,6 +1,6 @@
 // The Monday source-health report for the ops chat. It goes through the same gated channel as the
 // alerts (off unless FEISHU_INTERNAL_ENABLED).
-import { beijingDay } from "@aihot/contracts/time";
+import { seoulDay } from "@aihot/contracts/time";
 import { sql } from "../db.ts";
 import { sendAlert } from "../notify/feishu.ts";
 import { serverModules } from "../modules.ts";
@@ -16,8 +16,8 @@ export const pct = (a: number, b: number) => (b ? `${a >= b ? "+" : ""}${(((a - 
 export const n = (v: number) => v.toLocaleString("en-US");
 
 /** Who changed a source, as the owner reads it: the admin pages, or the AI's scripts. */
-const by = (actor: string) => actor.startsWith("admin:") ? "后台" : /^(ops-script|codex)/.test(actor) ? "AI" : actor;
-const brief = (reason: string | null) => !reason ? "没写原因" : [...reason].length > 60 ? `${[...reason].slice(0, 60).join("")}…` : reason;
+const by = (actor: string) => actor.startsWith("admin:") ? "관리자" : /^(ops-script|codex)/.test(actor) ? "AI" : actor;
+const brief = (reason: string | null) => !reason ? "사유 미입력" : [...reason].length > 60 ? `${[...reason].slice(0, 60).join("")}…` : reason;
 const excluded = (config: unknown) => {
   const c = (config ?? {}) as { denyUrlPrefixes?: string[]; denyCategories?: string[] };
   return [...(c.denyUrlPrefixes ?? []), ...(c.denyCategories ?? [])];
@@ -36,18 +36,18 @@ async function sourceChanges(since: Date): Promise<string[]> {
   const fenced: string[] = [];
   const fencedIds = new Set<string>();
   for (const r of rows) {
-    const who = `${by(r.actor)}，${beijingDay(r.at)}${r.module_only ? `，只给${usesText(r.uses)}用` : ""}`;
+    const who = `${by(r.actor)}, ${seoulDay(r.at)}${r.module_only ? `, ${usesText(r.uses)} 전용` : ""}`;
     // The audit keeps the fields a save sent; a form saved again on a paused source repeats enabled=false.
     if (r.after?.enabled === false && r.before?.enabled !== false && !r.enabled) paused.set(r.id, `· ${r.name}（${who}）：${brief(r.reason)}`);
     const added = excluded(r.after?.config).filter((rule) => !excluded(r.before?.config).includes(rule));
     if (added.length) {
-      fenced.push(`· ${r.name}（${who}，排除 ${added.join("、")}）：${brief(r.reason)}`);
+      fenced.push(`· ${r.name}(${who}, 제외 ${added.join(", ")}): ${brief(r.reason)}`);
       fencedIds.add(r.id);
     }
   }
   return [
-    ...(paused.size ? [`本周停用、现在仍停着的信源 ${paused.size} 个：`, ...paused.values()] : []),
-    ...(fenced.length ? [`本周排除了部分入口的信源 ${fencedIds.size} 个：`, ...fenced] : []),
+    ...(paused.size ? [`이번 주 비활성화되어 현재도 중단된 출처 ${paused.size}곳:`, ...paused.values()] : []),
+    ...(fenced.length ? [`이번 주 일부 수집 경로를 제외한 출처 ${fencedIds.size}곳:`, ...fenced] : []),
   ];
 }
 
@@ -73,19 +73,19 @@ export async function sourceHealthWeekly(now = Date.now()) {
     sql<{ uses: string[]; failing: boolean }[]>`SELECT uses, health = 'failing' AS failing FROM sources WHERE enabled AND ${moduleOnly}`,
   ]);
   const lines = [
-    `本周收录 ${n(items!.week)} 条（上周 ${n(items!.prev)}，${pct(items!.week, items!.prev)}），其中精选 ${n(items!.selected)} 条`,
-    `在用信源 ${counts!.enabled} 个，本周新增 ${counts!.added} 个；抓取失败 ${counts!.failing} 个，不太稳定 ${counts!.degraded} 个`,
+    `이번 주 ${n(items!.week)}건 수집(지난주 ${n(items!.prev)}, ${pct(items!.week, items!.prev)}), 이 중 엄선 ${n(items!.selected)}건`,
+    `활성 출처 ${counts!.enabled}곳, 이번 주 신규 ${counts!.added}곳; 수집 실패 ${counts!.failing}곳, 불안정 ${counts!.degraded}곳`,
   ];
   if (served.length) {
     const perUse = new Map<string, number>();
     for (const s of served) for (const u of s.uses) perUse.set(u, (perUse.get(u) ?? 0) + 1);
     const each = [...perUse].map(([u, count]) => `${usesText([u])} ${count}`).join("、");
-    lines.push(`另有只给模块用的信源 ${served.length} 个（${each}），抓取失败 ${served.filter((s) => s.failing).length} 个`);
+    lines.push(`모듈 전용 출처 ${served.length}곳(${each})이 추가로 있으며, 수집 실패 ${served.filter((s) => s.failing).length}곳`);
   }
   // The modules' own collectors, a line each.
   for (const m of serverModules()) if (m.sourceHealth) lines.push(...(await m.sourceHealth(now)));
   const changes = await sourceChanges(since);
   if (changes.length) lines.push("", ...changes);
-  await sendAlert("📊 信源周报", lines);
+  await sendAlert("📊 출처 주간 보고", lines);
   return { failing: counts!.failing };
 }

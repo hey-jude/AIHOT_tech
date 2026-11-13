@@ -1,18 +1,18 @@
-import { beijingDate, beijingTime, beijingWeekday, monthDay as engineMonthDay } from "@aihot/contracts/time";
+import { seoulDate, seoulTime, seoulWeekday, monthDay as engineMonthDay } from "@aihot/contracts/time";
 
 /**
- * "9月28日" of a calendar date (YYYY-MM-DD). A day of another year than `now` (Beijing) carries its year, so an
+ * "9月28日" of a calendar date (YYYY-MM-DD). A day of another year than `now` (Seoul) carries its year, so an
  * archived item is not read as this year's: "2019年2月19日". The engine's monthDay does this only when given today.
  */
 export function monthDay(date: string, now: number = Date.now()): string {
-  return engineMonthDay(date, beijingDate(now));
+  return engineMonthDay(date, seoulDate(now));
 }
 
-/** A list cut into runs of the same Beijing day, in the list's own order. */
-export function byBeijingDay<T>(list: readonly T[], at: (entry: T) => string): Array<{ day: string; entries: T[] }> {
+/** A list cut into runs of the same Seoul day, in the list's own order. */
+export function bySeoulDay<T>(list: readonly T[], at: (entry: T) => string): Array<{ day: string; entries: T[] }> {
   const days: Array<{ day: string; entries: T[] }> = [];
   for (const entry of list) {
-    const day = beijingDate(at(entry));
+    const day = seoulDate(at(entry));
     const last = days.at(-1);
     if (last?.day === day) last.entries.push(entry);
     else days.push({ day, entries: [entry] });
@@ -22,11 +22,11 @@ export function byBeijingDay<T>(list: readonly T[], at: (entry: T) => string): A
 
 /** "周六" of a calendar date (YYYY-MM-DD). */
 export function weekdayShort(date: string): string {
-  return beijingWeekday(date).replace("星期", "周");
+  return seoulWeekday(date).replace("星期", "周");
 }
 
 export function relativeTime(iso: string, now = Date.now()): string {
-  return timeAgo(iso, now) ?? beijingDate(iso);
+  return timeAgo(iso, now) ?? seoulDate(iso);
 }
 
 /** "3 天前" while that is under a month, else null: beside a full time, the date it would fall back to says nothing new. */
@@ -43,12 +43,12 @@ export function timeAgo(iso: string, now = Date.now()): string | null {
 }
 
 export function fullDateTime(iso: string): string {
-  return `${beijingDate(iso)} ${beijingTime(iso)}`;
+  return `${seoulDate(iso)} ${seoulTime(iso)}`;
 }
 
-/** "9月24日 10:51" (Beijing), for lists that span days. */
+/** "9月24日 10:51" (Seoul), for lists that span days. */
 export function monthDayTime(iso: string): string {
-  return `${monthDay(beijingDate(iso))} ${beijingTime(iso)}`;
+  return `${monthDay(seoulDate(iso))} ${seoulTime(iso)}`;
 }
 
 export function sourceInitial(name: string): string {

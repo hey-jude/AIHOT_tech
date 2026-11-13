@@ -3,8 +3,8 @@ import { describePublicationTime } from "../sources/dates.ts";
 // title/summary prompts for everything else, the output parsing and the deterministic guards. The
 // wording lives in the industry pack (industry/prompts/); a failed guard falls back without a repair call.
 import { IDENTITY_CONTEXT_ALIASES, IDENTITY_LEXICON, PUBLISHER_DOMAINS } from "@aihot/industry/taxonomy";
-import { stripTagMarkup, isChineseText as looksZh } from "../lib/text.ts";
-export { isChineseText as looksZh } from "../lib/text.ts";
+import { stripTagMarkup, isKoreanText as looksKo } from "../lib/text.ts";
+export { isKoreanText as looksKo } from "../lib/text.ts";
 import { onlyXArticleLink } from "../sources/x.ts";
 import type { AnalyzeInputArticle } from "./input.ts";
 import { promptText } from "./prompts.ts";
@@ -23,10 +23,10 @@ export function clampText(s: string, maxChars: number): string {
   return codepoints.length <= maxChars ? s : codepoints.slice(0, maxChars).join("") + "…";
 }
 
-/** Short tweet: under 100 characters of Chinese, under 500 of other text. */
+/** 짧은 게시물 기준: 한글 텍스트 100자, 그 외 텍스트 500자 미만. */
 export function isShortTweet(text: string): boolean {
   if (!text) return false;
-  const cjk = (text.match(/[一-鿿]/g) || []).length;
+  const cjk = (text.match(/[\u4e00-\u9fff\uAC00-\uD7AF]/g) || []).length;
   return text.length < (cjk > text.length * 0.3 ? 100 : 500);
 }
 
@@ -47,19 +47,19 @@ export function cleanArticleTextForLLM(s: string): string {
     .trim();
 }
 
-function chineseDensity(s: string): number {
-  const chinese = (s.match(/[一-鿿]/g) ?? []).length;
+function koreanDensity(s: string): number {
+  const korean = (s.match(/[\u4e00-\u9fff\uAC00-\uD7AF]/g) ?? []).length;
   const total = s.replace(/\s+/g, "").length;
-  return total === 0 ? 0 : chinese / total;
+  return total === 0 ? 0 : korean / total;
 }
 
 const stripNoise = (s: string) => s.replace(/https?:\/\/\S+/g, " ").replace(/@[A-Za-z0-9_]+/g, " ").replace(/#[A-Za-z0-9_]+/g, " ");
 
-/** A short tweet in Chinese needs no translation; mixed or English ones do. */
+/** 짧은 게시물은 한국어가 아니거나 혼합·영어 문장이면 번역한다. */
 export function needsShortTweetTranslation(text: string): boolean {
   const clean = stripNoise(text);
-  if (!looksZh(clean)) return true;
-  if (chineseDensity(clean) < 0.65) return true;
+  if (!looksKo(clean)) return true;
+  if (koreanDensity(clean) < 0.65) return true;
   const englishRuns = clean.match(/[A-Za-z][A-Za-z0-9+.#/-]*(?:\s+[A-Za-z][A-Za-z0-9+.#/-]*)+/g) ?? [];
   return englishRuns.some((run) => run.replace(/\s+/g, "").length >= 10);
 }
@@ -70,44 +70,44 @@ export function needsShortTweetTranslation(text: string): boolean {
 const unfetchedXArticle = (a: AnalyzeInputArticle) => !!a.xPost && a.bodyStatus !== "ok" && onlyXArticleLink(String(a.xPost.text ?? ""));
 
 function materialQuality(a: AnalyzeInputArticle): string {
-  if (a.xPost) return "完整正文（来自 RSS / API 自带的 content 字段）";
-  if (a.bodyText) return a.source.fetchesBody ? "完整正文（抓自原始网页）" : "完整正文（来自 RSS / API 自带的 content 字段）";
-  if (a.excerpt) return "仅摘要（feed 未提供完整正文）";
-  if (a.bodyStatus === "unconfirmed") return "抓取失败，仅标题可用";
-  return "无有效文本";
+  if (a.xPost) return "전체 본문(RSS/API의 content 필드 제공)";
+  if (a.bodyText) return a.source.fetchesBody ? "전체 본문(원문 웹페이지에서 수집)" : "전체 본문(RSS/API의 content 필드 제공)";
+  if (a.excerpt) return "요약만 있음(피드에 전체 본문 없음)";
+  if (a.bodyStatus === "unconfirmed") return "수집 실패, 제목만 사용 가능";
+  return "유효한 텍스트 없음";
 }
 
 /** The material as the prefilter and the content understanding read it. */
 export function renderContext(a: AnalyzeInputArticle, opts: { annotateQuoted?: boolean } = {}): string {
   const lines: string[] = [];
-  lines.push(`【来源】${a.source.name}（${a.source.kind}，tier=${a.source.tier || "未分级"}）`);
-  if (a.source.tags?.length) lines.push(`【来源标签】${a.source.tags.join(", ")}`);
+  lines.push(`【출처】${a.source.name}(${a.source.kind}, tier=${a.source.tier || "미분류"})`);
+  if (a.source.tags?.length) lines.push(`【출처 태그】${a.source.tags.join(", ")}`);
   const name = a.xPost?.authorName || a.author;
   const handle = a.xPost?.handle;
-  if (name || handle) lines.push(`【作者】${[name, handle ? `@${handle}` : null].filter(Boolean).join(" · ")}`);
-  if (a.publishedAt) lines.push(`【发布时间】${describePublicationTime(a.publishedAt, a.publicationTime)}`);
+  if (name || handle) lines.push(`【작성자】${[name, handle ? `@${handle}` : null].filter(Boolean).join(" · ")}`);
+  if (a.publishedAt) lines.push(`【게시 시각(한국시간)】${describePublicationTime(a.publishedAt, a.publicationTime)}`);
   const media = (a.xPost?.media ?? a.media ?? []) as Array<{ kind?: string }>;
   const images = media.filter((m) => m.kind === "image").length;
   const videos = media.filter((m) => m.kind === "video").length;
-  const mediaParts = [images ? `${images} 张图` : null, videos ? `${videos} 个视频` : null, unfetchedXArticle(a) ? "含 X 长文链接（正文未抓到）" : null].filter(Boolean);
-  if (mediaParts.length) lines.push(`【媒体】${mediaParts.join(" · ")}`);
-  lines.push(`【原文链接】${a.url}`);
-  lines.push(`【标题】${a.title}`);
+  const mediaParts = [images ? `이미지 ${images}개` : null, videos ? `동영상 ${videos}개` : null, unfetchedXArticle(a) ? "X 장문 링크 포함(본문 미수집)" : null].filter(Boolean);
+  if (mediaParts.length) lines.push(`【미디어】${mediaParts.join(" · ")}`);
+  lines.push(`【원문 링크】${a.url}`);
+  lines.push(`【제목】${a.title}`);
   const quoted = a.xPost?.quoted?.text ? a.xPost.quoted : null;
   if (quoted) {
-    const label = quoted.handle ? `@${quoted.handle}` : "原推";
+    const label = quoted.handle ? `@${quoted.handle}` : "원 게시물";
     if (opts.annotateQuoted) {
-      lines.push(`【引用 ${label}】（以下是作者转发/引用的**他人**内容，不是作者本人的产出）`);
+      lines.push(`【인용 ${label}】(아래는 작성자가 퍼오거나 인용한 **다른 사람의** 콘텐츠이며 작성자의 창작물이 아님)`);
       lines.push(String(quoted.text));
     } else {
-      lines.push(`【引用 ${label}】${quoted.text}`);
+      lines.push(`【인용 ${label}】${quoted.text}`);
     }
   }
   lines.push("");
-  lines.push(opts.annotateQuoted && quoted ? "【正文（作者自己的内容）】" : "【正文】");
-  lines.push(capBody(a.xPost ? String(a.xPost.text ?? a.title) : (a.bodyText ?? a.excerpt ?? "(无正文)")));
+  lines.push(opts.annotateQuoted && quoted ? "【본문(작성자 본인의 콘텐츠)】" : "【본문】");
+  lines.push(capBody(a.xPost ? String(a.xPost.text ?? a.title) : (a.bodyText ?? a.excerpt ?? "(본문 없음)")));
   lines.push("");
-  lines.push(`【材料质量】${materialQuality(a)}`);
+  lines.push(`【자료 품질】${materialQuality(a)}`);
   return lines.join("\n");
 }
 
@@ -120,7 +120,7 @@ export function missingEvidence(a: AnalyzeInputArticle): boolean {
 }
 
 export const understandUser = (a: AnalyzeInputArticle) =>
-  ["请按系统规则理解以下单篇材料，一次返回全部六个字段。", renderContext(a, { annotateQuoted: true })].join("\n\n");
+  ["시스템 규칙에 따라 다음 단일 자료를 분석하고 여섯 필드를 한 번에 반환하세요.", renderContext(a, { annotateQuoted: true })].join("\n\n");
 
 // Identity context and guard
 
@@ -196,9 +196,9 @@ function identityContext(input: TranslateInput) {
 function identityPrompt(input: TranslateInput): string {
   const ctx = identityContext(input);
   const facts: string[] = [];
-  if (ctx.publisher) facts.push(`文档发布域主体=${lexiconName(ctx.publisher) ?? ctx.publisher}`);
-  if (ctx.owner) facts.push(`来源账号主体=${lexiconName(ctx.owner) ?? ctx.owner}`);
-  return promptText("identity-context", { facts: facts.length > 0 ? facts.join("；") : "未识别到明确发布主体" });
+  if (ctx.publisher) facts.push(`문서 게시 도메인 주체=${lexiconName(ctx.publisher) ?? ctx.publisher}`);
+  if (ctx.owner) facts.push(`출처 계정 주체=${lexiconName(ctx.owner) ?? ctx.owner}`);
+  return promptText("identity-context", { facts: facts.length > 0 ? facts.join("; ") : "명확한 게시 주체를 확인하지 못함" });
 }
 
 export interface IdentityGuard {
@@ -216,7 +216,7 @@ export function enforceIdentity(input: TranslateInput, copy: { titleZh: string; 
   const unsupportedTitleEntityIds = matchEntityIds([copy.titleZh]).filter((id) => !allowed.has(id));
   const unsupportedSummaryEntityIds = matchEntityIds([copy.summaryZh]).filter((id) => !allowed.has(id));
   return {
-    titleZh: unsupportedTitleEntityIds.length ? (looksZh(input.title) ? input.title : "") : copy.titleZh,
+    titleZh: unsupportedTitleEntityIds.length ? (looksKo(input.title) ? input.title : "") : copy.titleZh,
     summaryZh: unsupportedSummaryEntityIds.length ? "" : copy.summaryZh,
     identityGuard: {
       outcome: unsupportedTitleEntityIds.length || unsupportedSummaryEntityIds.length ? "fallback" : "pass",
@@ -228,12 +228,13 @@ export function enforceIdentity(input: TranslateInput, copy: { titleZh: string; 
 
 // Answer-first summary length
 
+const sentences = (text: string) => [...new Intl.Segmenter("ko", { granularity: "sentence" }).segment(text)].map(({ segment }) => segment);
+
 export function compactAnswerFirstSummary(summary: string, maxChars = 190): string {
   const text = summary.trim().replace(/\s*\n+\s*/g, " ");
   if (text.length <= maxChars) return text;
-  const sentences = text.match(/[^。！？!?]+[。！？!?]?/gu) ?? [text];
   let result = "";
-  for (const sentence of sentences) {
+  for (const sentence of sentences(text)) {
     if ((result + sentence).length > maxChars) break;
     result += sentence;
     if (result.length >= 80) break;
@@ -253,9 +254,9 @@ export function compactAnswerFirstSummary(summary: string, maxChars = 190): stri
 function answerFirstSummaryLengthOk(summary: string, input: TranslateInput): boolean {
   const trimmed = summary.trim();
   const sourceLength = (input.sourceKind === "x_search" ? input.text : cleanArticleTextForLLM(input.text)).trim().length;
-  const sentences = trimmed.split(/[。！？!?]+/u).map((p) => p.trim()).filter(Boolean).length;
+  const sentenceCount = sentences(trimmed).filter((p) => p.trim()).length;
   const rich = sourceLength >= 500;
-  return trimmed.length <= 200 && trimmed.length >= (rich ? 80 : 50) && sentences <= 3 && (!rich || sentences >= 2);
+  return trimmed.length <= 200 && trimmed.length >= (rich ? 80 : 50) && sentenceCount <= 3 && (!rich || sentenceCount >= 2);
 }
 
 export const isShortTweetInput = (input: TranslateInput) => input.sourceKind === "x_search" && isShortTweet(input.mainText || input.title);
@@ -269,11 +270,11 @@ export function finalizeCopy(input: TranslateInput, copy: { titleZh: string; sum
 
 // Title/summary prompts for items the content understanding does not write
 
-const sourceName = (name?: string) => name?.trim() || "（未注明）";
+const sourceName = (name?: string) => name?.trim() || "(미기재)";
 
 function anchorDate(d: Date | undefined): string {
-  if (!d || Number.isNaN(d.getTime())) return "未注明";
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  if (!d || Number.isNaN(d.getTime())) return "미기재";
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }
 
 export function buildArticlePrompt(input: TranslateInput): string {
@@ -290,7 +291,7 @@ export function buildArticlePrompt(input: TranslateInput): string {
 /** The quoted post's block, appended after a blank line when there is one. */
 function quotedBlock(input: TranslateInput, name: string): string {
   if (!input.quotedText) return "";
-  return `\n\n${promptText(name, { quotedLabel: input.quotedAuthor ? `@${input.quotedAuthor}` : "引用推文", quotedText: clampText(input.quotedText, 1500) })}`;
+  return `\n\n${promptText(name, { quotedLabel: input.quotedAuthor ? `@${input.quotedAuthor}` : "인용 게시물", quotedText: clampText(input.quotedText, 1500) })}`;
 }
 
 export function buildShortTweetPrompt(input: TranslateInput): string {
@@ -303,8 +304,8 @@ export function buildLongTweetPrompt(input: TranslateInput): string {
   return promptText("summarize-long-post", { sourceName: sourceName(input.sourceName), identity: identityPrompt(input), post }) + quotedBlock(input, "summarize-long-post-quoted");
 }
 
-/** Prompt lines a model sometimes repeats after its answer (来源：…, 【已核验身份上下文】…, 原始标题：…). */
-const ECHO_LINE = /^(来源[:：]|【已核验身份上下文】|这些事实只用于防止|原始标题[:：]|【时间锚点】)/;
+/** Prompt lines a model sometimes repeats after its answer (source, verified identity context, original title, time anchor). */
+const ECHO_LINE = /^(출처[:：]|【검증된 신분 컨텍스트】|이 사실들은|원제목[:：]|【시간 앵커】)/;
 
 /** The answer without prompt lines repeated at its end. */
 export function stripEcho(text: string): string {

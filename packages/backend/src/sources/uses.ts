@@ -32,6 +32,6 @@ export const SourceUses = z
   .array(z.string())
   .max(10)
   .refine((uses) => uses.every((u) => Object.hasOwn(sourceUses(), u)), {
-    error: () => `信源用途只能是已装模块声明的：${Object.keys(sourceUses()).join("、") || "（没有）"}`,
+    error: () => `출처 용도는 설치된 모듈에서 선언한 항목만 사용할 수 있습니다: ${Object.keys(sourceUses()).join(", ") || "(없음)"}`,
   })
   .transform((uses) => [...new Set(uses)]);

@@ -57,7 +57,7 @@ interface DatedFields { publishedAt: string | null; publishedAtClaim: string | n
  * follows only where it was that date.
  */
 function historicalDate(article: PublicationDateMaterial, published: Date, date: Date, now: number): DatedFields {
-  if (date.getTime() >= now - RECENT_MS) throw new Error("历史日期校正的真实发布时间须早于七天窗口");
+  if (date.getTime() >= now - RECENT_MS) throw new Error("과거 날짜를 보정하려면 실제 게시 시각이 7일 이전이어야 합니다.");
   const iso = date.toISOString();
   const timelineAt = article.timeline_at.getTime() === published.getTime() ? iso : article.timeline_at.toISOString();
   return { publishedAt: iso, publishedAtClaim: iso, timelineAt, backfill: article.backfill, backfillReason: article.backfill_reason };
@@ -69,9 +69,9 @@ function historicalDate(article: PublicationDateMaterial, published: Date, date:
  * history, so it leaves automatic events and heat.
  */
 function liveDate(article: PublicationDateMaterial, date: Date | null): { after: DatedFields; archive: boolean } {
-  if (isHistorical(article)) throw new Error(date ? "近期日期只校正刚收录的非历史内容" : "历史内容只校正有明确原文证据的日期");
+  if (isHistorical(article)) throw new Error(date ? "최근 날짜는 방금 수집된 과거 자료가 아닌 콘텐츠만 보정할 수 있습니다." : "과거 콘텐츠는 원문의 명확한 근거가 있는 날짜만 보정할 수 있습니다.");
   const t = decideTimeline(date, article.discovered_at, explicitBackfill(article.backfill_reason));
-  if (date && !t.publishedAt) throw new Error("发布时间超过首次收录的一小时容差，不能据此校正");
+  if (date && !t.publishedAt) throw new Error("게시 시각이 최초 수집 시각에서 1시간 이상 차이나므로 이를 근거로 보정할 수 없습니다.");
   const iso = t.publishedAt?.toISOString() ?? null;
   return {
     after: { publishedAt: iso, publishedAtClaim: iso, timelineAt: t.timelineAt.toISOString(), backfill: t.backfill, backfillReason: t.backfillReason },
@@ -85,10 +85,10 @@ function liveDate(article: PublicationDateMaterial, date: Date | null): { after:
  */
 export function publicationDateCorrectionPlan(article: PublicationDateMaterial, publishedAt: string | null, now = Date.now()) {
   const date = publishedAt === null ? null : new Date(publishedAt);
-  if (date && (!Number.isFinite(date.getTime()) || date.toISOString() !== publishedAt)) throw new Error("发布时间必须是完整、有效的 UTC ISO 日期");
-  if (date && date.getTime() > now) throw new Error("发布时间不能是未来日期");
+  if (date && (!Number.isFinite(date.getTime()) || date.toISOString() !== publishedAt)) throw new Error("게시 시각은 유효한 전체 UTC ISO 날짜여야 합니다.");
+  if (date && date.getTime() > now) throw new Error("게시 시각은 미래일 수 없습니다.");
   const published = article.published_at;
-  if (!published) throw new Error("只校正有既有日期的内容");
+  if (!published) throw new Error("기존 게시 날짜가 있는 콘텐츠만 보정할 수 있습니다.");
   const before: DatedFields = { publishedAt: published.toISOString(), publishedAtClaim: article.published_at_claim?.toISOString() ?? null,
     timelineAt: article.timeline_at.toISOString(), backfill: article.backfill, backfillReason: article.backfill_reason };
   const { mode, after, archive } = date && published.getTime() < now - RECENT_MS
@@ -131,24 +131,24 @@ export async function correctPublicationDate(id: string, input: { version: numbe
     requestId: z.string().regex(/^[\w-]{8,80}$/), reason: z.string().trim().min(1) }).parse(input);
   return sql.begin(async tx => {
     const [article] = await material(tx, id, true);
-    if (!article) throw new Conflict("内容不存在");
+    if (!article) throw new Conflict("콘텐츠가 없습니다.");
     const [prior] = await tx<{ after: { publishedAt: string | null; result: PublicationDateCorrectionResult } }[]>`
       SELECT after FROM audit_log WHERE subject=${`content:${id}`} AND action='content.correct-publication-date'
         AND actor=${actor} AND request_id=${input.requestId} ORDER BY id LIMIT 1`;
     if (prior) {
-      if (prior.after.publishedAt !== input.publishedAt) throw new Conflict("同一个请求不能批准不同的发布时间");
+      if (prior.after.publishedAt !== input.publishedAt) throw new Conflict("동일한 요청에서 서로 다른 게시 시각을 승인할 수 없습니다.");
       return prior.after.result;
     }
     const plan = publicationDateCorrectionPlan(article, input.publishedAt);
-    if (article.revision !== input.version || plan.hash !== input.hash) throw new Conflict("材料或日期已被修改，请重新核对日期校正预览");
+    if (article.revision !== input.version || plan.hash !== input.hash) throw new Conflict("자료 또는 날짜가 변경되었습니다. 날짜 보정 미리보기를 다시 확인하세요.");
     if (!plan.changed) return { articleId: id, revision: article.revision, status: "unchanged", publishedAt: input.publishedAt };
-    if (plan.mode === "live" && !(await processingSettled(tx, article))) throw new Conflict("内容仍在处理中，请处理结束后重新核对日期");
+    if (plan.mode === "live" && !(await processingSettled(tx, article))) throw new Conflict("콘텐츠를 처리 중입니다. 처리가 끝난 뒤 날짜를 다시 확인하세요.");
     let previousStoryIds: number[] = [];
     if (plan.archive) {
       // An editor's grouping is never discarded by date repair.
       const [manual] = await tx`SELECT 1 FROM grouping_overrides WHERE article_id=${id}
         UNION ALL SELECT 1 FROM fact_articles WHERE article_id=${id} AND manual LIMIT 1`;
-      if (manual) throw new Conflict("这条内容有人工归组，请先核对其归属");
+      if (manual) throw new Conflict("이 콘텐츠는 수동으로 그룹화되었습니다. 먼저 소속을 확인하세요.");
       previousStoryIds = await resetAutomatic(tx, id);
       for (const storyId of previousStoryIds) await enqueue(QUEUES.digest, { storyId }, { singletonKey: `story:${storyId}` }, tx);
     }
@@ -163,7 +163,7 @@ export async function correctPublicationDate(id: string, input: { version: numbe
         const old = previous.decision as Record<string, unknown>;
         const fresh = (next?.decision ?? {}) as Record<string, unknown>;
         const changed = Object.keys(old).filter(key => stableJson(old[key]) !== stableJson(fresh[key]));
-        throw new Conflict(`公开决定已变化，日期校正不能改变选稿、范围、内容或归组：${changed.join("、")}`);
+        throw new Conflict(`공개 결정이 변경되었습니다. 날짜 보정으로 선정 여부, 범위, 콘텐츠 또는 그룹을 바꿀 수 없습니다: ${changed.join(", ")}`);
       }
     }
     await emit("articleChanged", { id, kind: "content", reduced: plan.archive,
@@ -233,12 +233,12 @@ async function inHotRanking(id: string, tx: Tx): Promise<boolean> {
   return !!p?.story_id && ranking.entries.some((e) => e.storyId === Number(p.story_id));
 }
 
-const STALE = "这条内容的人工设置已被修改，请刷新后再操作";
+const STALE = "이 콘텐츠의 수동 설정이 변경되었습니다. 새로고침한 뒤 다시 시도하세요.";
 
 async function overrideRow(id: string, tx: Tx) {
   // Use the same first lock as publication and automatic processing, including the first correction.
   const [article] = await tx`SELECT id FROM articles WHERE id = ${id} FOR UPDATE`;
-  if (!article) throw Object.assign(new Error("内容不存在"), { statusCode: 400 });
+  if (!article) throw Object.assign(new Error("콘텐츠가 없습니다."), { statusCode: 400 });
   const [o] = await tx<{ fields: Record<string, unknown>; visibility: string | null; version: number }[]>`SELECT fields, visibility, version FROM editorial_overrides WHERE article_id = ${id}`;
   return o ?? { fields: {}, visibility: null, version: 0 };
 }
@@ -364,7 +364,7 @@ async function presentationSnapshot(id: string, db: Db = sql, lock = false) {
     SELECT a.revision,a.title,a.body_text,a.excerpt,a.body_html,a.media,a.source_id,a.identity_key,a.url,s.kind,s.config,
       tr.body_html AS tr_html,tr.origin AS tr_origin
     FROM articles a JOIN sources s ON s.id=a.source_id
-    LEFT JOIN translations tr ON tr.article_id=a.id AND tr.lang='zh' AND tr.revision=a.revision
+    LEFT JOIN translations tr ON tr.article_id=a.id AND tr.lang='ko' AND tr.revision=a.revision
     WHERE a.id=${id} ${lock ? sql`FOR UPDATE OF a` : sql``}`;
   return a;
 }
@@ -372,7 +372,7 @@ async function presentationSnapshot(id: string, db: Db = sql, lock = false) {
 /** Preview and apply through the existing audited command, without analysis, date changes or paid extraction. */
 async function refreshPresentation(id: string, options: Pick<AdminRerun, "preview" | "version">, requestId: string, actor: string): Promise<AdminPresentationRefresh | null> {
   const input = z.object({ preview: z.boolean().optional(), version: z.string().regex(/^[a-f0-9]{64}$/).optional() }).parse(options);
-  if (!input.preview && !input.version) throw new Conflict("请先预览正文展示变化");
+  if (!input.preview && !input.version) throw new Conflict("먼저 본문 표시 변경을 미리보기 하세요.");
   if (!input.preview) {
     const [prior] = await sql<{ after: { result: AdminPresentationRefresh } }[]>`SELECT after FROM audit_log
       WHERE subject=${`content:${id}`} AND action='content.rerun.presentation' AND actor=${actor} AND request_id=${requestId} ORDER BY id DESC LIMIT 1`;
@@ -394,9 +394,9 @@ async function refreshPresentation(id: string, options: Pick<AdminRerun, "previe
     if (page) got = { ...page, images: a.media.length ? a.media : page.images };
   }
   const before = presentationCounts(a.body_html), after = presentationCounts(got?.html ?? a.body_html);
-  let reason = !got ? "当前原文未能直接抽取，请使用正常正文抽取处理" :
+  let reason = !got ? "현재 원문을 직접 추출하지 못했습니다. 일반 본문 추출 절차를 사용하세요." :
     contentHash({ title: a.title, bodyText: a.body_text, excerpt: a.excerpt }) !== contentHash({ title: a.title, bodyText: got.text, excerpt: a.excerpt })
-      ? "正文文字已经变化，需要正常抽取和评估，不能只刷新展示" : null;
+      ? "본문 텍스트가 변경되었습니다. 정상적으로 다시 추출하고 평가해야 하며 표시만 새로고침할 수 없습니다." : null;
   let translation: AdminPresentationRefresh["translation"] = a.tr_origin === "source" ? "source" : a.tr_html ? "reused" : "absent";
   if (!reason && got && got.html !== a.body_html && a.tr_html && a.tr_origin === "model") {
     try { rebaseTranslation(a.body_html ?? "", got.html, a.tr_html); }
@@ -411,17 +411,17 @@ async function refreshPresentation(id: string, options: Pick<AdminRerun, "previe
     changed: !!got && (got.html !== a.body_html || stableJson(got.images) !== stableJson(a.media)), reason,
     images: { before: before.images, after: after.images }, links: { before: before.links, after: after.links }, translation };
   if (input.preview) return result;
-  if (input.version !== version) throw new Conflict("正文或原网页在预览后变化，请重新预览");
-  if (reason || !got) throw new Conflict(reason ?? "正文未能抽取");
+  if (input.version !== version) throw new Conflict("미리보기 후 본문 또는 원본 페이지가 변경되었습니다. 다시 미리보기 하세요.");
+  if (reason || !got) throw new Conflict(reason ?? "본문을 추출하지 못했습니다.");
   return sql.begin(async tx => {
     const current = await presentationSnapshot(id, tx, true);
     const [prior] = await tx<{ after: { result: AdminPresentationRefresh } }[]>`SELECT after FROM audit_log
       WHERE subject=${`content:${id}`} AND action='content.rerun.presentation' AND actor=${actor} AND request_id=${requestId} ORDER BY id DESC LIMIT 1`;
     if (prior) return prior.after.result;
-    if (stableJson(current) !== stableJson(a)) throw new Conflict("材料在预览后变化，请重新预览");
+    if (stableJson(current) !== stableJson(a)) throw new Conflict("미리보기 후 자료가 변경되었습니다. 다시 미리보기 하세요.");
     await updatePresentation(tx, id, { html: got.html, media: got.images });
     const applied = { ...result, applied: true };
-    await audit(actor, "content.rerun.presentation", `content:${id}`, "仅刷新正文展示",
+    await audit(actor, "content.rerun.presentation", `content:${id}`, "본문 표시만 새로고침",
       { revision: a.revision, bodyHtml: a.body_html, media: a.media, translationHtml: a.tr_html },
       { result: applied, bodyHtml: got.html, media: got.images }, { requestId, db: tx });
     return applied;

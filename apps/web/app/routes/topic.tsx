@@ -9,7 +9,7 @@ import { DayList, Pagination } from "../features/feed/DayList";
 import { BrandMark } from "../components/BrandMark";
 import { EmptyState } from "../components/ui/Page";
 import { IconArrowLeft } from "../components/icons";
-import { beijingDate } from "@aihot/contracts/time";
+import { seoulDate } from "@aihot/contracts/time";
 import { monthDay, monthDayTime } from "../lib/format";
 import { PhoneBar } from "../components/shell/PhoneBar";
 import { navUp } from "../components/shell/nav";
@@ -54,7 +54,7 @@ function description(data: TopicPage, parts: Part[]): string {
   const { topic } = data;
   let text = topic.definition;
   const news = parts.flatMap((p) => p.news(p.data)).slice(0, 2).map((title) => title.replace(/[。.]$/u, "")).join("；");
-  if (news && topic.latest) text = `${monthDay(beijingDate(topic.latest.at))}更新：${news}。${topic.definition}`;
+  if (news && topic.latest) text = `${monthDay(seoulDate(topic.latest.at))}更新：${news}。${topic.definition}`;
   return text.length > 150 ? `${text.slice(0, 149)}…` : text;
 }
 
@@ -69,7 +69,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
   return pageMeta({
     title: page > 1
       ? `${topic.name} 精选 · 第 ${page} 页`
-      : SEO_TITLES.topic(topic.name, topic.group, topic.latest ? monthDay(beijingDate(topic.latest.at)) : null),
+      : SEO_TITLES.topic(topic.name, topic.group, topic.latest ? monthDay(seoulDate(topic.latest.at)) : null),
     description: text,
     path,
     image: `/og/topics/${topic.slug}.png`,
