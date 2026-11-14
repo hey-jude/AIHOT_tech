@@ -1,7 +1,7 @@
 // Names, dates and grouping for daily, weekly and monthly reports.
 import { REPORT_NAMES, type ReportNavigationEntry, type ReportKind } from "@aihot/contracts/site";
 import { seoulDate, seoulWeekday, isoWeekLabel, isoWeekRange, monthDay as engineMonthDay } from "@aihot/contracts/time";
-import { EDITION_WHEN, REPORTS, SITE, subjectAfter } from "@aihot/site";
+import { EDITION_WHEN, REPORTS, SITE, withSubject } from "@aihot/site";
 import { RELEASE } from "@aihot/industry/taxonomy";
 import { monthDay, weekdayShort } from "../../lib/format.ts";
 
@@ -30,9 +30,9 @@ export const ENTRIES_UNIT = measure;
 /** Report headline count, using the site's configured subject and entry wording. */
 export function headline(kind: ReportKind, key: string, count: number): string {
   const noun = REPORTS.entry.noun;
-  if (kind === "daily") return subjectAfter(`오늘의 ${count}${measure}의 ${noun}`);
-  if (kind === "weekly") return subjectAfter(`이번 주 ${count}${measure}의 ${noun}`);
-  return subjectAfter(`${Number(key.slice(5, 7))}월 ${count}${measure}의 ${noun}`);
+  if (kind === "daily") return `오늘의 ${withSubject(noun)} ${count}${measure}`;
+  if (kind === "weekly") return `이번 주 ${withSubject(noun)} ${count}${measure}`;
+  return `${Number(key.slice(5, 7))}월 ${withSubject(noun)} ${count}${measure}`;
 }
 
 /** "09.16" for a story inside a week or month. */

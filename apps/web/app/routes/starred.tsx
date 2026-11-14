@@ -140,7 +140,7 @@ export default function StarredPage() {
           <IconBookmark size={20} className="text-ink-4" />
           <p className="mt-3 text-[13px] text-ink-3">즐겨찾기가 없습니다. 콘텐츠 상세 페이지에서 즐겨찾기를 눌러 추가하세요.</p>
           <Link to="/" className="mt-4 text-[12.5px] font-medium text-accent hover:text-accent-ink">
-            엄선 콘텐츠 보기 →
+            주요 뉴스 콘텐츠 보기 →
           </Link>
         </div>
       ) : (

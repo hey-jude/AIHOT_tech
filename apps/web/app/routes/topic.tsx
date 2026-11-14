@@ -64,11 +64,11 @@ export function meta({ loaderData }: Route.MetaArgs) {
   const { topic, page } = data;
   const parts = partsOf(data);
   const path = page > 1 ? `/topics/${topic.slug}/page/${page}` : `/topics/${topic.slug}`;
-  const text = page > 1 ? `${topic.name} 엄선 아카이브 ${page}페이지. ${topic.definition}` : description(data, parts);
+  const text = page > 1 ? `${topic.name} 주요 뉴스 아카이브 ${page}페이지. ${topic.definition}` : description(data, parts);
   const crumbs = breadcrumbLd([{ name: SITE.name, path: "/" }, ...UP.crumbs, { name: topic.name, path: `/topics/${topic.slug}` }]);
   return pageMeta({
     title: page > 1
-      ? `${topic.name} 엄선 · ${page}페이지`
+      ? `${topic.name} 주요 뉴스 · ${page}페이지`
       : SEO_TITLES.topic(topic.name, topic.group, topic.latest ? monthDay(seoulDate(topic.latest.at)) : null),
     description: text,
     path,
@@ -140,10 +140,10 @@ export default function TopicRoute() {
         </div>
       ))}
 
-      <h2 className="sr-only">{page === 1 ? `${topic.name} 엄선` : `엄선 아카이브 · ${page}페이지`}</h2>
+      <h2 className="sr-only">{page === 1 ? `${topic.name} 주요 뉴스` : `주요 뉴스 아카이브 · ${page}페이지`}</h2>
       {items.length === 0 ? (
         <div className="lg:card">
-          <EmptyState title="이 주제에는 아직 엄선된 내용이 없습니다" />
+          <EmptyState title="이 주제에는 아직 주요 뉴스로 선정된 내용이 없습니다" />
         </div>
       ) : (
         <DayList items={items} headerAside={<span className="num whitespace-nowrap">{first}–{last}건<span className="hidden sm:inline"> · 전체 {topic.total.toLocaleString("ko-KR")}건</span></span>} />

@@ -34,8 +34,8 @@ const CACHE = { edgeCacheSeconds: 300 };
 const LEFT_OUT = [...FEED_COPY.allLeavesOut, "검토 전 항목", "관련도 낮은 항목", `${SELECTION.browseFloor}점 이하 항목`, "중복 병합 항목"];
 
 const FEEDS: FeedMeta[] = [
-  { id: "selected", path: "/feed.xml", title: `${SITE.name} — 엄선`, description: `최신 ${SITE.name} 엄선 기사 50건의 요약과 사이트 내 읽기, 원문 링크를 제공합니다. 전문 피드는 /feed/full.xml에서 구독할 수 있습니다.`, homePath: "/", pollHintMinutes: 30, ...CACHE },
-  { id: "selected-full", path: "/feed/full.xml", title: `${SITE.name} — 엄선 전문`, description: "엄선 요약 피드의 최신 50건입니다. 재배포가 명시적으로 허용된 출처만 본문을 포함하고, 그 외에는 요약과 읽기 링크를 제공합니다.", homePath: "/", pollHintMinutes: 30, ...CACHE },
+  { id: "selected", path: "/feed.xml", title: `${SITE.name} — 주요 뉴스`, description: `최신 ${SITE.name} 주요 뉴스 50건의 요약과 사이트 내 읽기, 원문 링크를 제공합니다. 전문 피드는 /feed/full.xml에서 구독할 수 있습니다.`, homePath: "/", pollHintMinutes: 30, ...CACHE },
+  { id: "selected-full", path: "/feed/full.xml", title: `${SITE.name} — 주요 뉴스 전문`, description: "주요 뉴스 요약 피드의 최신 50건입니다. 재배포가 명시적으로 허용된 출처만 본문을 포함하고, 그 외에는 요약과 읽기 링크를 제공합니다.", homePath: "/", pollHintMinutes: 30, ...CACHE },
   { id: "all", path: "/feed/all.xml", title: `${SITE.name} — 전체 소식`, description: `최근 7일간의 공개 소식을 실제 게시 시각 역순으로 제공합니다. ${LEFT_OUT.join(", ")}은 제외됩니다.`, homePath: "/all", pollHintMinutes: 30, ...CACHE },
   { id: "daily", path: "/feed/daily.xml", title: `${SITE.name} 일간`, description: `${SITE.name} 일간 브리핑입니다. 한국시간(Asia/Seoul)에 발행되며 최근 30개 호를 보관합니다.`, homePath: "/daily", pollHintMinutes: 30, ...CACHE },
   { id: "weekly", path: "/feed/weekly.xml", title: `${SITE.name} 주간`, description: `${SITE.name} 주간 브리핑입니다. 한국시간(Asia/Seoul)에 발행되며 최근 12개 호를 보관합니다.`, homePath: "/weekly", pollHintMinutes: 180, ...CACHE },
@@ -174,8 +174,8 @@ export async function itemFeed(kind: ItemFeedKind, category: PublicApiCategoryKe
     meta = {
       title: includeContent ? `${SITE.name} — ${label} 전문` : `${SITE.name} — ${label}`,
       description: includeContent
-        ? `${SITE.name}의 ‘${label}’ 카테고리 엄선 전문 피드입니다. 재배포가 명시적으로 허용된 출처의 본문만 포함합니다.`
-        : `${SITE.name}에서 매일 엄선한 ‘${label}’ 카테고리 요약 피드입니다.`,
+        ? `${SITE.name}의 ‘${label}’ 카테고리 주요 뉴스 전문 피드입니다. 재배포가 명시적으로 허용된 출처의 본문만 포함합니다.`
+        : `${SITE.name}에서 매일 주요 뉴스로 선정한 ‘${label}’ 카테고리 요약 피드입니다.`,
       homePath: "/",
       selfPath: includeContent ? `/feed/full/category/${category}.xml` : `/feed/category/${category}.xml`,
       ttl: m.pollHintMinutes,

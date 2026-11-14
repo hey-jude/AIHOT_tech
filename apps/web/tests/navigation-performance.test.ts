@@ -114,7 +114,7 @@ test('hover downloads nothing, a press fetches article data once for its click, 
     // In one task, as a scroll moves within the hold that makes a still touch a press; two calls can be further apart.
     await link.evaluate(a=>{for(const type of ['touchstart','touchmove'])a.dispatchEvent(new TouchEvent(type,{bubbles:true,cancelable:true,composed:true}));});
     await link.hover();await page.waitForTimeout(300);
-    await page.getByRole('heading',{name:'엄선',exact:true}).click();
+    await page.getByRole('heading',{name:'주요 뉴스',exact:true}).click();
     assert.equal(hits.slice(start).filter(x=>x.startsWith('/api/site/items/')).length,0);
     await link.click();await expect(page.getByText('고정 본문',{exact:true})).toBeVisible();
     assert.equal(hits.slice(start).filter(x=>x.startsWith('/api/site/items/')).length,1,'the click reuses the prefetch its press started');
@@ -123,7 +123,7 @@ test('hover downloads nothing, a press fetches article data once for its click, 
       await visit(freshPage,origin+'/');failing='/api/site/items/navigation-fixture';
       const failed=freshPage.waitForResponse(r=>r.url().includes('/items/navigation-fixture.data')&&r.status()===503);
       await freshPage.getByRole('link',{name:'성능 확인 기사',exact:true}).dispatchEvent('pointerdown',press);await failed;
-      await expect(freshPage.getByRole('heading',{name:'엄선',exact:true})).toBeVisible();
+      await expect(freshPage.getByRole('heading',{name:'주요 뉴스',exact:true})).toBeVisible();
     }finally{await fresh.close();}
   }finally{failing='';await context.close();}
 });

@@ -23,7 +23,7 @@ const SECTIONS: Array<{ title: string; items: NavItem[] }> = [
   {
     title: "콘텐츠",
     items: [
-      { to: "/", label: "엄선", icon: IconBolt, end: true },
+      { to: "/", label: "주요 뉴스", icon: IconBolt, end: true },
       { to: "/all", label: "전체 동향", icon: IconList },
       { to: "/hot", label: "핫 이슈", icon: IconFlame },
       { to: "/daily", label: "일간", icon: IconDoc, covers: ["/weekly", "/monthly"] },
@@ -51,12 +51,12 @@ const UP = {
 } as const;
 
 /**
- * Where pages under a navigation entry lead back up to: the entry, or 엄선 in its place while the site hides
+ * Where pages under a navigation entry lead back up to: the entry, or 주요 뉴스 in its place while the site hides
  * it. `name` is for breadcrumbs and desktop back links (핫 이슈), `back` for the phone bar (핫 이슈), `tab` the
  * phone tab it sits under, `crumbs` its breadcrumb after the site's home.
  */
 export function navUp(entry: keyof typeof UP): { to: string; name: string; back: string; tab: TabKey; crumbs: Array<{ name: string; path: string }> } {
-  if (!inNav(entry)) return { to: "/", name: "엄선", back: "엄선", tab: "featured", crumbs: [] };
+  if (!inNav(entry)) return { to: "/", name: "주요 뉴스", back: "주요 뉴스", tab: "featured", crumbs: [] };
   return { to: entry, ...UP[entry], crumbs: [{ name: UP[entry].name, path: entry }] };
 }
 
@@ -96,7 +96,7 @@ export function activeSidebarItem(items: readonly NavItem[], pathname: string): 
 }
 
 /**
- * The phone tab bar: 전체 동향 lives beside 엄선 as a switch, 핫 이슈 and 일간 are tabs, and "마이" at /more holds
+ * The phone tab bar: 전체 동향 lives beside 주요 뉴스 as a switch, 핫 이슈 and 일간 are tabs, and "마이" at /more holds
  * 즐겨찾기, 테마, the tools and the site's own pages. Which tab a page sits under is declared by the page
  * itself (components/shell/screens.ts).
  */
@@ -119,7 +119,7 @@ export interface Tab {
 }
 
 const ENGINE_TABS: Tab[] = [
-  { key: "featured", to: "/", label: "엄선", icon: IconBolt },
+  { key: "featured", to: "/", label: "주요 뉴스", icon: IconBolt },
   { key: "hot", to: "/hot", label: "핫 이슈", icon: IconFlame },
   { key: "daily", to: "/daily", label: "일간", icon: IconDoc, covers: ["/weekly", "/monthly"] },
   { key: "me", to: "/more", label: "마이", icon: IconUser, changelog: true },
@@ -132,7 +132,7 @@ export function tabs(): Tab[] {
 
 /**
  * The rail that stands in for the sidebar on narrow desktops (unfolded foldables, tablets upright): the
- * tabs, with 전체 동향 after 엄선 since desktop pages have no 엄선 | 전체 동향 switch.
+ * tabs, with 전체 동향 after 주요 뉴스 since desktop pages have no 주요 뉴스 | 전체 동향 switch.
  */
 export function rail(): Tab[] {
   const all = tabs();

@@ -172,7 +172,7 @@ export function siteLd() {
       "@type": "Dataset",
       "@id": `${base}/#dataset`,
       name: `${SITE.name} — ${withSubject("업계 동향 데이터셋")}`,
-      description: `계속 업데이트되는 AI 업계 동향으로, 각 항목에 한국어 요약과 점수, 원문 출처를 제공합니다. ${subjectAfter("매일 엄선 소식과", "일간 보고서")}도 RSS와 공개 API로 이용할 수 있습니다.`,
+      description: `계속 업데이트되는 AI 업계 동향으로, 각 항목에 한국어 요약과 점수, 원문 출처를 제공합니다. ${subjectAfter("매일 주요 뉴스와", "일간 보고서")}도 RSS와 공개 API로 이용할 수 있습니다.`,
       url: base,
       inLanguage: SITE.locale,
       isAccessibleForFree: true,
@@ -181,7 +181,7 @@ export function siteLd() {
       creator: orgRef(),
       publisher: orgRef(),
       distribution: [
-        { "@type": "DataDownload", name: "엄선 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
+        { "@type": "DataDownload", name: "주요 뉴스 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed.xml` },
         { "@type": "DataDownload", name: "전체 동향 RSS", encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/all.xml` },
         { "@type": "DataDownload", name: `${withSubject("일간")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/daily.xml` },
         { "@type": "DataDownload", name: `${withSubject("주간")} RSS`, encodingFormat: "application/rss+xml", contentUrl: `${base}/feed/weekly.xml` },

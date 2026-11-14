@@ -25,7 +25,7 @@ export function PhoneBar({ back, title, large = false, sub, leading, center, act
   /** A line under the large title. */
   sub?: ReactNode;
   leading?: ReactNode;
-  /** Always shown in the middle instead of the title (엄선 | 전체 동향). */
+  /** Always shown in the middle instead of the title (주요 뉴스 | 전체 동향). */
   center?: ReactNode;
   actions?: ReactNode;
 }) {
@@ -68,7 +68,7 @@ export function PhoneBar({ back, title, large = false, sub, leading, center, act
   );
 }
 
-/** "‹ 엄선": back through the reader's history, or to the page's parent when it was opened directly. */
+/** "‹ 주요 뉴스": back through the reader's history, or to the page's parent when it was opened directly. */
 function BackButton({ to, label }: BackTarget) {
   const navigate = useNavigate();
   const { key } = useLocation();

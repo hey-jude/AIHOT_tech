@@ -102,7 +102,7 @@ export const FeedItem = memo(function FeedItem({ item, group, filters, read = fa
 
       {item.sameEvent && (
         <p className="relative z-10 mt-2 line-clamp-1 text-[12.5px] text-ink-4">
-          같은 사안의 엄선 소식:
+          같은 사안의 주요 뉴스:
           <Link viewTransition to={`/items/${item.sameEvent.id}`} className="text-ink-3 transition-colors hover:text-accent">
             《{item.sameEvent.title}》
           </Link>

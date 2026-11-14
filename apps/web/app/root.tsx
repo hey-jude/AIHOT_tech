@@ -26,7 +26,7 @@ export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/png", href: "/icon.png" },
   { rel: "apple-touch-icon", href: "/apple-icon.png" },
   { rel: "manifest", href: "/manifest.webmanifest" },
-  { rel: "alternate", type: "application/rss+xml", title: `${SITE.name} — 엄선`, href: "/feed.xml" },
+  { rel: "alternate", type: "application/rss+xml", title: `${SITE.name} — 주요 뉴스`, href: "/feed.xml" },
 ];
 
 /** The release rendering this document: once a newer one is deployed, a render error reloads the page (entry.client). */
@@ -155,7 +155,7 @@ export function ErrorBoundary() {
             새로고침
           </Link>}
           <Link reloadDocument to="/" className={buttonClass(notFound ? "primary" : "secondary")}>
-            엄선으로 돌아가기
+            주요 뉴스로 돌아가기
           </Link>
           <Link reloadDocument to="/all" className={buttonClass("secondary")}>
             전체 동향 보기

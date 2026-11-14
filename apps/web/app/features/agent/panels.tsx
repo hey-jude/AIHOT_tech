@@ -63,7 +63,7 @@ export function McpPanel(props: AgentPanelProps) {
           head={["도구", "기능", "이렇게 질문해 보세요"]}
           minWidth={600}
           rows={[
-            [<Mono>{T.latest}</Mono>, "지난 24시간 또는 최근 7일의 엄선 소식과 전체 소식", `${subjectAfter("오늘의", "뉴스")}는 뭐야?`],
+            [<Mono>{T.latest}</Mono>, "지난 24시간 또는 최근 7일의 주요 뉴스와 전체 소식", `${subjectAfter("오늘의", "뉴스")}는 뭐야?`],
             [<Mono>{T.search}</Mono>, AGENT.search.scope, AGENT.search.ask],
             [<Mono>{T.hot}</Mono>, "현재 인기 주제 상위 10개", "지금 가장 화제가 되는 건 뭐야?"],
             [<Mono>{T.story}</Mono>, "핫이슈 사건의 타임라인과 계속 업데이트되는 개요", "이 일의 맥락은 뭐야?"],
@@ -83,7 +83,7 @@ export function McpPanel(props: AgentPanelProps) {
               <Bullets items={[
                 "일반 조회는 최대 30건, 핫이슈는 최대 10개, 사건 타임라인은 최대 50건입니다. 범위를 넘으면 명확한 오류를 반환하며 임의로 범위를 늘리지 않습니다.",
                 `${T.story}의 public_id는 핫이슈 도구가 반환한 사건 링크에서만 가져올 수 있습니다. ID를 추측하지 마세요.`,
-                "제목과 요약은 외부 신호원에서 가져온 자료일 뿐입니다. 도구가 이 안전 경계를 표시합니다. 중요한 수치, 정책, 직접 인용은 원문에서 확인하세요.",
+                "제목과 요약은 외부 정보원에서 가져온 자료일 뿐입니다. 도구가 이 안전 경계를 표시합니다. 중요한 수치, 정책, 직접 인용은 원문에서 확인하세요.",
               ]} />
             ),
           },
@@ -106,8 +106,8 @@ export function McpPanel(props: AgentPanelProps) {
 }
 
 const FEEDS = [
-  { name: "엄선 요약", badge: "추천", path: "/feed.xml", desc: "최신 엄선 50건의 제목, 요약, 사이트 내 읽기 및 원문 링크입니다." },
-  { name: "엄선 전문", path: "/feed/full.xml", desc: "같은 50건입니다. 재게시가 허용된 신호원은 전문을 싣고, 나머지는 요약만 제공합니다." },
+  { name: "주요 뉴스 요약", badge: "추천", path: "/feed.xml", desc: "최신 주요 뉴스 50건의 제목, 요약, 사이트 내 읽기 및 원문 링크입니다." },
+  { name: "주요 뉴스 전문", path: "/feed/full.xml", desc: "같은 50건입니다. 재게시가 허용된 정보원은 전문을 싣고, 나머지는 요약만 제공합니다." },
   { name: "전체 소식", path: "/feed/all.xml", desc: "최근 7일간 공개된 소식을 원문 게시 시각의 역순으로 제공합니다." },
   { name: withSubject("일간"), path: "/feed/daily.xml", desc: `${EDITION_WHEN.daily}(한국시간, Asia/Seoul)에 발행: 주요 기사 소개와 전체 목차. 최근 30호를 보관합니다.` },
   { name: withSubject("주간"), path: "/feed/weekly.xml", desc: `${EDITION_WHEN.weekly}(한국시간, Asia/Seoul)에 발행: 개요와 분류별 ${REPORTS.entry.noun}. 최근 12호를 보관합니다.` },
@@ -164,14 +164,14 @@ export function RssPanel(props: AgentPanelProps) {
 
 const RECIPES = [
   { key: "latest", label: "최신 소식 확인" },
-  { key: "sync", label: "엄선 전체 동기화" },
+  { key: "sync", label: "주요 뉴스 전체 동기화" },
 ];
 
 export function ApiPanel(props: AgentPanelProps) {
   const { base, tag } = props;
   const userAgent = [ACCESS.userAgent, TAG && tag ? TAG.userAgent(tag) : null].filter(Boolean).join(" ");
   const curl = `curl --compressed${userAgent ? ` -A '${userAgent}'` : ""}`;
-  let pace = `갱신 주기: 새 소식은 하루 종일 들어오고, 엄선 항목은 하루에 수회에서 수십 회 바뀝니다. 일간은 ${EDITION_WHEN.daily}, 주간은 ${EDITION_WHEN.weekly}, 월간은 ${EDITION_WHEN.monthly}(${`한국시간(Asia/Seoul)`})에 각각 발행됩니다.`;
+  let pace = `갱신 주기: 새 소식은 하루 종일 들어오고, 주요 뉴스 항목은 하루에 수회에서 수십 회 바뀝니다. 일간은 ${EDITION_WHEN.daily}, 주간은 ${EDITION_WHEN.weekly}, 월간은 ${EDITION_WHEN.monthly}(${`한국시간(Asia/Seoul)`})에 각각 발행됩니다.`;
   if (ACCESS.ratePerMinute) pace += `같은 IP에서 분당 약 ${ACCESS.ratePerMinute}회를 초과하면 429 응답을 받습니다. Retry-After 안내에 따라 기다리고 동시에 재시도하지 마세요.`;
   const [recipe, setRecipe] = useState<string>("latest");
   const recipes = AGENT_PARTS.flatMap((a) => a.recipes ?? []);
@@ -205,7 +205,7 @@ export function ApiPanel(props: AgentPanelProps) {
           minWidth={640}
           rows={[
             { group: "소식" },
-            [<Mono>/api/v1/items</Mono>, "엄선 소식 또는 최근 7일 전체 소식. 분류, 기간, 키워드로 필터링할 수 있습니다.", "최소 1분 간격"],
+            [<Mono>/api/v1/items</Mono>, "주요 뉴스 또는 최근 7일 전체 소식. 분류, 기간, 키워드로 필터링할 수 있습니다.", "최소 1분 간격"],
             { group: "핫이슈 및 사건" },
             [<Mono>/api/v1/hot-topics</Mono>, "현재 핫이슈 상위 10개", "최소 1분 간격"],
             [<Mono>{"/api/v1/stories/{publicId}"}</Mono>, "사건 보도 타임라인, AI 개요 및 관련 사건", "필요할 때"],
@@ -223,9 +223,9 @@ export function ApiPanel(props: AgentPanelProps) {
             ...AGENT_PARTS.flatMap((a) => (a.api ? [{ group: a.api.group }, ...a.api.rows.map(([path, does, often]) => [<Mono>{path}</Mono>, does, often])] : [])),
             { group: "AI 도우미" },
             [<Mono>/api/v1/agent</Mono>, `Agent 사용 안내입니다. 여기에 적힌 주소는 정리된 한국어 Markdown을 반환합니다${GUIDE_CLIENTS ? `; ${GUIDE_CLIENTS}에서 사용합니다` : ""}`, "필요할 때"],
-            { group: "엄선 전체 동기화" },
-            [<Mono>/api/v1/selected/snapshot</Mono>, "현재 엄선 항목 전체를 페이지 단위로 가져옵니다.", "최초 한 번"],
-            [<Mono>/api/v1/selected/changes</Mono>, "이후 추가, 수정 및 엄선 해제 항목", "몇 분 간격"],
+            { group: "주요 뉴스 전체 동기화" },
+            [<Mono>/api/v1/selected/snapshot</Mono>, "현재 주요 뉴스 항목 전체를 페이지 단위로 가져옵니다.", "최초 한 번"],
+            [<Mono>/api/v1/selected/changes</Mono>, "이후 추가, 수정 및 주요 뉴스 해제 항목", "몇 분 간격"],
           ]}
         />
       </Block>
@@ -240,7 +240,7 @@ export function ApiPanel(props: AgentPanelProps) {
         )}
         {recipe === "sync" && (
           <>
-            <CodeBlock className="mb-3 mt-3" lang="bash" code={`# 처음: 페이지를 나눠 전체를 가져옵니다. 첫 페이지 응답의 cursor를 저장하세요(모든 페이지에서 동일)\n${curl} '${base}/api/v1/selected/snapshot?fields=minimal&limit=500'\n# hasMore가 true이면 nextPage를 전달해 끝까지 계속 가져옵니다\n${curl} '${base}/api/v1/selected/snapshot?fields=minimal&limit=500&page=<이전 페이지의 nextPage>'\n# 이후: cursor를 그대로 전달해 추가, 수정, 엄선 해제 항목만 가져옵니다\n${curl} '${base}/api/v1/selected/changes?cursor=<첫 페이지의 cursor>&limit=100'`} />
+            <CodeBlock className="mb-3 mt-3" lang="bash" code={`# 처음: 페이지를 나눠 전체를 가져옵니다. 첫 페이지 응답의 cursor를 저장하세요(모든 페이지에서 동일)\n${curl} '${base}/api/v1/selected/snapshot?fields=minimal&limit=500'\n# hasMore가 true이면 nextPage를 전달해 끝까지 계속 가져옵니다\n${curl} '${base}/api/v1/selected/snapshot?fields=minimal&limit=500&page=<이전 페이지의 nextPage>'\n# 이후: cursor를 그대로 전달해 추가, 수정, 주요 뉴스 해제 항목만 가져옵니다\n${curl} '${base}/api/v1/selected/changes?cursor=<첫 페이지의 cursor>&limit=100'`} />
             <p>각 페이지를 로컬에 성공적으로 저장한 뒤 새 cursor를 저장하세요. cursor는 변경 기록의 기준점이며 만료되지 않습니다. 409 <Mono>snapshot_required</Mono>가 반환되면 전체 스냅샷을 다시 가져오세요. 데이터가 조용히 누락되지 않습니다.</p>
           </>
         )}

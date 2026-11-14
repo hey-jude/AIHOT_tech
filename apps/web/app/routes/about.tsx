@@ -82,23 +82,23 @@ function stagesOf(stats: SiteStats | null): Stage[] {
     {
       no: "01",
       title: "수집",
-      figure: stats && <Figure n={stats.sources} unit="개 출처" />,
+      figure: stats && <Figure n={stats.sources} unit="개 정보원" />,
       text: ABOUT.steps.collect,
       note: kinds,
     },
     {
       no: "02",
       title: "등록",
-      figure: stats && <Figure n={stats.items} unit="건의 동향" />,
+      figure: stats && <Figure n={stats.items} unit="건의 소식" />,
       text: ABOUT.steps.store,
       note: stats && <>지난 24시간 동안 {stats.day.collected.toLocaleString("en-US")}건 등록</>,
     },
     {
       no: "03",
-      title: "엄선",
+      title: "주요 뉴스",
       figure: stats && <Figure n={stats.selected} unit={REPORTS.metricUnits.selectedCount} />,
       text: ABOUT.steps.select,
-      note: stats && <>지난 24시간 동안 {stats.day.selected}건 엄선</>,
+      note: stats && <>지난 24시간 동안 {stats.day.selected}건 선정</>,
     },
     {
       no: "04",
@@ -176,12 +176,12 @@ function Maker({ maker, contact }: { maker: NonNullable<typeof ABOUT.maker>; con
   );
 }
 
-/** The latest 엄선 item under the river's paper; it moves on each time an item reaches the paper. */
+/** The latest 주요 뉴스 item under the river's paper; it moves on each time an item reaches the paper. */
 function Latest({ item, className = "" }: { item: SiteStats["latest"][number] | undefined; className?: string }) {
   if (!item) return null;
   return (
     <IntentLink viewTransition to={`/items/${item.id}`} className={`group block ${className}`}>
-      <span className="text-[11px] font-semibold tracking-[0.2em] text-accent">최근 엄선</span>
+      <span className="text-[11px] font-semibold tracking-[0.2em] text-accent">최근 주요 뉴스</span>
       <span key={item.id} className="animate-fade-up mt-1.5 block">
         <span className="line-clamp-2 text-[13.5px] font-semibold leading-[1.55] text-ink transition-colors group-hover:text-accent">{item.title}</span>
         <span className="mt-1 block truncate text-[12px] text-ink-4">{item.source}</span>
@@ -228,10 +228,10 @@ export default function AboutPage() {
         </div>
         <div className="flex flex-wrap gap-3 lg:pb-2">
           <IntentLink to="/" className={buttonClass("primary", "lg")}>
-            오늘의 엄선 보기 <IconArrowRight size={15} />
+            오늘의 주요 뉴스 보기 <IconArrowRight size={15} />
           </IntentLink>
           <IntentLink to="/daily" className={buttonClass("secondary", "lg")}>
-            최신 일간 보기
+            최신 일간 리포트 보기
           </IntentLink>
         </div>
       </header>
@@ -243,7 +243,7 @@ export default function AboutPage() {
         <SignalRiver sources={sources} focus={focus} onArrive={onArrive} className="h-[230px] sm:h-[300px] lg:h-[360px] 2xl:h-[420px]">
           <Latest item={latest[at]} className="absolute left-[75%] top-[calc(42%+42px)] hidden w-[25%] px-6 lg:block" />
         </SignalRiver>
-        <p className="sr-only">{`도식: 각 선은 출처를 뜻합니다. 선이 모인 묶음은 같은 사건을 다룬 여러 보도이며, 엄선 과정을 거쳐 일부만 ${subjectAfter("매일 발행하는", "일간")}에 실립니다.`}</p>
+        <p className="sr-only">{`도식: 각 선은 출처를 뜻합니다. 선이 모인 묶음은 같은 사건을 다룬 여러 보도이며, 주요 뉴스 선정 과정을 거쳐 일부만 ${subjectAfter("매일 발행하는", "일간")}에 실립니다.`}</p>
         <Latest item={latest[at]} className="mt-2 border-t border-line pt-4 lg:hidden" />
         <ol className="mt-4 grid grid-cols-1 border-t border-line-strong sm:grid-cols-2 lg:mt-0 lg:grid-cols-4">
           {stages.map((s, i) => (

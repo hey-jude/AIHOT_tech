@@ -16,7 +16,7 @@ export const CATEGORIES = [
   { key: "ai-products", tagColor: "turquoise", label: "제품", feedLabel: "AI 제품", section: "제품 출시/업데이트", guide: "사용 가능한 AI 제품, 기능, 애플리케이션, 도구, API, 플랫폼, 엔지니어링 컴포넌트의 출시 업데이트. 모델 제조사가 출시한 추론 프레임워크·연산자 라이브러리·하드웨어 적응 컴포넌트도 제품이며, 제조사명 때문에 모델로 분류해서는 안 된다." },
   { key: "industry", tagColor: "orange", label: "산업", feedLabel: "산업 동향", section: "산업 동향", guide: "이미 발생한 회사 경영, 투자·인수·합병, 인사, 협력, 소송, 정책, 실제 안전 사고와 조사 진행. 뉴스의 당사자가 본인을 보조하며 태도를 드러내도 의견으로 바뀌지 않는다." },
   { key: "paper", tagColor: "violet", label: "논문", feedLabel: "논문", section: "논문 연구", guide: "새로운 연구 방법, 실험 설계와 발견이 핵심인 논문·기술 보고서·새 벤치마크·연구 데이터셋. 체계적 레드팀 실험은 연구에 속하며, 기존 리더보드 성적은 모델로, 실제 사고의 뉴스 조사는 산업으로 분류한다." },
-  { key: "tip", tagColor: "green", label: "튜토리얼", section: "실용·오피니언", guide: "독자가 따라갈 수 있는 방법, 프롬프트, 도구 사용법, 엔지니어링 실천 회고와 기술 해설. 핵심은 재사용 가능한 방법이다. 단순한 도구 출시는 제품으로, 방법 없는 태도·예측뿐이면 의견으로 분류한다.", commentary: true },
+  { key: "tip", tagColor: "green", label: "활용 가이드", section: "실용·오피니언", guide: "독자가 따라갈 수 있는 방법, 프롬프트, 도구 사용법, 엔지니어링 실천 회고와 기술 해설. 핵심은 재사용 가능한 방법이다. 단순한 도구 출시는 제품으로, 방법 없는 태도·예측뿐이면 의견으로 분류한다.", commentary: true },
   { key: "opinion", tagColor: "purple", label: "의견", section: "실용·오피니언", guide: "핵심이 작성자의 해석·판단·주장·예측·논평 또는 인터뷰 의견인 글. 시장을 논했다고 자동으로 산업으로 분류하지 않고, 작성자가 유명인이라고 자동으로 의견으로 분류하지 않는다.", commentary: true },
 ] as const satisfies ReadonlyArray<{ key: string; tagColor: string; label: string; feedLabel?: string; section: string; guide: string; commentary?: true }>;
 

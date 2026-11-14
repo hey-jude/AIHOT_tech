@@ -30,7 +30,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
   const base = siteUrl();
   return pageMeta({
     title: SITE.topicsTitle,
-    description: `${by}의 최신 동향을 추적하세요. ${named ? `${named} 등 ` : ""}${topics.length}개 주제의 최신 엄선 소식과 주요 진전을 계속 업데이트합니다.`,
+    description: `${by}의 최신 동향을 추적하세요. ${named ? `${named} 등 ` : ""}${topics.length}개 주제의 최신 주요 뉴스와 주요 진전을 계속 업데이트합니다.`,
     path: "/topics",
     image: "/og/pages/topics.png",
     jsonLd: [
@@ -86,7 +86,7 @@ function TopicCard({ t }: { t: TopicSummary }) {
                 최근 30일 <span className="num font-semibold text-ink-3">{t.recent}</span>건
               </>
             ) : (
-              "최근 30일 동안 새 엄선 소식이 없습니다"
+              "최근 30일 동안 새 주요 뉴스가 없습니다"
             )}
           </span>
         </span>
@@ -105,7 +105,7 @@ export default function TopicsPage() {
         <h1 data-page-title="" className="text-[24px] font-semibold leading-[1.3] text-ink">주제별 동향</h1>
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink-3">
           {`${groups.map((g) => g.name).join(", ")} 분야에서 `}
-          <span className="num">{topics.length}</span>개 주제를 살펴보고 최신 엄선 소식과 주요 진전을 확인하세요.
+          <span className="num">{topics.length}</span>개 주제를 살펴보고 최신 주요 뉴스와 주요 진전을 확인하세요.
         </p>
       </header>
       {groups.map((g) => (

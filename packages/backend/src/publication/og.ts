@@ -30,6 +30,6 @@ export async function loadItemOgCard(id: string): Promise<OgCard | null> {
     title: item.title,
     subtitle: item.summary,
     meta: `${item.source.name} · ${seoulDate(item.timelineAt)}`,
-    badge: item.selected && item.score !== null && ITEM_COPY.showScore ? { value: String(Math.round(item.score)), label: '엄선 점수' } : null,
+    badge: item.selected && item.score !== null && ITEM_COPY.showScore ? { value: String(Math.round(item.score)), label: '주요 뉴스 선정 점수' } : null,
   };
 }

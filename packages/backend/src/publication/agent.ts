@@ -62,10 +62,10 @@ const BRIEF_HINTS = [
 export interface LatestQuery { window: AgentWindow; mode: "selected" | "all"; category: PublicApiCategoryKey | null; limit: number }
 
 export function latestAnswer(res: V1ItemsResult, q: LatestQuery): string {
-  const scope = q.mode === "selected" ? "엄선" : "전체 공개 소식";
+  const scope = q.mode === "selected" ? "주요 뉴스" : "전체 공개 소식";
   const title = [`${SITE.name} ${scope}`, category(q.category), WINDOW_LABEL[q.window]].filter(Boolean).join(" · ");
   if (!res.items.length) {
-    return answer([`# ${title}`, "", `${WINDOW_LABEL[q.window]} 동안 조건에 맞는 ${scope}이 없습니다.`], null, [
+    return answer([`# ${title}`, "", `${WINDOW_LABEL[q.window]} 동안 조건에 맞는 ${scope} 항목이 없습니다.`], null, [
       "이 기간에 결과가 없다고 알리세요. window=7d 또는 mode=all로 다시 검색할 수 있습니다.",
       "학습 데이터의 기억을 최신 소식처럼 보충하지 마세요.",
     ]);
@@ -86,16 +86,16 @@ export function searchAnswer(found: { res: V1ItemsResult; expanded: boolean }, q
   const title = [`${SITE.name} ‘${q.q}’ 검색`, category(q.category), WINDOW_LABEL[q.window]].filter(Boolean).join(" · ");
   const { res, expanded } = found;
   if (!res.items.length) {
-    return answer([`# ${title}`, "", `${WINDOW_LABEL[q.window]}의 엄선 및 전체 공개 소식에서 관련 보도를 찾지 못했습니다.`], null, [
+    return answer([`# ${title}`, "", `${WINDOW_LABEL[q.window]}의 주요 뉴스 및 전체 공개 소식에서 관련 보도를 찾지 못했습니다.`], null, [
       `${SITE.name}에서 ${WINDOW_LABEL[q.window]} 동안 관련 보도를 찾지 못했다고 알리세요${q.window === "24h" ? "(window=7d로 최근 일주일을 검색할 수 있음)" : "; 더 오래된 내용은 여기서 검색할 수 없음"}.`,
       "표현을 바꾸거나 회사명·제품명처럼 더 짧은 키워드로 다시 검색할 수 있습니다.",
       "학습 데이터의 기억을 최신 소식처럼 말하지 마세요.",
     ]);
   }
-  const scope = expanded ? "엄선 결과는 없어, 아래는 엄선되지 않은 전체 공개 소식입니다." : `${SITE.name}에서 엄선한 관련 보도입니다.`;
+  const scope = expanded ? "주요 뉴스 결과는 없어, 아래는 주요 뉴스로 선정되지 않은 전체 공개 소식입니다." : `${SITE.name}에서 주요 뉴스로 선정한 관련 보도입니다.`;
   return answer([`# ${title}`, "", `${scope}${res.items.length}건, 최신순, 시각은 한국시간(Asia/Seoul)입니다.`], itemLines(res.items), [
     `이 결과만으로 답하세요. ${SITE.name}에 수록된 관련 보도이며 웹 전체 검색 결과가 아닙니다. 웹에 이것만 있다고 말하지 마세요.`,
-    ...(expanded ? [`이 항목은 ${SITE.name}에서 엄선되지 않았다고 알리세요.`] : []),
+    ...(expanded ? [`이 항목은 ${SITE.name}에서 주요 뉴스로 선정되지 않았다고 알리세요.`] : []),
     ...BRIEF_HINTS.slice(1),
   ]);
 }
@@ -104,7 +104,7 @@ type HotTopics = Awaited<ReturnType<typeof v1HotTopics>>;
 
 export function hotAnswer(res: HotTopics, limit: number, via: Via): string {
   const items = res.items.slice(0, limit);
-  if (!items.length) return answer([`# ${SITE.name} 실시간 화제`, "", "현재 화제 목록이 비어 있습니다."], null, ["현재 화제가 없다고 알리고 최신 엄선 소식을 살펴보도록 안내하세요."]);
+  if (!items.length) return answer([`# ${SITE.name} 실시간 화제`, "", "현재 화제 목록이 비어 있습니다."], null, ["현재 화제가 없다고 알리고 최신 주요 뉴스를 살펴보도록 안내하세요."]);
   const data = items.flatMap((t) => {
     const publicId = t.links.story.split("/").pop()!;
     const sources = [...new Set(t.sourceNames.map(publicSourceName))];
@@ -133,7 +133,7 @@ export function storyAnswer(s: Story, limit: number, via: Via): string {
     "",
     ...(s.digest ? [`사건 요약: ${s.digest}`, ""] : []),
     "보도 타임라인(최신순):",
-    ...reports.map((r, i) => `${i + 1}. ${stamp(r.publishedAt)} · ${publicSourceName(r.source.name)}${r.source.firstParty ? "(1차 출처)" : ""} · [${linkText(r.title)}](${r.links.aihot})`),
+    ...reports.map((r, i) => `${i + 1}. ${stamp(r.publishedAt)} · ${publicSourceName(r.source.name)}${r.source.firstParty ? "(공식 발표)" : ""} · [${linkText(r.title)}](${r.links.aihot})`),
     ...(neighbours.length ? ["", "관련 사건:", ...neighbours.map((n) => `- ${n.title}: ${via === "http" ? agentUrl(`/stories/${n.publicId}`) : `public_id=${n.publicId}`}`)] : []),
   ];
   return answer([
@@ -143,7 +143,7 @@ export function storyAnswer(s: Story, limit: number, via: Via): string {
     `사건 페이지: ${s.links.aihot}`,
   ], data, [
     "최근 동향을 먼저 설명한 뒤 시간순으로 배경을 정리하세요. 요약에서 언급한 충돌이나 미확인 사항은 그대로 밝혀 주세요.",
-    "‘1차 출처’ 표시는 당사 기업이나 인물의 발표입니다. 인용할 때 우선 사용하세요.",
+    "‘공식 발표’ 표시는 당사 기업이나 인물의 발표입니다. 인용할 때 우선 사용하세요.",
     ...(s.reportCount > reports.length ? [`타임라인에는 전체 ${s.reportCount}건 중 최신 ${reports.length}건만 있습니다. ${via === "http" ? "limit을 늘리면(최대 50) 더 볼 수 있습니다" : "report_limit을 늘리면(최대 50) 더 볼 수 있습니다"}.`] : []),
     NO_INTERNALS,
   ]);
@@ -278,7 +278,7 @@ export function agentGuide(): string {
   const lines = [
     `# ${SITE.name} Agent 사용 안내`,
     "",
-    `${SITE.name}（${siteUrl("")}）는 AI 업계 소식을 제공하는 사이트입니다: 편집부 엄선 소식, 전체 공개 소식, 화제 사건, 일간·주간·월간 브리핑`
+    `${SITE.name}（${siteUrl("")}）는 AI 업계 소식을 제공하는 사이트입니다: 주요 뉴스, 전체 공개 소식, 화제 사건, 일간·주간·월간 브리핑`
       + (abilities.length ? `, ${abilities.map((a) => a.title).join(", ")}` : "")
       + `. 아래 주소는 모두 API Key가 필요 없는 익명 읽기 전용 GET입니다. 한국어 Markdown을 반환하며, 마지막의 ‘답변 안내’에는 사용자에게 전달하는 방법이 담겨 있습니다. 이 안내는 ${SITE.name}에서 관리하며 새로운 기능을 먼저 반영합니다.`,
     "",
@@ -289,7 +289,7 @@ export function agentGuide(): string {
     `| ${subjectAfter("오늘·지난 24시간", "의 주요 소식")} | ${u("/latest")} |`,
     `| 최근 일주일 | ${u("/latest?window=7d")} |`,
     `| 특정 카테고리만 보기 | category=${categories.slice(0, -1).join(", ")} 또는 ${categories.at(-1)} 추가 |`,
-    "| 엄선뿐 아니라 전체 공개 소식 보기 | mode=all 추가 |",
+    "| 주요 뉴스뿐 아니라 전체 공개 소식 보기 | mode=all 추가 |",
     "| 더 많은 항목 보기 | limit=20 추가(1~30, 기본 10) |",
     `| 기업, 제품, 모델, 인물 또는 주제 | ${u("/search?q=키워드")} (최근 7일; 오늘만 보려면 window=24h) |`,
     `| 현재 화제와 많이 논의되는 내용 | ${u("/hot")} |`,

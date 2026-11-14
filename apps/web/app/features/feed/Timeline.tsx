@@ -310,12 +310,12 @@ export function Timeline({ initial, filters }: { initial: TimelineResponse; filt
         <div className="lg:card">
           {unreadOnly ? (
             state.nextCursor ? (
-              <EmptyState title="이번 엄선 소식은 모두 읽었습니다">아래 버튼을 눌러 더 이전의 읽지 않은 소식을 찾아보세요.</EmptyState>
+              <EmptyState title="이번 주요 뉴스는 모두 읽었습니다">아래 버튼을 눌러 더 이전의 읽지 않은 소식을 찾아보세요.</EmptyState>
             ) : (
-              <EmptyState title="읽지 않은 엄선 소식이 없습니다">‘읽지 않은 항목만 보기’를 끄면 전체 소식을 볼 수 있습니다.</EmptyState>
+              <EmptyState title="읽지 않은 주요 뉴스가 없습니다">‘읽지 않은 항목만 보기’를 끄면 전체 소식을 볼 수 있습니다.</EmptyState>
             )
           ) : (
-            <EmptyState title="이 필터에 해당하는 엄선 소식이 없습니다">다른 분류를 선택하거나 전체 동향에서 찾아보세요.</EmptyState>
+            <EmptyState title="이 필터에 해당하는 주요 뉴스가 없습니다">다른 분류를 선택하거나 전체 동향에서 찾아보세요.</EmptyState>
           )}
         </div>
       )}

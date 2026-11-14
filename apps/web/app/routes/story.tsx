@@ -327,7 +327,7 @@ export default function StoryPage() {
               items={[
                 { key: "all", label: "전체 보도", count: counts.all },
                 { key: "official", label: "공식 발표", count: counts.official },
-                { key: "selected", label: "엄선 보도", count: counts.selected },
+                { key: "selected", label: "주요 뉴스 보도", count: counts.selected },
               ]}
             />
             {days.length === 0 ? (

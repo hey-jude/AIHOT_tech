@@ -186,7 +186,7 @@ function Runner({ e }: { e: HotEntryView }) {
         <div className="flex min-w-0 flex-col gap-1.5">
           <Faces participants={e.participants} total={e.participantCount} size={20} />
           <span className="text-[12px] text-ink-4">
-            <span className="whitespace-nowrap"><span className="num">{e.sourceCount}</span>곳 출처</span> ·{" "}
+            <span className="whitespace-nowrap">출처 <span className="num">{e.sourceCount}</span>곳</span> ·{" "}
             <span className="whitespace-nowrap"><span className="num">{e.participantCount}</span>명 참여</span>
           </span>
         </div>
@@ -219,7 +219,7 @@ function Row({ e }: { e: HotEntryView }) {
         <div className="mt-2 flex items-center gap-2.5 wide:hidden">
           <Faces participants={e.participants} total={e.participantCount} size={20} />
           <span className="text-[12px] text-ink-4">
-            <span className="num">{e.sourceCount}</span>곳 출처
+            출처 <span className="num">{e.sourceCount}</span>곳
           </span>
           <span className="ml-auto flex items-center gap-2">
             <span className="mono text-[17px] font-semibold leading-none text-ink">{Math.round(e.heat)}</span>

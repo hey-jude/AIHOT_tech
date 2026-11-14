@@ -68,10 +68,10 @@ export function FeedBar({ base, category, channel }: { base: "/" | "/all"; categ
           <PillTabs
             size="sm"
             layoutId="feed-scope"
-            label="엄선 또는 전체 동향 보기"
+            label="주요 뉴스 또는 전체 동향 보기"
             active={base === "/" ? "featured" : "all"}
             items={[
-              { key: "featured", label: "엄선", to: scope("/"), resetScroll: true, prefetchOnPress: true },
+              { key: "featured", label: "주요 뉴스", to: scope("/"), resetScroll: true, prefetchOnPress: true },
               { key: "all", label: "전체 동향", to: scope("/all"), resetScroll: true, prefetchOnPress: true },
             ]}
           />

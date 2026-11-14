@@ -34,7 +34,7 @@ export default function SearchBusy() {
   const button = "inline-flex h-9 items-center rounded-full px-4 text-[13.5px]";
   return (
     <>
-    <PhoneBar back={{ to: base, label: base === "/all" ? "전체 동향" : "엄선" }} />
+    <PhoneBar back={{ to: base, label: base === "/all" ? "전체 동향" : "주요 뉴스" }} />
     <div className="mx-auto max-w-sm py-24 text-center" aria-live="polite">
       <RingMark className="mx-auto mb-5 size-10 text-accent" spinning />
       <h1 className="text-[20px] font-bold text-ink">검색 요청이 많습니다</h1>
@@ -47,7 +47,7 @@ export default function SearchBusy() {
             <Link to={retry} className={`${button} bg-accent font-medium text-accent-contrast hover:bg-accent-ink`}>다시 검색</Link>
           ))}
         <Link to="/all" className={`${button} ${hasSearch ? "border border-line-strong bg-surface text-ink-2 hover:border-ink-4" : "bg-accent font-medium text-accent-contrast hover:bg-accent-ink"}`}>전체 동향 보기</Link>
-        <Link to="/" className={`${button} border border-line-strong bg-surface text-ink-2 hover:border-ink-4`}>엄선으로 돌아가기</Link>
+        <Link to="/" className={`${button} border border-line-strong bg-surface text-ink-2 hover:border-ink-4`}>주요 뉴스로 돌아가기</Link>
       </div>
     </div>
     </>

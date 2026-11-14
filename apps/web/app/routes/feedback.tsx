@@ -199,7 +199,7 @@ export default function FeedbackPage() {
             피드백 번호 <span className="mono font-semibold text-ink">#{state.id}</span> · 답변 시 이 번호를 안내해 드립니다.
           </p>
           <Link to="/" className="mt-8 inline-flex h-10 items-center rounded-full bg-ink px-6 text-[14px] font-medium text-bg transition-opacity hover:opacity-90">
-            엄선으로 돌아가기
+            주요 뉴스로 돌아가기
           </Link>
         </div>
       </ReadingLayout>

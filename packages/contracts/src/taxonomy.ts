@@ -42,7 +42,7 @@ export const CHANNEL_LABELS: Record<ChannelKey, string> = {
   all: "전체",
   news: "뉴스",
   x: "X",
-  firstParty: "1차",
+  firstParty: "공식 발표",
 };
 
 export function isChannelKey(value: unknown): value is ChannelKey {

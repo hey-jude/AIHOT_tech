@@ -145,8 +145,8 @@ export default function AgentPage() {
           })}
         </nav>
       </AsideCard>
-      <AsideCard title="접속 자료">
-        <nav aria-label="접속 자료" className="-mx-2 -mb-1">
+      <AsideCard title="연동 문서">
+        <nav aria-label="연동 문서" className="-mx-2 -mb-1">
           {RESOURCES.map(([l, h, note]) => (
             <a key={h} href={h} target={h.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="group flex items-start gap-2 rounded-control px-2 py-2 transition-colors hover:bg-bg-sunk">
               <span className="min-w-0 flex-1">
@@ -174,7 +174,7 @@ export default function AgentPage() {
       <header className="lg:pt-5">
         <Kicker>AGENT 접속</Kicker>
         <h1 data-page-title="" className="mt-4 text-[28px] font-semibold leading-[1.3] text-ink sm:text-[32px]">{`${SITE.name}을 Agent에 연결하세요`}</h1>
-        <p className="mt-3 max-w-[40em] text-[15px] leading-[1.8] text-ink-3">{`${TRACKS.map((t) => t.short).join(", ")} 등 ${WAYS}가지 방식으로 같은 데이터를 조회합니다. 엄선, 핫 이슈, 일간, 주간, 월간 중 사용하는 도구에 맞는 방식을 선택하세요. 모두 익명 읽기 전용이며 가입이나 API Key가 필요 없습니다.`}</p>
+        <p className="mt-3 max-w-[40em] text-[15px] leading-[1.8] text-ink-3">{`${TRACKS.map((t) => t.short).join(", ")} 등 ${WAYS}가지 방식으로 같은 데이터를 조회합니다. 주요 뉴스, 핫 이슈, 일간, 주간, 월간 중 사용하는 도구에 맞는 방식을 선택하세요. 모두 익명 읽기 전용이며 가입이나 API Key가 필요 없습니다.`}</p>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span className={`${chip} ${healthy ? "text-ok" : "text-hot"}`}>
             <span className={`size-1.5 rounded-full ${healthy ? "bg-ok" : "bg-hot"}`} aria-hidden="true" />

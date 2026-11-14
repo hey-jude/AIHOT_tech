@@ -186,7 +186,7 @@ test("with everything read and no more pages, the filter says so instead of look
     await page.goto(`${origin}/?tag=read`);
     await expect(page.getByRole("link", { name: "첫 페이지 기사 가", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "읽지 않은 항목만 보기" }).click();
-    await expect(page.getByText("읽지 않은 엄선 소식이 없습니다", { exact: true })).toBeVisible();
+    await expect(page.getByText("읽지 않은 주요 뉴스가 없습니다", { exact: true })).toBeVisible();
   } finally {
     await context.close();
   }
@@ -203,7 +203,7 @@ test("all-read pages stop at the automatic bound and can continue manually witho
     await expect(more).toBeVisible();
     await more.click();
     await expect(more).toBeVisible();
-    await expect(page.getByText("이번 엄선 소식은 모두 읽었습니다", { exact: true })).toBeVisible();
+    await expect(page.getByText("이번 주요 뉴스는 모두 읽었습니다", { exact: true })).toBeVisible();
     await more.click();
     await expect(page.getByRole("link", { name: "배치 5", exact: true })).toBeVisible();
     assert.equal(await page.evaluate(() => localStorage.getItem("aihot-read-items")), raw);

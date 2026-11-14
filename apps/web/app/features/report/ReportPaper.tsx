@@ -91,7 +91,7 @@ function Source({ c, size = 16 }: { c: ReportCitation; size?: number }) {
     <span className="inline-flex min-w-0 items-center gap-1.5">
       <SourceAvatar name={c.sourceName} iconUrl={c.sourceIconUrl} iconSrcSet={c.sourceIconSrcSet} size={size} />
       <span className="truncate">{c.sourceName}</span>
-      {c.firstParty && <Badge tone="accent">1차</Badge>}
+      {c.firstParty && <Badge tone="accent">공식 발표</Badge>}
     </span>
   );
 }

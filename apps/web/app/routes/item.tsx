@@ -75,7 +75,7 @@ export function meta({ loaderData }: Route.MetaArgs) {
       articleLd({ path: `/items/${item.id}`, headline: item.title, description: item.summary, publishedAt: item.publishedAt ?? item.discoveredAt, image: `/og/items/${item.id}.png`, basedOn: item.links.original }),
       breadcrumbLd([
         { name: SITE.name, path: "/" },
-        { name: item.selected ? "엄선" : "전체 동향", path: item.selected ? "/" : "/all" },
+        { name: item.selected ? "주요 뉴스" : "전체 동향", path: item.selected ? "/" : "/all" },
         { name: item.title, path: `/items/${item.id}` },
       ]),
     ],
@@ -242,7 +242,7 @@ function ItemPreview({ preview }: { preview: FeedItemSummary }) {
   const shownAt = preview.publishedAt ?? preview.timelineAt;
   return (
     <div className="mx-auto max-w-[var(--page-max-reading)] pb-8">
-      <PhoneBar back={{ to: preview.selected ? "/" : "/all", label: preview.selected ? "엄선" : "전체" }} title={isPost ? preview.x!.authorName : preview.title} />
+      <PhoneBar back={{ to: preview.selected ? "/" : "/all", label: preview.selected ? "주요 뉴스" : "전체" }} title={isPost ? preview.x!.authorName : preview.title} />
       <article className="pb-6 pt-3" aria-busy="true">
         <div className="mb-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-3">
           <span className="font-semibold text-ink-2">{isX ? preview.x!.authorName : preview.source.name}</span>
@@ -295,7 +295,7 @@ function ItemGone() {
   const gone = isRouteErrorResponse(error) && error.status === 404;
   return (
     <div className="mx-auto max-w-sm pb-8">
-      <PhoneBar back={{ to: "/", label: "엄선" }} />
+      <PhoneBar back={{ to: "/", label: "주요 뉴스" }} />
       <div className="py-24 text-center">
         <div className="text-[20px] font-bold text-ink">{gone ? "콘텐츠를 찾을 수 없습니다" : "잠시 불러올 수 없습니다"}</div>
         <p className="mt-2 text-[13.5px] leading-relaxed text-ink-3">{gone ? "주소가 잘못되었거나 이 콘텐츠가 내려갔을 수 있습니다." : "서비스가 잠시 혼잡합니다. 잠시 후 다시 시도해 주세요."}</p>
@@ -497,7 +497,7 @@ function ItemView({ item, followups }: Loaded) {
 
       {/* Phones: back to where the reader came from, the title once it has scrolled away, more actions. */}
       <PhoneBar
-        back={{ to: item.selected ? "/" : "/all", label: item.selected ? "엄선" : "전체" }}
+        back={{ to: item.selected ? "/" : "/all", label: item.selected ? "주요 뉴스" : "전체" }}
         title={isPost ? item.x!.authorName : item.title}
         actions={
           <BarButton label="더 보기" onClick={() => setActionsOpen(true)}>
@@ -577,7 +577,7 @@ function ItemView({ item, followups }: Loaded) {
 
           {item.sameEvent && (
             <p className="mt-5 text-[13px] leading-relaxed text-ink-4">
-              같은 사건 중 엄선한 보도는
+              같은 사건 중 주요 뉴스로 선정한 보도는
               <Link viewTransition to={`/items/${item.sameEvent.id}`} className="text-ink-3 transition-colors hover:text-accent">
                 《{item.sameEvent.title}》
               </Link>
