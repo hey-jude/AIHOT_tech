@@ -95,7 +95,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
     >
       <div className="mb-5 flex flex-wrap gap-1.5">
         {p ? <Badge tone={p.visibility === "public" ? "ok" : "warn"}>{VISIBILITY_LABEL[p.visibility] ?? p.visibility}</Badge> : <Badge>미공개</Badge>}
-        {p?.selected && <Badge tone="accent">엄선</Badge>}
+        {p?.selected && <Badge tone="accent">주요 뉴스</Badge>}
         {p?.eligible === false && <Badge>공개 대상 아님</Badge>}
         {a.backfill && <Badge tone="warn">과거 데이터 수집</Badge>}
         <Badge>처리 상태 {a.processing_state}</Badge>
@@ -149,7 +149,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                     <div key={an.id} className="rounded-control bg-bg-sunk/60 p-3 ring-1 ring-line">
                       <div className="flex flex-wrap items-center gap-1.5 text-[12px]">
                         <Badge tone={an.relevance === "pass" ? "ok" : "muted"}>{an.relevance}</Badge>
-                        {an.selected && <Badge tone="accent">엄선 반영</Badge>}
+                        {an.selected && <Badge tone="accent">주요 뉴스 반영</Badge>}
                         <Badge tone="info">점수 {an.score}</Badge>
                         {an.category && <Badge>{CATEGORY_LABELS[an.category as keyof typeof CATEGORY_LABELS] ?? an.category}</Badge>}
                         <span className="text-ink-4">{an.model} · {an.prompt_version} · 입력 v{an.input_revision} · {an.origin} · {bj(an.created_at)}</span>
@@ -160,7 +160,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                         <div className="mt-2 flex flex-wrap gap-1.5 text-[11.5px]">
                           {an.receipts.map((r) => (
                             <span key={r.id} className="num rounded-mark bg-surface px-1.5 py-0.5 text-ink-3 ring-1 ring-line">
-                              영수증 #{r.id} · {r.status} · {r.model ?? r.service}{r.cost !== null ? ` · ${money(r.cost)}` : ""}
+                              요청 기록 #{r.id} · {r.status} · {r.model ?? r.service}{r.cost !== null ? ` · ${money(r.cost)}` : ""}
                             </span>
                           ))}
                         </div>
@@ -177,7 +177,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                 <KV
                   items={[
                     ["범위", VISIBILITY_LABEL[p.visibility] ?? p.visibility],
-                    ["엄선", p.selected ? `예 · 공개 시점 ${p.visible_after ? bj(p.visible_after, true) : "즉시"}` : "아니요"],
+                    ["주요 뉴스", p.selected ? `예 · 공개 시점 ${p.visible_after ? bj(p.visible_after, true) : "즉시"}` : "아니요"],
                     ["카테고리", p.category ? CATEGORY_LABELS[p.category as keyof typeof CATEGORY_LABELS] ?? p.category : null],
                     ["태그", (p.tags as string[] | null)?.join("、")],
                     ["요약", p.summary],
@@ -185,7 +185,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                     [
                       "본문 표시",
                       `${p.body_mode}${p.syndicate ? " · 외부에 전문 제공 가능" : ""}${
-                        p.indexable ? (p.seo_indexed_at ? " · 검색 등록 가능 (수동 설정)" : " · 검색 등록 가능 (엄선 자동)") : p.seo_excluded_at ? " · 검색 미등록 (수동 제외)" : " · 검색 미등록"
+                        p.indexable ? (p.seo_indexed_at ? " · 검색 등록 가능 (수동 설정)" : " · 검색 등록 가능 (주요 뉴스 자동)") : p.seo_excluded_at ? " · 검색 미등록 (수동 제외)" : " · 검색 미등록"
                       }`,
                     ],
                   ]}
@@ -200,7 +200,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                 </div>
               )}
             </Step>
-            <Step title="엄선 동기화 기록" meta={`${c.ledger.length}건`} tone={c.ledger.length ? "accent" : "muted"}>
+            <Step title="주요 뉴스 동기화 기록" meta={`${c.ledger.length}건`} tone={c.ledger.length ? "accent" : "muted"}>
               {c.ledger.length ? (
                 <ul className="space-y-1">
                   {c.ledger.map((l) => (
@@ -212,7 +212,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                   ))}
                 </ul>
               ) : (
-                <span className="text-ink-4">엄선 동기화 기록 없음</span>
+                <span className="text-ink-4">주요 뉴스 동기화 기록 없음</span>
               )}
             </Step>
             <Step title="이벤트 그룹화" tone={story ? "accent" : "muted"} meta={a.grouped_at ? `그룹화 ${bj(a.grouped_at, true)}` : "그룹화 안 됨"}>
@@ -235,7 +235,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
                       <span className="num text-ink-4">{bj(d.created_at)}</span>
                       <Badge>{d.verdict}</Badge>
                       {d.fact_id && <span>사실 #{d.fact_id}</span>}
-                      {d.receipt_id && <span className="text-ink-4">영수증 #{d.receipt_id}</span>}
+                      {d.receipt_id && <span className="text-ink-4">요청 기록 #{d.receipt_id}</span>}
                     </li>
                   ))}
                 </ul>
@@ -297,8 +297,8 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
         title={p?.indexable ? "검색 등록 취소" : "검색 등록 설정"}
         description={
           p?.indexable
-            ? "상세 페이지를 noindex로 되돌리고 사이트맵에서 제외합니다. 엄선 항목도 다시 설정하기 전까지 자동 등록되지 않습니다."
-            : "상세 페이지는 기본적으로 noindex이며 엄선 항목은 자동 등록됩니다. 설정하면 (공개 상태일 때만) index로 바뀌어 사이트맵에 추가되고 다음 IndexNow 제출에 포함됩니다. 독립적인 가치가 있고 요약과 본문이 충분한 콘텐츠에 적합합니다."
+            ? "상세 페이지를 noindex로 되돌리고 사이트맵에서 제외합니다. 주요 뉴스 항목도 다시 설정하기 전까지 자동 등록되지 않습니다."
+            : "상세 페이지는 기본적으로 noindex이며 주요 뉴스 항목은 자동 등록됩니다. 설정하면 (공개 상태일 때만) index로 바뀌어 사이트맵에 추가되고 다음 IndexNow 제출에 포함됩니다. 독립적인 가치가 있고 요약과 본문이 충분한 콘텐츠에 적합합니다."
         }
         confirmLabel={p?.indexable ? "검색 등록 취소" : "검색 등록 설정"}
         busy={pending === "seo"}
@@ -378,17 +378,17 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
             </Select>
           </Field>
           {fields.scoreMode === "value" && <Field label="점수 (0–100)"><Input type="number" min={0} max={100} step="any" required value={fields.score} onChange={(e) => setFields({ ...fields, score: e.target.value })} /></Field>}
-          <Field label="엄선">
+          <Field label="주요 뉴스">
             <Select value={fields.selected} onChange={(e) => setFields({ ...fields, selected: e.target.value })}>
               <option value="">모델 기준</option>
-              <option value="true">엄선 반영 강제</option>
-              <option value="false">엄선 제외 강제</option>
+              <option value="true">주요 뉴스 반영 강제</option>
+              <option value="false">주요 뉴스 제외 강제</option>
             </Select>
           </Field>
           <Field label="전달">
             <Select value={fields.silent} onChange={(e) => setFields({ ...fields, silent: e.target.value })}>
               <option value="">기본</option>
-              <option value="true">알림 없이 처리 (엄선되어도 전달 안 함)</option>
+              <option value="true">알림 없이 처리 (주요 뉴스로 선정되어도 전달 안 함)</option>
               <option value="false">알림 없이 처리 취소</option>
             </Select>
           </Field>
@@ -398,7 +398,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
       <ReasonDialog
         open={dialog === "analyze"}
         title="현재 버전 다시 평가"
-        description="새 모델 호출을 실행합니다 (비용이 발생하고 영수증이 기록됩니다). 같은 요청을 반복해도 중복 과금되지 않습니다."
+        description="새 모델 호출을 실행합니다 (비용이 발생하며 호출 내역이 저장됩니다). 같은 요청을 반복해도 중복 과금되지 않습니다."
         requireReason={false}
         confirmLabel="다시 평가"
         busy={pending === "analyze"}
@@ -408,7 +408,7 @@ export default function ContentItem({ loaderData }: Route.ComponentProps) {
       <ReasonDialog
         open={dialog === "presentation"}
         title="본문 표시 새로고침"
-        description="원본 웹페이지의 이미지, 링크, 서식 변경을 먼저 확인합니다. 텍스트가 같으면 기존 요약, 번역, 엄선 여부와 이벤트 소속을 유지합니다."
+        description="원본 웹페이지의 이미지, 링크, 서식 변경을 먼저 확인합니다. 텍스트가 같으면 기존 요약, 번역, 주요 뉴스 선정 여부와 이벤트 소속을 유지합니다."
         requireReason={false}
         confirmLabel={presentation?.ready && presentation.changed ? "표시 업데이트 적용" : "변경 미리보기"}
         busy={pending === "presentation"}

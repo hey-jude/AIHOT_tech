@@ -161,12 +161,12 @@ async function selectedGrouping(now: number, open: AlertState): Promise<Finding[
   return [{
     key: "content.grouping",
     level: "now",
-    title: "엄선 대상 기사가 중복 확인 단계에서 멈춰 아직 발행되지 않았습니다",
-    impact: `엄선 기준을 충족한 기사 ${waiting.length}건이 중복 확인을 마치지 못해 엄선 목록에 들어가지 않았습니다. 독자가 새 소식을 늦게 볼 수 있습니다.`,
+    title: "주요 뉴스 대상 기사가 중복 확인 단계에서 멈춰 아직 발행되지 않았습니다",
+    impact: `주요 뉴스 선정 기준을 충족한 기사 ${waiting.length}건이 중복 확인을 마치지 못해 주요 뉴스 목록에 들어가지 않았습니다. 독자가 새 소식을 늦게 볼 수 있습니다.`,
     heals: manual ? `${manual}건은 수동 처리해야 복구됩니다${manual < waiting.length ? "; 나머지는 자동 복구 중입니다" : ""}`
       : receipt ? "자동 복구 대기 중입니다. 결제 여부가 불명확한 요청은 30분 후 한 번 자동 허용됩니다." : "자동 재시도 중이나 대기 시간이 정상 범위를 넘었습니다.",
     action: manual ? "AI에 전달해 처리하세요. 결제 여부를 확인하거나, 기존 복구 권한에 따라 결제 불명 상태를 기록한 뒤 허용하세요." : "AI에 전달해 대기 원인을 확인하고 적체를 방지하세요.",
-    detail: waiting.slice(0, 8).map((item) => `${item.articleId}${item.receiptId ? ` 영수증 #${item.receiptId}` : ""}${item.error ? `: ${item.error.slice(0, 120)}` : ""}`).join("; "),
+    detail: waiting.slice(0, 8).map((item) => `${item.articleId}${item.receiptId ? ` 요청 기록 #${item.receiptId}` : ""}${item.error ? `: ${item.error.slice(0, 120)}` : ""}`).join("; "),
     since: waiting[0]!.since,
   }];
 }
@@ -200,7 +200,7 @@ async function contentProcessing(now: number, open: AlertState): Promise<Finding
     title: "새 콘텐츠 처리 지연으로 사이트에 표시되지 않습니다",
     impact: [p!.waiting > 0 && `처리를 기다리는 기사 ${p!.waiting}건`, p!.failed > 0 && `처리에 실패한 미복구 기사 ${p!.failed}건`]
       .filter(Boolean)
-      .join("; ") + "(엄선 소식과 화제 목록에 콘텐츠가 누락될 수 있습니다)",
+      .join("; ") + "(주요 뉴스와 화제 목록에 콘텐츠가 누락될 수 있습니다)",
     heals: p!.failed > 0 ? "실패한 기사를 복구 처리해야 합니다. 서비스가 복구되어도 적체가 모두 해소된 것은 아닙니다." : "대기 중인 기사는 계속 처리되지만 완료 여부를 확인해야 합니다.",
     action: "AI에 전달해 처리하세요.",
     // Article age is useful detail; incident duration starts at first detection.

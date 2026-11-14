@@ -22,8 +22,8 @@ export interface Capability {
 }
 
 export const CAPABILITIES = {
-  prefilter: { label: "엄선 사전 필터(업계 관련 여부, 넓은 범위로 탐색)", env: "PREFILTER_MODEL", default: DEFAULTS.prefilter ?? "default", purposes: ["prefilter_article"] },
-  score: { label: "엄선 점수(출처 등급과 카테고리 기준에 따른 독립 평가 2회)", env: "SCORE_MODEL", default: DEFAULTS.score ?? "default", purposes: ["score_article"] },
+  prefilter: { label: "주요 뉴스 사전 필터(업계 관련 여부, 넓은 범위로 탐색)", env: "PREFILTER_MODEL", default: DEFAULTS.prefilter ?? "default", purposes: ["prefilter_article"] },
+  score: { label: "주요 뉴스 선정 점수(출처 등급과 카테고리 기준에 따른 독립 평가 2회)", env: "SCORE_MODEL", default: DEFAULTS.score ?? "default", purposes: ["score_article"] },
   understand: { label: "콘텐츠 이해(선정 및 선정에 가까운 기사의 제목·요약·추천 사유, 이미지 지원 시 대표 이미지 확인)", env: "UNDERSTAND_MODEL", default: DEFAULTS.understand ?? "default", purposes: ["understand_article"] },
   summarize: { label: "제목·요약(그 외 기사의 한국어 제목과 요약)", env: "SUMMARIZE_MODEL", default: DEFAULTS.summarize ?? "default", purposes: ["summarize_article"] },
   wording: { label: "표현 교정(사이트에서 사용하지 않는 단어가 제목·요약·사유에 있을 때 해당 단어만 수정)", env: "WORDING_MODEL", default: DEFAULTS.wording ?? "default", purposes: ["mend_wording"], idle: () => !READER_WORDING.length },
@@ -33,7 +33,7 @@ export const CAPABILITIES = {
   digest: { label: "사건 요약", env: "DIGEST_MODEL", default: DEFAULTS.digest ?? "default", purposes: ["story_digest"] },
   // Dailies are computed by rule; report_lead and report_daily remain for their older receipts.
   report: { label: "주간·월간 브리핑 개요와 주제(일간은 규칙으로 생성하며 모델을 사용하지 않음)", env: "REPORT_MODEL", default: DEFAULTS.report ?? "default", purposes: ["report_weekly", "report_monthly", "report_lead", "report_daily"] },
-  translate: { label: "엄선 기사 전문 번역(인용 게시물 포함)", env: "TRANSLATE_MODEL", default: DEFAULTS.translate ?? "default", purposes: ["translate_body", "translate_quoted"] },
+  translate: { label: "주요 뉴스 전문 번역(인용 게시물 포함)", env: "TRANSLATE_MODEL", default: DEFAULTS.translate ?? "default", purposes: ["translate_body", "translate_quoted"] },
   feedback: { label: "피드백 선별(독자 피드백에 내용이 있는지 판단하고, 내용이 없으면 전달하지 않음)", env: "FEEDBACK_MODEL", default: DEFAULTS.feedback ?? "default", purposes: ["judge_feedback"] },
 } satisfies Record<string, Capability>;
 

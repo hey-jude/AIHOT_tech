@@ -73,7 +73,7 @@ export async function sourceHealthWeekly(now = Date.now()) {
     sql<{ uses: string[]; failing: boolean }[]>`SELECT uses, health = 'failing' AS failing FROM sources WHERE enabled AND ${moduleOnly}`,
   ]);
   const lines = [
-    `이번 주 ${n(items!.week)}건 수집(지난주 ${n(items!.prev)}, ${pct(items!.week, items!.prev)}), 이 중 엄선 ${n(items!.selected)}건`,
+    `이번 주 ${n(items!.week)}건 수집(지난주 ${n(items!.prev)}, ${pct(items!.week, items!.prev)}), 이 중 주요 뉴스 ${n(items!.selected)}건`,
     `활성 출처 ${counts!.enabled}곳, 이번 주 신규 ${counts!.added}곳; 수집 실패 ${counts!.failing}곳, 불안정 ${counts!.degraded}곳`,
   ];
   if (served.length) {

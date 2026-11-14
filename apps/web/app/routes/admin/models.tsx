@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export const meta: Route.MetaFunction = () => [{ title: `모델 및 평가 · ${SITE.name} 관리자` }];
 
-const SOURCE_LABEL = { admin: "관리자 전환", env: "환경 변수", default: "코드 기본값" } as const;
+const SOURCE_LABEL = { admin: "관리자 설정", env: "환경 변수", default: "코드 기본값" } as const;
 
 /** A cost the provider did not report and no price covers. */
 function Unpriced() {
@@ -34,7 +34,7 @@ export default function ModelsAdmin({ loaderData: m }: Route.ComponentProps) {
   return (
     <AdminPage
       title="모델 및 평가"
-      subtitle="기능별 사용 모델과 설정 출처 (관리자 전환 > 환경 변수 > 코드 기본값), 최근 성공률·소요 시간·비용입니다. 전환은 이후 새 작업에만 적용되며 기존 결과는 다시 계산하지 않습니다. 평가 모델을 바꾸기 전에 SelectBench 동일 샘플 비교를 확인하세요."
+      subtitle="기능별 사용 모델과 설정 우선순위(관리자 설정 > 환경 변수 > 코드 기본값), 최근 성공률·소요 시간·비용입니다. 전환은 이후 새 작업에만 적용되며 기존 결과는 다시 계산하지 않습니다. 평가 모델을 바꾸기 전에 SelectBench 동일 샘플 비교를 확인하세요."
       actions={<FilterChips param="days" options={[{ value: "1", label: "24시간" }, { value: "", label: "7일" }, { value: "30", label: "30일" }]} />}
     >
       <div className="grid grid-cols-1 gap-5">

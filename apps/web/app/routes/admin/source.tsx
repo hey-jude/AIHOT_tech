@@ -138,7 +138,7 @@ export default function SourceDetail({ loaderData }: Route.ComponentProps) {
         />
         <Stat label="누적 항목" value={num(stats.total)} />
         <Stat label="최근 7일" value={num(stats.last7d)} />
-        <Stat label="엄선 반영" value={num(stats.selected)} />
+        <Stat label="주요 뉴스 반영" value={num(stats.selected)} />
       </div>
       {s.last_error && s.health !== "ok" && <div className="mb-5 rounded-card bg-hot-soft px-4 py-3 text-[13px] text-hot ring-1 ring-hot/20">{s.last_error}</div>}
 
@@ -199,12 +199,12 @@ export default function SourceDetail({ loaderData }: Route.ComponentProps) {
                   </div>
                 </Field>
               )}
-              <Field label="등급" hint="T1만 1차 출처입니다.">
+              <Field label="등급" hint="T1만 공식 출처입니다.">
                 <Select value={draft.tier} onChange={(e) => setDraft({ ...draft, tier: e.target.value })}>
                   {Object.entries(TIER_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                 </Select>
               </Field>
-              <Field label="분류" hint="엄선 기준이 높아지며 1차 출처 여부는 바뀌지 않습니다.">
+              <Field label="분류" hint="주요 뉴스 선정 기준이 높아지며 공식 출처 여부는 바뀌지 않습니다.">
                 <Select value={draft.selection_class ?? ""} onChange={(e) => setDraft({ ...draft, selection_class: e.target.value || null })}>
                   <option value="">없음 (등급 기준)</option>
                   {Object.entries(SELECTION_CLASS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -257,7 +257,7 @@ export default function SourceDetail({ loaderData }: Route.ComponentProps) {
                     <Link to={`/admin/content/${r.id}`} className="line-clamp-2 min-w-[260px] text-ink hover:text-accent">{r.title_zh || r.title}</Link>
                   ),
                 },
-                { key: "s", label: "상태", render: (r) => <span className="flex gap-1">{r.selected && <Badge tone="accent">엄선</Badge>}{r.visibility && r.visibility !== "public" && <Badge tone="warn">{VISIBILITY_LABEL[r.visibility]}</Badge>}<Badge>{r.processing_state}</Badge></span> },
+                { key: "s", label: "상태", render: (r) => <span className="flex gap-1">{r.selected && <Badge tone="accent">주요 뉴스</Badge>}{r.visibility && r.visibility !== "public" && <Badge tone="warn">{VISIBILITY_LABEL[r.visibility]}</Badge>}<Badge>{r.processing_state}</Badge></span> },
                 { key: "d", label: "발견", render: (r) => <Time at={r.discovered_at} /> },
               ]}
             />

@@ -50,7 +50,7 @@ export default function Content({ loaderData }: Route.ComponentProps) {
                 label: "상태",
                 render: (r) => (
                   <span className="flex flex-wrap gap-1">
-                    {r.selected && <Badge tone="accent">엄선</Badge>}
+                    {r.selected && <Badge tone="accent">주요 뉴스</Badge>}
                     {r.visibility && <Badge tone={r.visibility === "public" ? "muted" : "warn"}>{VISIBILITY_LABEL[r.visibility] ?? r.visibility}</Badge>}
                     {!r.visibility && <Badge>{r.processing_state}</Badge>}
                   </span>

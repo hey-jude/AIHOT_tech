@@ -32,7 +32,7 @@ export async function releaseReceipt(id: number, input: { billed: boolean | null
   if (input.billed !== null && typeof input.billed !== "boolean") throw new Error("billed must be true, false or null");
   const [row] = await sql<{ status: string }[]>`SELECT status FROM receipts WHERE id = ${id}`;
   if (!row) return null;
-  if (row.status !== "unknown") throw new Conflict("결과가 불명확한 영수증만 수동으로 확인할 수 있습니다.");
+  if (row.status !== "unknown") throw new Conflict("결과가 확인되지 않은 요청만 수동으로 확인할 수 있습니다.");
   const error = input.billed === null ? `수동 허용: 결제 여부를 알 수 없어 권한에 따라 복구합니다. ${input.note}`
     : `수동 확인: ${input.billed ? "공급업체가 청구했지만 결과를 받지 못함" : "공급업체가 청구하지 않음"}. ${input.note}`;
   return release(id, error, actor, input.note, input.billed);

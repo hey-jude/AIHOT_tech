@@ -92,7 +92,7 @@ export default function Sources({ loaderData }: Route.ComponentProps) {
                   {r.uses.map((u) => <Badge key={u} tone="info">{useLabels[u] ?? u}</Badge>)}
                   <Badge tone="info">{r.tier.replace("_", ".")}</Badge>
                   {r.selection_class && <Badge tone="muted">{SELECTION.classes[r.selection_class]?.label ?? r.selection_class}</Badge>}
-                  {r.first_party && <Badge tone="ok">1차 출처</Badge>}
+                  {r.first_party && <Badge tone="ok">공식 출처</Badge>}
                 </div>
               ),
             },
@@ -110,7 +110,7 @@ export default function Sources({ loaderData }: Route.ComponentProps) {
             { key: "ok", label: "최근 성공", render: (r) => <Time at={r.last_ok_at} /> },
             { key: "interval", label: "주기", align: "right", render: (r) => `${r.interval_minutes}분` },
             { key: "items", label: "최근 7일 항목", align: "right", render: (r) => num(r.items_7d) },
-            { key: "sel", label: "최근 30일 엄선", align: "right", render: (r) => num(r.selected_30d) },
+            { key: "sel", label: "최근 30일 주요 뉴스", align: "right", render: (r) => num(r.selected_30d) },
           ]}
         />
       </Card>

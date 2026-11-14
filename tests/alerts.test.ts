@@ -285,7 +285,7 @@ test("selected identity delays show reader impact, recovery state and the affect
     await make("group-alert-failed", 20, "failed");
     let warning = await finding();
     assert.equal(warning?.level, "now");
-    assert.match(warning!.impact!, /엄선 기준을 충족한 기사 1건/);
+    assert.match(warning!.impact!, /주요 뉴스 선정 기준을 충족한 기사 1건/);
     assert.match(warning!.heals!, /수동 처리/);
     assert.match(warning!.detail!, /group-alert-failed/);
     const runs = await runsOverview();
@@ -428,7 +428,7 @@ test("provider recovery follows the refused model and current routing", async ()
       VALUES(${r!.id},4,'dashscope','qwen3.8-flash','received')`;
     assert.ok((await checkAlerts(now+2*3600_000)).open.includes('provider.refused.dashscope:qwen3.7-flash'), 'another model cannot prove recovery');
     let finding=(await collectFindings(now+2*3600_000)).find(f=>f.key==='provider.refused.dashscope:qwen3.7-flash')!;
-    assert.match(finding.impact!, /엄선 사전 필터/);
+    assert.match(finding.impact!, /주요 뉴스 사전 필터/);
     assert.doesNotMatch(finding.impact!, /구조 추출/);
     process.env.PREFILTER_MODEL = "qwen3.8-flash";
     invalidateModelCache();
@@ -459,7 +459,7 @@ test("provider impact includes the same evaluated fallback as modelRoute", async
     assert.equal(route.fallbackModel, "test-backup");
     const steps = await stepsOnService("zhipu", new Set(["glm-5.3-flash"]));
     assert.ok(steps.some((s) => s.startsWith("제목·요약(")), "the fallback can fail and stop articles even without a primary on this supplier");
-    assert.ok(!steps.includes("엄선 점수"), "an unevaluated fallback is not invented for other steps");
+    assert.ok(!steps.includes("주요 뉴스 선정 점수"), "an unevaluated fallback is not invented for other steps");
   } finally {
     for (const [key, value] of Object.entries(envs)) if (value === undefined) delete process.env[key]; else process.env[key] = value;
     delete MODELS["test-primary"];

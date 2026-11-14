@@ -22,7 +22,7 @@ export default function SelectBench({ loaderData }: Route.ComponentProps) {
   return (
     <AdminPage
       title="SelectBench"
-      subtitle="엄선 판단을 위한 모델 비교입니다. 동일한 수동 정답 표본으로 각 모델의 엄선 여부를 항목별 비교합니다. scripts/eval-selection.ts 실행 결과는 자동으로 가져오며, 보고서 파일을 업로드할 수도 있습니다."
+      subtitle="주요 뉴스 선정 판단을 위한 모델 비교입니다. 동일한 수동 정답 표본으로 각 모델의 주요 뉴스 선정 여부를 항목별 비교합니다. scripts/eval-selection.ts 실행 결과는 자동으로 가져오며, 보고서 파일을 업로드할 수도 있습니다."
       actions={
         <>
           <input
@@ -61,7 +61,7 @@ export default function SelectBench({ loaderData }: Route.ComponentProps) {
                   <table className="w-full min-w-[900px] text-[13px]">
                     <thead>
                       <tr className="border-b border-line text-left text-[12px] text-ink-3">
-                        {["모델", "유효 출력 정확도", "포괄률", "전체 정확도", "정밀도", "재현율", "F1", "엄선 비율", "정답 엄선", "실패", "평균 소요 시간", "입력/출력 토큰"].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}
+                        {["모델", "유효 출력 정확도", "포괄률", "전체 정확도", "정밀도", "재현율", "F1", "주요 뉴스 비율", "정답 주요 뉴스", "실패", "평균 소요 시간", "입력/출력 토큰"].map((h) => <th key={h} className="px-3 py-2 font-medium">{h}</th>)}
                       </tr>
                     </thead>
                     <tbody>

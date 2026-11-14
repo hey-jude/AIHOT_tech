@@ -15,7 +15,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 export const meta: Route.MetaFunction = ({ loaderData }) => [{ title: `${loaderData?.run.label ?? "SelectBench"} · ${SITE.name} 관리자` }];
 
-const GOLD: Record<string, [string, "accent" | "muted" | "info"]> = { select: ["엄선 대상", "accent"], reject: ["제외", "muted"], either: ["판단 보류", "info"] };
+const GOLD: Record<string, [string, "accent" | "muted" | "info"]> = { select: ["주요 뉴스 대상", "accent"], reject: ["제외", "muted"], either: ["판단 보류", "info"] };
 
 function verdict(d: AdminSelectBenchDecision | undefined, gold: string) {
   if (!d) return <span className="text-ink-4">—</span>;
@@ -23,7 +23,7 @@ function verdict(d: AdminSelectBenchDecision | undefined, gold: string) {
   const right = gold === "either" || d.decision === gold;
   return (
     <span className="inline-flex items-center gap-1.5">
-      <Badge tone={right ? (d.decision === "select" ? "ok" : "muted") : "bad"}>{d.decision === "select" ? "엄선 반영" : "제외"}</Badge>
+      <Badge tone={right ? (d.decision === "select" ? "ok" : "muted") : "bad"}>{d.decision === "select" ? "주요 뉴스 반영" : "제외"}</Badge>
       <span className="num text-[12px] text-ink-3">{d.score ?? "—"}</span>
     </span>
   );
@@ -53,7 +53,7 @@ export default function SelectBenchRun({ loaderData: d }: Route.ComponentProps) 
               <div className="text-[13.5px] font-semibold text-ink">{m}</div>
               <div className="num mt-1.5 text-[22px] font-semibold tracking-tight text-ink">유효 출력 F1 {pct(s.f1)}</div>
               <div className="num mt-0.5 text-[12px] text-ink-3">유효 출력 정확도 {pct(s.accuracy)} · 포괄률 {pct(s.coverage)} · 전체 정확도 {pct(s.completeAccuracy)}</div>
-              <div className="num mt-0.5 text-[12px] text-ink-3">정밀도 {pct(s.precision)} · 재현율 {pct(s.recall)} · 정답엄선 반영 {pct(s.goldSelectRate)}</div>
+              <div className="num mt-0.5 text-[12px] text-ink-3">정밀도 {pct(s.precision)} · 재현율 {pct(s.recall)} · 정답 주요 뉴스 반영률 {pct(s.goldSelectRate)}</div>
               <div className="num mt-0.5 text-[12px] text-ink-4">오선택 {s.fp ?? "—"} · 누락 {s.fn ?? "—"} · {s.decisiveErrors !== undefined ? <>판단 실패 {s.decisiveErrors}{s.eitherErrors ? ` · 판단 보류실패 ${s.eitherErrors}` : ""}</> : <>실패 {s.errors ?? 0}</>}</div>
             </button>
           );
@@ -114,7 +114,7 @@ export default function SelectBenchRun({ loaderData: d }: Route.ComponentProps) 
                                 <div key={m} className="rounded-control bg-surface p-3 ring-1 ring-line">
                                   <div className="mb-1 flex items-center justify-between text-[12px] text-ink-3"><span className="font-medium text-ink-2">{m}</span>{x?.category && <span>{CATEGORY_LABELS[x.category as keyof typeof CATEGORY_LABELS] ?? x.category}</span>}</div>
                                   <div className="text-[12.5px] leading-relaxed text-ink-2">{x?.error ?? x?.reason ?? "（이유 없음）"}</div>
-                                  <div className="mt-1 text-[11.5px] text-ink-4">관련성 {x?.relevance ?? "—"}{x?.receiptId ? ` · 영수증 #${x.receiptId}` : ""}</div>
+                                  <div className="mt-1 text-[11.5px] text-ink-4">관련성 {x?.relevance ?? "—"}{x?.receiptId ? ` · 요청 기록 #${x.receiptId}` : ""}</div>
                                 </div>
                               );
                             })}

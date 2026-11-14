@@ -42,7 +42,7 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
   const failing = r.jobs.filter((j) => j.status === "failed");
 
   return (
-    <AdminPage title="실행" subtitle={<>작업, 대기열, 출처 지연, 직접 확인이 필요한 영수증과 전송 현황. 20초마다 자동 새로고침 · 최근 확인 {bj(r.checkedAt)}</>}>
+    <AdminPage title="실행" subtitle={<>작업, 대기열, 출처 지연, 직접 확인이 필요한 요청과 전송 현황. 20초마다 자동 새로고침 · 최근 확인 {bj(r.checkedAt)}</>}>
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat
           label="worker"
@@ -51,18 +51,18 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
         />
         <Stat label="대기열 적체" value={num(queued)} tone={queued > 500 ? "warn" : undefined} hint="대기 및 재시도 대기" />
         <Stat label="실패한 예약 작업" value={num(failing.length)} tone={failing.length ? "bad" : "ok"} hint="최근 실행 실패" />
-        <Stat label="결과 미확인 영수증" value={num(r.receipts.issues.filter((x) => x.status === "unknown").length)} tone={r.receipts.issues.some((x) => x.status === "unknown") ? "bad" : "ok"} hint={`7일간 유료 요청 ${num(Object.values(r.receipts.counts).reduce((a, b) => a + b, 0))}회`} />
+        <Stat label="결과 미확인 요청" value={num(r.receipts.issues.filter((x) => x.status === "unknown").length)} tone={r.receipts.issues.some((x) => x.status === "unknown") ? "bad" : "ok"} hint={`7일간 유료 요청 ${num(Object.values(r.receipts.counts).reduce((a, b) => a + b, 0))}회`} />
         <Stat label="전송 확인 필요" value={num(r.deliveries.filter((d) => d.status === "unknown").length)} tone={r.deliveries.some((d) => d.status === "unknown") ? "bad" : "ok"} />
       </div>
 
       {r.grouping.waiting > 0 && (
-        <Card className="mb-5" title="중복 확인 대기 중인 엄선 후보" right={<span>{num(r.grouping.waiting)}건 대기 · {num(r.grouping.needsAttention)}건 10분 초과</span>} pad={false} scrollable>
-          <p className="px-4 py-3 text-[13px] text-ink-3">엄선 기준을 충족한 뉴스입니다. 중복 여부를 확인한 뒤 엄선에 반영됩니다. 오래 기다린 30건까지 표시합니다.</p>
+        <Card className="mb-5" title="중복 확인 대기 중인 주요 뉴스 후보" right={<span>{num(r.grouping.waiting)}건 대기 · {num(r.grouping.needsAttention)}건 10분 초과</span>} pad={false} scrollable>
+          <p className="px-4 py-3 text-[13px] text-ink-3">주요 뉴스 선정 기준을 충족한 뉴스입니다. 중복 여부를 확인한 뒤 주요 뉴스에 반영됩니다. 오래 기다린 30건까지 표시합니다.</p>
           <DataTable dense rows={r.grouping.items} rowKey={(item) => item.articleId} columns={[
             { key: "title", label: "뉴스", render: (item) => <Link className="text-accent" to={`/admin/content/${item.articleId}`}>{item.title}</Link> },
             { key: "since", label: "대기 시작", render: (item) => <Time at={item.since} /> },
-            { key: "recovery", label: "다음 단계", render: (item) => <Badge tone={item.recovery === "manual" ? "bad" : "warn"}>{item.recovery === "manual" ? "처리 후 복구" : item.recovery === "receipt" ? "유료 결과 확인 후 자동 복구" : "자동 처리 중"}</Badge> },
-            { key: "error", label: "원인", render: (item) => <span className="line-clamp-2 text-[12px] text-ink-3">{item.receiptId ? `영수증 #${item.receiptId} · ` : ""}{item.error ?? "신원 확인 대기"}</span> },
+            { key: "recovery", label: "다음 단계", render: (item) => <Badge tone={item.recovery === "manual" ? "bad" : "warn"}>{item.recovery === "manual" ? "처리 후 복구" : item.recovery === "receipt" ? "요청 결과 미확인 · 자동 복구 대기" : "자동 처리 중"}</Badge> },
+            { key: "error", label: "원인", render: (item) => <span className="line-clamp-2 text-[12px] text-ink-3">{item.receiptId ? `요청 기록 #${item.receiptId} · ` : ""}{item.error ?? "동일한 사건인지 확인 중"}</span> },
           ]} />
         </Card>
       )}
@@ -119,14 +119,14 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
       )}
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <Card title="확인이 필요한 유료 영수증" right={<span>{Object.entries(r.receipts.counts).map(([k, v]) => `${k} ${v}`).join(" · ")}</span>} pad={false} scrollable>
+        <Card title="확인이 필요한 유료 요청" right={<span>{Object.entries(r.receipts.counts).map(([k, v]) => `${k} ${v}`).join(" · ")}</span>} pad={false} scrollable>
           <DataTable
             dense
             rows={r.receipts.issues}
             rowKey={(x) => x.id}
-            empty="처리할 영수증 없음"
+            empty="처리할 요청 기록 없음"
             columns={[
-              { key: "id", label: "영수증", render: (x) => <span className="num">#{x.id}</span> },
+              { key: "id", label: "요청 ID", render: (x) => <span className="num">#{x.id}</span> },
               { key: "s", label: "상태", render: (x) => <Badge tone={x.status === "unknown" ? "bad" : "warn"}>{x.status}</Badge> },
               { key: "w", label: "서비스", render: (x) => <span className="whitespace-nowrap">{x.service}{x.model ? ` · ${x.model}` : ""}</span> },
               { key: "p", label: "용도", render: (x) => (x.subject && /^[\w-]{10,}$/.test(x.subject) && x.purpose.includes("analy") ? <Link className="text-accent" to={`/admin/content/${x.subject}`}>{x.purpose}</Link> : x.purpose) },
@@ -244,7 +244,7 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
 
       <ReasonDialog
         open={!!receipt}
-        title={`영수증 확인 #${receipt?.id ?? ""}`}
+        title={`요청 결과 확인 #${receipt?.id ?? ""}`}
         description="자동 복구 후에도 결과가 확인되지 않은 요청은 직접 승인해야 합니다. 과금 여부를 확인하세요. 확인할 수 없지만 복구 승인을 받은 경우에는 과금 여부 미확인을 선택하고 승인 근거를 적으세요. 승인하면 다시 호출되어 중복 과금될 수 있습니다."
         confirmLabel="기록 후 승인"
         busy={pending === "release"}

@@ -40,7 +40,7 @@ export default function NewSource() {
   };
 
   return (
-    <AdminPage title="출처 추가" subtitle="중복 확인과 미리보기를 먼저 진행하세요. RSS/JSON 등 안정적인 프로토콜을 우선 사용하고, 최초 수집 성공 후 실제 항목이 있어야 연동이 완료됩니다. 1차 출처는 운영 주체 또는 공식 교차 링크로 확인해야 합니다.">
+    <AdminPage title="출처 추가" subtitle="중복 확인과 미리보기를 먼저 진행하세요. RSS/JSON 등 안정적인 프로토콜을 우선 사용하고, 최초 수집 성공 후 실제 항목이 있어야 연동이 완료됩니다. 공식 출처는 운영 주체 또는 공식 교차 링크로 확인해야 합니다.">
       <div className="grid gap-5 xl:grid-cols-[1fr_420px]">
         <Card title="출처 정보">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -70,12 +70,12 @@ export default function NewSource() {
                 {Object.entries(MODE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </Select>
             </Field>
-            <Field label="등급" hint="T1만 1차 출처입니다.">
+            <Field label="등급" hint="T1만 공식 출처입니다.">
               <Select value={form.tier} onChange={(e) => setForm({ ...form, tier: e.target.value })}>
                 {Object.entries(TIER_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </Select>
             </Field>
-            <Field label="분류" hint="엄선 기준을 높입니다. 1차 출처 여부에는 영향을 주지 않습니다.">
+            <Field label="분류" hint="주요 뉴스 선정 기준을 높입니다. 공식 출처 여부에는 영향을 주지 않습니다.">
               <Select value={form.selection_class} onChange={(e) => setForm({ ...form, selection_class: e.target.value })}>
                 <option value="">없음(등급 기준)</option>
                 {Object.entries(SELECTION_CLASS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}

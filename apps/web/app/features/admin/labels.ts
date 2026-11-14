@@ -2,7 +2,7 @@
 import { SELECTION } from "@aihot/industry/selection";
 
 export const KIND_LABEL: Record<string, string> = { rss: "RSS", web_list: "웹 목록", json_list: "JSON", x_search: "X", mp_account: "위챗 공중계정", external: "외부 보고" };
-export const MODE_LABEL: Record<string, string> = { editorial: "엄선", hot_signal: "화제 신호", isolated: "뉴스 제외" };
+export const MODE_LABEL: Record<string, string> = { editorial: "주요 뉴스", hot_signal: "화제 신호", isolated: "뉴스 제외" };
 export const HEALTH_LABEL: Record<string, string> = { ok: "정상", degraded: "불안정", failing: "실패", paused: "일시정지", unknown: "미확인" };
 export const VISIBILITY_LABEL: Record<string, string> = { public: "공개", "summary-only": "요약만", withdrawn: "게시 중단" };
 export const FEEDBACK_STATUS: Record<string, string> = { new: "새 피드백", triaged: "처리 중", replied: "답변 완료", resolved: "해결됨", spam: "스팸" };
