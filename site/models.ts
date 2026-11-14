@@ -7,6 +7,22 @@ export type { ModelPreset } from "@aihot/contracts/site-config";
 
 /** 이름 있는 모델 예시 (각각 자기 키 설정 필요). 필요 없으면 지워도 됩니다. */
 export const PRESETS: Record<string, ModelPreset> = {
+  "free": {
+    service: "llm", model: "free", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
+  "gpt-6-luna": {
+    service: "llm", model: "gpt-6-luna", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
+  "deepseek-v4.1-flash": {
+    service: "llm", model: "deepseek-v4.1-flash", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
+  "gemini-3.8-flash": {
+    service: "llm", model: "gemini-3.8-flash", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
   // GLM 5.3 Flash always reasons; the lowest effort keeps short structured tasks fast.
   "glm-5.3-flash": {
     service: "zhipu", model: "glm-5.3-flash", baseUrlEnv: "ZHIPU_BASE_URL", apiKeyEnv: "ZHIPU_API_KEY",
