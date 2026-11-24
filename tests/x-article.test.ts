@@ -110,7 +110,7 @@ test("an article that cannot be fetched is flagged to the model, not passed off 
   assert.equal(await extractArticleBody(id), "unconfirmed");
   const input = (await loadAnalyzeInput(id))!;
   assert.equal(input.bodyStatus, "unconfirmed");
-  assert.match(renderContext(input), /【미디어】X 장문 링크 포함\(본문 미수집\)/);
+  assert.match(renderContext(input), /【Media】X Article link included \(body not fetched\)/);
 });
 
 test("a post a module reads (sources.uses) has its X Article fetched while it is news; one nobody reads whole is grouped as it is", async () => {

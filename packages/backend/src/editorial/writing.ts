@@ -70,44 +70,44 @@ export function needsShortTweetTranslation(text: string): boolean {
 const unfetchedXArticle = (a: AnalyzeInputArticle) => !!a.xPost && a.bodyStatus !== "ok" && onlyXArticleLink(String(a.xPost.text ?? ""));
 
 function materialQuality(a: AnalyzeInputArticle): string {
-  if (a.xPost) return "전체 본문(RSS/API의 content 필드 제공)";
-  if (a.bodyText) return a.source.fetchesBody ? "전체 본문(원문 웹페이지에서 수집)" : "전체 본문(RSS/API의 content 필드 제공)";
-  if (a.excerpt) return "요약만 있음(피드에 전체 본문 없음)";
-  if (a.bodyStatus === "unconfirmed") return "수집 실패, 제목만 사용 가능";
-  return "유효한 텍스트 없음";
+  if (a.xPost) return "Full body (RSS/API content field)";
+  if (a.bodyText) return a.source.fetchesBody ? "Full body (fetched from original page)" : "Full body (RSS/API content field)";
+  if (a.excerpt) return "Summary only (feed supplies no full body)";
+  if (a.bodyStatus === "unconfirmed") return "Fetch failed; title only";
+  return "No usable text";
 }
 
 /** The material as the prefilter and the content understanding read it. */
 export function renderContext(a: AnalyzeInputArticle, opts: { annotateQuoted?: boolean } = {}): string {
   const lines: string[] = [];
-  lines.push(`【출처】${a.source.name}(${a.source.kind}, tier=${a.source.tier || "미분류"})`);
-  if (a.source.tags?.length) lines.push(`【출처 태그】${a.source.tags.join(", ")}`);
+  lines.push(`【Source】${a.source.name} (${a.source.kind}, tier=${a.source.tier || "unrated"})`);
+  if (a.source.tags?.length) lines.push(`【Source tags】${a.source.tags.join(", ")}`);
   const name = a.xPost?.authorName || a.author;
   const handle = a.xPost?.handle;
-  if (name || handle) lines.push(`【작성자】${[name, handle ? `@${handle}` : null].filter(Boolean).join(" · ")}`);
-  if (a.publishedAt) lines.push(`【게시 시각(한국시간)】${describePublicationTime(a.publishedAt, a.publicationTime)}`);
+  if (name || handle) lines.push(`【Author】${[name, handle ? `@${handle}` : null].filter(Boolean).join(" · ")}`);
+  if (a.publishedAt) lines.push(`【Publication time】${describePublicationTime(a.publishedAt, a.publicationTime, "en")}`);
   const media = (a.xPost?.media ?? a.media ?? []) as Array<{ kind?: string }>;
   const images = media.filter((m) => m.kind === "image").length;
   const videos = media.filter((m) => m.kind === "video").length;
-  const mediaParts = [images ? `이미지 ${images}개` : null, videos ? `동영상 ${videos}개` : null, unfetchedXArticle(a) ? "X 장문 링크 포함(본문 미수집)" : null].filter(Boolean);
-  if (mediaParts.length) lines.push(`【미디어】${mediaParts.join(" · ")}`);
-  lines.push(`【원문 링크】${a.url}`);
-  lines.push(`【제목】${a.title}`);
+  const mediaParts = [images ? `${images} images` : null, videos ? `${videos} videos` : null, unfetchedXArticle(a) ? "X Article link included (body not fetched)" : null].filter(Boolean);
+  if (mediaParts.length) lines.push(`【Media】${mediaParts.join(" · ")}`);
+  lines.push(`【Source URL】${a.url}`);
+  lines.push(`【Title】${a.title}`);
   const quoted = a.xPost?.quoted?.text ? a.xPost.quoted : null;
   if (quoted) {
-    const label = quoted.handle ? `@${quoted.handle}` : "원 게시물";
+    const label = quoted.handle ? `@${quoted.handle}` : "original post";
     if (opts.annotateQuoted) {
-      lines.push(`【인용 ${label}】(아래는 작성자가 퍼오거나 인용한 **다른 사람의** 콘텐츠이며 작성자의 창작물이 아님)`);
+      lines.push(`【Quoted ${label}】(the following is **someone else’s** content reposted/quoted by the author, not the author’s own work)`);
       lines.push(String(quoted.text));
     } else {
-      lines.push(`【인용 ${label}】${quoted.text}`);
+      lines.push(`【Quoted ${label}】${quoted.text}`);
     }
   }
   lines.push("");
-  lines.push(opts.annotateQuoted && quoted ? "【본문(작성자 본인의 콘텐츠)】" : "【본문】");
-  lines.push(capBody(a.xPost ? String(a.xPost.text ?? a.title) : (a.bodyText ?? a.excerpt ?? "(본문 없음)")));
+  lines.push(opts.annotateQuoted && quoted ? "【Body (author’s own content)】" : "【Body】");
+  lines.push(capBody(a.xPost ? String(a.xPost.text ?? a.title) : (a.bodyText ?? a.excerpt ?? "(no body)")));
   lines.push("");
-  lines.push(`【자료 품질】${materialQuality(a)}`);
+  lines.push(`【Material quality】${materialQuality(a)}`);
   return lines.join("\n");
 }
 

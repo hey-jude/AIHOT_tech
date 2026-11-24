@@ -97,14 +97,14 @@ export function describeReport(r: ReportView, label: string, extra = "", summary
   const f = r.frame;
   return [
     `【${label}】${extra}`,
-    `제목: ${r.title}`,
-    `출처: ${r.source}${r.firstParty ? "(당사자/공식)" : ""} | 게시 시각: ${describePublicationTime(r.at, r.publicationTime)}`,
-    `요약: ${(r.summary ?? "").slice(0, summaryLimit) || "(없음)"}`,
-    r.scope && r.scope !== "unknown" ? `자료 범위: ${r.scope === "composite" ? "여러 독립 사건을 다룬 종합 보도" : "단일 사건 또는 주제"}` : null,
+    `Title: ${r.title}`,
+    `Source: ${r.source}${r.firstParty ? " (first party/official)" : ""} | Publication time: ${describePublicationTime(r.at, r.publicationTime, "en")}`,
+    `Summary: ${(r.summary ?? "").slice(0, summaryLimit) || "(none)"}`,
+    r.scope && r.scope !== "unknown" ? `Scope: ${r.scope === "composite" ? "roundup of independent occurrences" : "single occurrence or topic"}` : null,
     f && (f.subject || f.action || f.object)
-      ? `사실 요소: 주체=${f.subject || "?"}; 행동=${f.action || "?"}; 대상=${f.object || "?"}; 날짜=${f.occurredAt || "알 수 없음"}`
+      ? `Fact frame: subject=${f.subject || "?"}; action=${f.action || "?"}; object=${f.object || "?"}; date=${f.occurredAt || "unknown"}`
       : null,
-    r.sourceText ? `【원문 근거】\n${r.sourceText.slice(0, GROUP_BODY_CHARS)}\n【원문 근거 끝】` : null,
+    r.sourceText ? `【Source evidence】\n${r.sourceText.slice(0, GROUP_BODY_CHARS)}\n【End source evidence】` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -112,24 +112,24 @@ export function describeReport(r: ReportView, label: string, extra = "", summary
 
 export const candidateKey = (index: number) => `C${index + 1}`;
 
-export function batchUser(query: ReportView, cands: CandidateView[], queryLabel = "새 보도", reading: ReadingContext[] = []): string {
+export function batchUser(query: ReportView, cands: CandidateView[], queryLabel = "New report", reading: ReadingContext[] = []): string {
   const list = cands
     .map((c, i) => [
-      describeReport(c.report, `후보 ${candidateKey(i)}`, `(이 사실에 대한 보도 ${c.members}건; 사실 제목: ${c.factTitle})`),
-      queryLabel === "새 보도" ? c.selected && c.selectedReport
-        ? describeReport(c.selectedReport, "기존 공개 엄선", "(추가 정보는 이 공개 기사와만 비교)")
-        : "【공개 엄선 없음】이 후보는 동일 사건인지 판단하는 용도로만 사용합니다." : null,
+      describeReport(c.report, `Candidate ${candidateKey(i)}`, `(${c.members} reports for this fact; fact title: ${c.factTitle})`),
+      queryLabel === "New report" ? c.selected && c.selectedReport
+        ? describeReport(c.selectedReport, "Published selection", "(compare added information only against this published report)")
+        : "【No published selection】Use this candidate only to judge identity." : null,
     ].filter(Boolean).join("\n"))
     .join("\n\n");
   const background = reading.map(({ report, sourceText }, i) => [
-    describeReport(report, `기존 공개 엄선 참고 자료 R${i + 1}`, "(정보 범위만 비교하며 사실 후보는 아님)", 2000),
-    sourceText ? `【기존 엄선 보도의 원문 근거】\n${sourceText.slice(0, GROUP_BODY_CHARS)}\n【원문 근거 끝】` : null,
+    describeReport(report, `Published selection reading context R${i + 1}`, "(compare coverage only; not a fact candidate)", 2000),
+    sourceText ? `【Published selection source evidence】\n${sourceText.slice(0, GROUP_BODY_CHARS)}\n【End source evidence】` : null,
   ].filter(Boolean).join("\n")).join("\n\n");
-  return `${describeReport(query, queryLabel)}\n\n${list}${background ? `\n\n${background}` : ""}\n\n${queryLabel}와 각 후보의 관계는 무엇인가요?${background ? " 기존 공개 엄선 기사 전체와 함께 비교해 추가 가치를 판단하세요. 사실 후보가 없으면 decisions=[]로 반환하세요." : ""}`;
+  return `${describeReport(query, queryLabel)}\n\n${list}${background ? `\n\n${background}` : ""}\n\n${queryLabel}: what is its relationship to each candidate?${background ? " Also compare all published selections to judge added value; without fact candidates return decisions=[]." : ""}`;
 }
 
 export function pairUser(a: ReportView, b: ReportView): string {
-  return `${describeReport(a, "보도 A")}\n\n${describeReport(b, "보도 B")}\n\n두 보도의 관계는 무엇인가요?`;
+  return `${describeReport(a, "Report A")}\n\n${describeReport(b, "Report B")}\n\nWhat is the relationship between these reports?`;
 }
 
 /** An identity answer must address every supplied candidate exactly once. */

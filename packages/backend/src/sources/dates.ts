@@ -88,7 +88,13 @@ export function readPublicationDate(value: string | null | undefined, utcOffset 
 }
 
 /** Legacy timestamps have lost their source precision; midnight never tells us which it was. */
-export function describePublicationTime(at: Date | null, source: string | null | undefined): string {
+export function describePublicationTime(at: Date | null, source: string | null | undefined, language: "ko" | "en" = "ko"): string {
+  if (language === "en") {
+    if (!at) return "Unknown";
+    if (!source) return `${seoulDate(at)} ${seoulTime(at)} (historical record; original precision unknown)`;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(source)) return `${source} (source provides date only; time unknown)`;
+    return `${seoulDate(at)} ${seoulTime(at)} (Asia/Seoul)`;
+  }
   if (!at) return "알 수 없음";
   if (!source) return `${seoulDate(at)} ${seoulTime(at)}(과거 기록, 원래 시각의 정밀도 알 수 없음)`;
   if (/^\d{4}-\d{2}-\d{2}$/.test(source)) return `${source}(원문에 날짜만 있고 시각은 없음)`;

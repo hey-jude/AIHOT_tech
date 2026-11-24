@@ -132,3 +132,48 @@ test("retries consume the shared network budget without saving duplicate feedbac
   await assert.rejects(submitFeedback({...input,userAgent:'Chrome',content:'换浏览器仍共享已用完的额度'}),e => e instanceof FeedbackRejected && e.status===429 && e.retryAfter!>0 && e.retryAfter!<=3600);
   assert.equal(Number((await sql`SELECT count(*) AS n FROM feedback WHERE content=${input.content}`)[0]!.n),1);
 });
+
+test("daily cleanup expires articles after seven days of discovery and cascades content while retaining paid receipts", async () => {
+  const { dailyRetention } = await import("@aihot/backend/operations/retention");
+  const now = new Date('2030-01-05T00:00:00Z');
+  const cutoff = new Date(now.getTime() - 7 * 86400_000);
+  await sql`INSERT INTO sources(id,name,kind,config) VALUES ('retention-source','Retention','rss','{}')`;
+  const old = new Date(cutoff.getTime() - 1);
+  // Multiple batches and the exact boundary; publication age must not shorten discovery retention.
+  for (const [id, discovered] of [['retention-old',old],['retention-boundary',cutoff],['retention-new',now]] as const) {
+    await sql`INSERT INTO articles(id,source_id,identity_key,url,title,discovered_at,timeline_at,published_at)
+      VALUES (${id},'retention-source',${id},${`https://example.org/${id}`},${id},${discovered},${discovered},'2000-01-01')`;
+    await sql`INSERT INTO translations(article_id,lang,revision,body_text) VALUES (${id},'ko',1,'translated body')`;
+    await sql`INSERT INTO analyses(article_id,input_revision,origin) VALUES (${id},1,'rule')`;
+  }
+  await sql`INSERT INTO articles(id,source_id,identity_key,url,title,discovered_at,timeline_at)
+    SELECT 'retention-batch-'||n,'retention-source','retention-batch-'||n,'https://example.org/batch/'||n,'Old',${old},${old}
+    FROM generate_series(1,500) n`;
+  await sql`INSERT INTO receipts(logical_key,service,purpose,subject,status,response)
+    VALUES ('retention-receipt','llm','score_article','retention-old','completed','{"attentionScore":80}')`;
+  assert.ok((await dailyRetention(now)).deletedArticles >= 501);
+  assert.deepEqual((await sql`SELECT id FROM articles WHERE source_id='retention-source' ORDER BY id`).map(r => r.id), ['retention-boundary','retention-new']);
+  assert.equal((await sql`SELECT 1 FROM translations WHERE article_id='retention-old'`).length, 0);
+  assert.equal((await sql`SELECT 1 FROM analyses WHERE article_id='retention-old'`).length, 0);
+  assert.equal((await sql`SELECT 1 FROM receipts WHERE logical_key='retention-receipt' AND response->>'attentionScore'='80'`).length, 1);
+  assert.equal((await dailyRetention(now)).deletedArticles, 0);
+});
+
+
+test("daily cleanup keeps seven days of terminal job runs including failures and never removes active runs", async () => {
+  const { dailyRetention } = await import("@aihot/backend/operations/retention");
+  const now = new Date('2031-01-05T00:00:00Z');
+  const cutoff = new Date(now.getTime() - 7 * 86400_000);
+  const old = new Date(cutoff.getTime() - 1);
+  for (const status of ['ok','failed','skipped']) {
+    await sql`INSERT INTO job_runs(job,status,started_at,finished_at) VALUES
+      ('retention-old',${status},${old},${old}),
+      ('retention-boundary',${status},${old},${cutoff}),
+      ('retention-recent-completion',${status},${old},${now}),
+      ('retention-legacy',${status},${old},null)`;
+  }
+  await sql`INSERT INTO job_runs(job,status,started_at) VALUES ('retention-active','running',${old})`;
+  assert.ok((await dailyRetention(now)).deletedJobRuns >= 6);
+  assert.equal((await sql`SELECT 1 FROM job_runs WHERE job IN ('retention-old','retention-legacy')`).length, 0);
+  assert.equal((await sql`SELECT 1 FROM job_runs WHERE job IN ('retention-boundary','retention-recent-completion','retention-active')`).length, 7);
+});

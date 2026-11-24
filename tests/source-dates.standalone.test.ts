@@ -150,12 +150,16 @@ test('real midnight keeps its precision; date-only and missing source precision 
   assert.equal(describePublicationTime(new Date('2026-10-13T07:00:00Z'), '2026-10-13'), '2026-10-13(원문에 날짜만 있고 시각은 없음)');
   assert.equal(describePublicationTime(new Date('2026-10-13T07:00:00Z'), null), '2026-10-13 16:00(과거 기록, 원래 시각의 정밀도 알 수 없음)');
   assert.equal(describePublicationTime(null, null), '알 수 없음');
+  assert.equal(describePublicationTime(new Date('2026-10-13T07:00:00Z'), '2026-10-13', 'en'), '2026-10-13 (source provides date only; time unknown)');
+  assert.equal(describePublicationTime(new Date('2026-10-13T07:00:00Z'), null, 'en'), '2026-10-13 16:00 (historical record; original precision unknown)');
+  assert.equal(describePublicationTime(new Date('2026-10-13T07:00:00Z'), '2026-10-13T07:00:00.000Z', 'en'), '2026-10-13 16:00 (Asia/Seoul)');
+  assert.equal(describePublicationTime(null, null, 'en'), 'Unknown');
 });
 
 test('grouping distinguishes a publication day from an exact instant', () => {
   const report = { title: 'Release', source: 'Official', firstParty: true, at: new Date('2026-10-13T07:00:00Z'), publicationTime: '2026-10-13', summary: null };
   const text = describeReport(report, '报道');
-  assert.match(text, /게시 시각: 2026-10-13\(원문에 날짜만 있고 시각은 없음\)/);
+  assert.match(text, /Publication time: 2026-10-13 \(source provides date only; time unknown\)/);
   assert.doesNotMatch(text, /15:00/);
 });
 

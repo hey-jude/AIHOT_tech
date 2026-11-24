@@ -109,7 +109,7 @@ test("a selected item: prefilter, two scores, the content understanding and the 
   assert.equal(r.output.scope, "single");
   assert.equal(r.output.fact.evidence, "a lab released a model");
   const score = requests.find((q) => q.marker === "CLEAR" && q.step === "score")!;
-  assert.match(score.user, /【제목】\nCLEAR model release/, "the score reads the original title, before any writing");
+  assert.match(score.user, /【Title】\nCLEAR model release/, "the score reads the original title, before any writing");
 });
 
 test("a word the site keeps from readers goes back once to be changed; copy without one is not sent", async () => {

@@ -45,15 +45,15 @@ const provider = await stub((_hit, req) => {
   const body = JSON.parse(req.body);
   const user = String(body.messages.at(-1).content);
   users.push(user);
-  const ids = [...user.matchAll(/【후보 (C\d+)】/g)].map(m => m[1]);
-  const matching = new Set([...user.matchAll(/【후보 (C\d+)】\(이 사실에 대한 보도 \d+건; 사실 제목: (.*)\)/g)]
+  const ids = [...user.matchAll(/【Candidate (C\d+)】/g)].map(m => m[1]);
+  const matching = new Set([...user.matchAll(/【Candidate (C\d+)】\(\d+ reports for this fact; fact title: (.*)\)/g)]
     .filter(m => m[2] === sameOccurrenceTitle).map(m => m[1]));
-  if (user.includes("보도 A")) {
+  if (user.includes("Report A")) {
     pairCalls += 1;
     if (pairFails) return { choices: [{ message: { content: "不是 JSON" } }] };
   }
   const pairRelation = !pairAnswers ? relation : String(body.model).includes("mimo") ? pairAnswers.mimo : pairAnswers.deepseek;
-  const answer = user.includes("보도 A")
+  const answer = user.includes("Report A")
     ? { a: "a", b: "b", relation: pairRelation, confidence: 1, difference: "" }
     : { query: "当前动作", decisions: ids.map(id => ({ id,
       relation: sameOccurrenceTitle ? matching.has(id) ? "SAME_OCCURRENCE" : "UNRELATED" : relation, confidence: 1, note: "" })), selection };
@@ -187,7 +187,7 @@ test("a material revision rechecks value in the same batch while keeping its con
     relation = "UNRELATED"; // The new value judgement cannot move its established identity.
     const prompts = users.length;
     const result = await groupArticle(id);
-    assert.equal(users.slice(prompts).filter((user) => !user.includes("보도 A")).length, 1, "one existing batch judges the replacement revision");
+    assert.equal(users.slice(prompts).filter((user) => !user.includes("Report A")).length, 1, "one existing batch judges the replacement revision");
     assert.deepEqual([result.verdict,result.factId,result.storyId], ["kept",original.factId,original.storyId]);
     assert.deepEqual([(await state(id)).selection_adds_value,(await state(id)).selected], [addsValue,addsValue]);
     const calls = provider.hits();
@@ -257,7 +257,7 @@ for (const addsValue of [false, true]) test(`a selected composite supplies readi
   assert.ok(users.at(-1)!.includes(text + "综合首发"));
   assert.ok(users.at(-1)!.includes("末项功能支持输出透明图层"), "the end of a public composite summary remains readable");
   assert.ok(users.at(-1)!.includes("原文核心功能：可调参数、自动资源和多人联机"), "saved original evidence covers facts omitted by a terse summary");
-  assert.doesNotMatch(users.at(-1)!, /【후보 C\d+】/);
+  assert.doesNotMatch(users.at(-1)!, /【Candidate C\d+】/);
   assert.equal(result.verdict, "new-story", "the new report owns its identity independently of the reading context");
   assert.equal((await state(background)).fact_id, null);
   assert.equal((await sql`SELECT 1 FROM fact_articles WHERE article_id=${background}`).length, 0);
@@ -296,8 +296,8 @@ test("a launch selected before the identity window is still reader coverage for 
   const calls = provider.hits();
   const result = await groupArticle(id);
   assert.equal(provider.hits(), calls + 1, "judged in the batch call");
-  assert.ok(users.at(-1)!.includes("기존 공개 엄선 참고 자료 R1") && users.at(-1)!.includes(text + "首发"));
-  assert.doesNotMatch(users.at(-1)!, /【후보 C\d+】/);
+  assert.ok(users.at(-1)!.includes("Published selection reading context R1") && users.at(-1)!.includes(text + "首发"));
+  assert.doesNotMatch(users.at(-1)!, /【Candidate C\d+】/);
   assert.equal(result.verdict, "new-story", "identity keeps its own window");
   assert.deepEqual([(await state(id)).selection_adds_value, (await state(id)).selected], [false, false]);
 });
@@ -313,9 +313,9 @@ test("a selected fact still among the candidates is not repeated as reading cont
   selection = { addsValue: false, reason: "已覆盖" };
   const id = await report(text + "再次介绍");
   await groupArticle(id);
-  const batch = users.findLast(u => u.startsWith(`【새 보도】\n제목: ${text}再次介绍`))!;
-  assert.match(batch, /【후보 C1】/);
-  assert.doesNotMatch(batch, /기존 공개 엄선 참고 자료/);
+  const batch = users.findLast(u => u.startsWith(`【New report】\nTitle: ${text}再次介绍`))!;
+  assert.match(batch, /【Candidate C1】/);
+  assert.doesNotMatch(batch, /Published selection reading context/);
 });
 
 test("unselected candidates are not prior selected coverage", async () => {

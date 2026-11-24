@@ -92,7 +92,7 @@ export function scoreInputTime(at: Date): string {
 export function buildScoreInput(a: AnalyzeInputArticle): string {
   let body: string;
   if (a.xPost) {
-    const quoted = a.xPost.quoted?.text ? `\n\n[인용 ${a.xPost.quoted.handle ? `@${a.xPost.quoted.handle}` : "원 게시물"}]: ${a.xPost.quoted.text}` : "";
+    const quoted = a.xPost.quoted?.text ? `\n\n[Quoted ${a.xPost.quoted.handle ? `@${a.xPost.quoted.handle}` : "original post"}]: ${a.xPost.quoted.text}` : "";
     body = `${String(a.xPost.text ?? "").trim()}${quoted}`.trim();
   } else {
     body = (a.bodyText ?? a.excerpt ?? "").trim();
@@ -100,10 +100,10 @@ export function buildScoreInput(a: AnalyzeInputArticle): string {
   if (!body) body = a.title;
   const at = a.publishedAt;
   return [
-    "시스템 규칙에 따라 다음 단일 자료가 다루는 사건을 평가하세요. attentionScore만 출력하세요.",
-    `【게시 시각(한국시간)】\n${at ? a.publicationTime === undefined || a.publicationTime?.includes("T") ? scoreInputTime(at) : describePublicationTime(at, a.publicationTime) : "알 수 없음(수집 시각은 게시 시각이 아님)"}`,
-    `【제목】\n${a.title.trim()}`,
-    `【전체 본문】\n${body.length > MAX_BODY_CHARS ? body.slice(0, MAX_BODY_CHARS) : body}`,
+    "Evaluate the event represented by this single source according to the system rules. Output only attentionScore.",
+    `【Publication time (Asia/Seoul)】\n${at ? a.publicationTime === undefined || a.publicationTime?.includes("T") ? scoreInputTime(at) : describePublicationTime(at, a.publicationTime, "en") : "Unknown (collection time is not publication time)"}`,
+    `【Title】\n${a.title.trim()}`,
+    `【Full body】\n${body.length > MAX_BODY_CHARS ? body.slice(0, MAX_BODY_CHARS) : body}`,
   ].join("\n\n");
 }
 
