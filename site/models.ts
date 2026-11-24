@@ -23,6 +23,18 @@ export const PRESETS: Record<string, ModelPreset> = {
     service: "llm", model: "gemini-3.8-flash", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
     jsonMode: true,
   },
+  "nemotron-3.5-super-vl": {
+    service: "llm", model: "nemotron-3.5-super-vl", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true, vision: true,
+  },
+  "qwen3.8-27b": {
+    service: "llm", model: "qwen3.8-27b", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
+  "glm-5.3-flash-llm": {
+    service: "llm", model: "glm-5.3-flash", baseUrlEnv: "LLM_BASE_URL", apiKeyEnv: "LLM_API_KEY",
+    jsonMode: true,
+  },
   // GLM 5.3 Flash always reasons; the lowest effort keeps short structured tasks fast.
   "glm-5.3-flash": {
     service: "zhipu", model: "glm-5.3-flash", baseUrlEnv: "ZHIPU_BASE_URL", apiKeyEnv: "ZHIPU_API_KEY",
