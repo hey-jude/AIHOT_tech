@@ -209,6 +209,7 @@ export function fitted(text: string, max: number): string | null {
  * An automatic run skips a complete period of quiet dailies without publishing an empty issue.
  */
 async function composePeriod(kind: "weekly" | "monthly", key: string, startDate: string, endDateInclusive: string, reason: string | undefined) {
+  if (!REPORTS.enabled[kind]) return null;
   const previous = await savedReport(kind, key);
   if (previous && reason === undefined) return { key, entries: previous.entries };
   // The dailies' windows run from the edition time the day before the first to that time on the last.
@@ -331,6 +332,7 @@ export async function composeDueReports(now = new Date(), limit = 8): Promise<{ 
   // up and is not due (a site started mid-month would otherwise fail that month's issue on every run).
   const [{ first: firstDaily }] = await sql<{ first: string | null }[]>`SELECT min(key) AS first FROM reports WHERE kind = 'daily'`;
   kinds: for (const k of kinds) {
+    if (!REPORTS.enabled[k.kind]) continue;
     const have = new Set((await sql<{ key: string }[]>`SELECT key FROM reports WHERE kind = ${k.kind}`).map((r) => r.key));
     const first = [...have].sort()[0] ?? k.due;
     for (let key = first; key <= k.due; key = k.next(key)) {

@@ -4,6 +4,7 @@ import { editionAt, stub, tag } from "./setup.ts";
 import assert from "node:assert/strict";
 import { after, before, beforeEach, test } from "node:test";
 import { closeDb, sql } from "@aihot/backend/db";
+import { REPORTS } from "@aihot/site";
 import { addDays } from "@aihot/contracts/time";
 import { stopBoss } from "@aihot/backend/jobs/queue";
 import { composeDaily, composeDueReports, composeWeekly, composeMonthly } from "@aihot/backend/reports/compose";
@@ -20,6 +21,7 @@ before(async () => {
   await sql`INSERT INTO sources (id, name, kind, tier) VALUES (${SOURCE}, 'Report recovery', 'rss', 'T1')`;
 });
 beforeEach(async () => {
+  Object.assign(REPORTS.enabled, { daily: true, weekly: true, monthly: true });
   await sql`DELETE FROM reports`;
   await sql`DELETE FROM articles WHERE source_id = ${SOURCE}`;
 });
@@ -190,4 +192,20 @@ test("quiet first periods start at the site's first daily, while later missing d
   await sql`DELETE FROM reports WHERE kind = 'daily' AND key = '2024-02-08'`;
   await assert.rejects(composeWeekly("2024-W06"), /no daily entries/);
   await assert.rejects(composeMonthly("2024-02"), /no daily entries/);
+});
+
+
+test("daily-only configuration skips weekly and monthly catch-up and explicit generation without model calls", async () => {
+  REPORTS.enabled.weekly = false;
+  REPORTS.enabled.monthly = false;
+  await daily("2024-02-29", await item("2024-02-29"));
+  await item("2024-03-01");
+  const calls = provider.hits();
+  const result = await composeDueReports(editionAt("monthly", "2024-03-01", 60));
+  assert.deepEqual(result, { generated: ["daily:2024-03-01"], failed: [] });
+  assert.equal(await composeWeekly("2024-W08", "manual request"), null);
+  assert.equal(await composeMonthly("2024-02", "manual request"), null);
+  assert.equal(provider.hits(), calls);
+  assert.equal((await sql`SELECT 1 FROM reports WHERE kind IN ('weekly','monthly')`).length, 0);
+  assert.ok(await report("daily", "2024-02-29"));
 });

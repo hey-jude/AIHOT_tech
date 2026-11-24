@@ -1,8 +1,9 @@
-// Daily housekeeping: expired leases, old run history, feedback screenshots left behind and derived caches,
+// Daily housekeeping: expired articles and leases, old run history, feedback screenshots and derived caches,
 // and the site's modules' own periods (their server.ts retention). Paid receipts and their raw responses are
 // kept: they stop a request being paid for twice and are the record for reviewing a result.
 import { readdir, stat, unlink } from "node:fs/promises";
 import path from "node:path";
+import { ARTICLE_RETENTION_DAYS, JOB_RUN_RETENTION_DAYS } from "@aihot/site";
 import { config } from "../config.ts";
 import { sql } from "../db.ts";
 import { expireFeedbackBans, pruneFeedbackSubmissionState, screenshotsForwarded } from "./feedback.ts";
@@ -34,11 +35,23 @@ export async function dailyRetention(now = new Date()) {
   // The modules' periods first (their aggregates before their deletions, as the engine's).
   const modules: Record<string, unknown> = {};
   for (const m of serverModules()) if (m.retention) Object.assign(modules, await m.retention(now));
+  // Use discovery time: an old source publication must still get its full retention period.
+  const articleCutoff = new Date(now.getTime() - ARTICLE_RETENTION_DAYS * 86400_000);
+  let deletedArticles = 0;
+  for (;;) {
+    const removed = await sql`DELETE FROM articles WHERE id IN (
+      SELECT id FROM articles WHERE discovered_at < ${articleCutoff}
+      ORDER BY discovered_at, id LIMIT 500
+    )`;
+    deletedArticles += removed.count;
+    if (removed.count < 500) break;
+  }
   const leases = await sql`DELETE FROM delivery_leases WHERE expires_at < ${now}`;
   const expiredFeedbackBans = await sql.begin(tx => expireFeedbackBans(tx, now));
   const expiredFeedbackState = await pruneFeedbackSubmissionState(now);
-  // Scheduled-task history: 30 days (failures 90) is enough for the runs view.
-  const runs = await sql`DELETE FROM job_runs WHERE started_at < ${new Date(now.getTime() - 30 * 86400_000)} AND (status IS DISTINCT FROM 'failed' OR started_at < ${new Date(now.getTime() - 90 * 86400_000)})`;
+  // Keep active runs; successful, failed and skipped histories share the site's retention period.
+  const runs = await sql`DELETE FROM job_runs WHERE status <> 'running'
+    AND coalesce(finished_at, started_at) < ${new Date(now.getTime() - JOB_RUN_RETENTION_DAYS * 86400_000)}`;
   const monthMs = 30 * 86400_000;
   // Feedback screenshots that only wait to be forwarded (the database then keeps just the Feishu image
   // key). The forwarding sweep gives up after a week; anything older is removed, whether or not
@@ -48,6 +61,7 @@ export async function dailyRetention(now = new Date()) {
   const prunedCache = (await removeOlderThan(path.join(config.dataDir, "imgcache"), monthMs, now.getTime())) + (await removeOlderThan(path.join(config.dataDir, "ogcache"), monthMs, now.getTime()));
   return {
     ...modules,
+    deletedArticles,
     deletedLeases: leases.count,
     expiredFeedbackBans,
     expiredFeedbackState,

@@ -2,11 +2,14 @@
 // the catch-up run treats it as an interruption (no failed issue, no failed run, nothing published).
 // The stop is the worker's own signal, aborted in this file's process; the provider is a local stub.
 import { editionAt, gate, Reply, stub, tag } from "./setup.ts";
+import { REPORTS } from "@aihot/site";
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { closeDb, sql } from "@aihot/backend/db";
 import { shutdownSignal, stopBoss } from "@aihot/backend/jobs/queue";
 import { composeDaily, composeDueReports } from "@aihot/backend/reports/compose";
+
+REPORTS.enabled.weekly = true;
 
 const T = tag();
 const SOURCE = `report-shutdown-${T}`;

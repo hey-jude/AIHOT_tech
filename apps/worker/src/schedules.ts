@@ -1,6 +1,7 @@
 // Cron-style schedules (Asia/Seoul), the engine's and then the site's modules'. Each run is recorded in
 // job_runs; missed slots run once.
 import type { PgBoss } from "pg-boss";
+import { sql } from "@aihot/backend/db";
 import { ensureQueue, recordRun } from "@aihot/backend/jobs/queue";
 import { serverModules, type Scheduled } from "@aihot/backend/modules";
 import { sweepUnprocessed } from "@aihot/backend/jobs/content";
@@ -66,10 +67,31 @@ const ENGINE_SCHEDULES: Scheduled[] = [
 ];
 
 export async function registerSchedules(boss: PgBoss) {
+  const sweepQueue = "cron.content.sweep";
+  const previous = await boss.getQueue(sweepQueue);
+  if (previous?.policy !== "stately") {
+    let pending = false;
+    if (previous) {
+      await boss.supervise(sweepQueue);
+      // pg-boss policies cannot be updated. Replace only this timer's queue while all old workers
+      // are stopped; never delete a run still marked active. Business queues and job_runs stay intact.
+      const [state] = await sql<{ active: boolean; pending: boolean }[]>`
+        SELECT coalesce(bool_or(state = 'active'), false) AS active,
+               coalesce(bool_or(state IN ('created', 'retry')), false) AS pending
+        FROM pgboss.job WHERE name = ${sweepQueue} AND state IN ('created', 'retry', 'active')`;
+      if (state!.active) throw new Error("Cannot replace sweep queue while a legacy sweep is active; stop all old workers and let the run finish or expire before restarting");
+      pending = state!.pending;
+      await boss.deleteQueue(sweepQueue);
+    }
+    // A periodic sweep reads current article state, so old ticks need only one replacement.
+    // No retry slot: the next tick retries the scan without a second kind of pending job.
+    await boss.createQueue(sweepQueue, { policy: "stately", retryLimit: 0, expireInSeconds: 3600 });
+    if (pending) await boss.send(sweepQueue, {});
+  }
   const schedules = [...ENGINE_SCHEDULES, ...serverModules().flatMap((m) => m.schedules ?? [])].filter((s) => s.when?.() ?? true);
   for (const s of schedules) {
     const queue = `cron.${s.name}`;
-    await ensureQueue(queue, { policy: "singleton", retryLimit: 1, expireInSeconds: 3600 });
+    if (queue !== sweepQueue) await ensureQueue(queue, { policy: "singleton", retryLimit: 1, expireInSeconds: 3600 });
     await boss.schedule(queue, s.cron, {}, { tz: "Asia/Seoul", missed: s.missed ?? "skip" });
     // Schedules fire at minute boundaries; a 15 s pickup keeps them on time with a third of the polling.
     await boss.work(queue, { pollingIntervalSeconds: 15 }, async () => recordRun(s.name, s.run));

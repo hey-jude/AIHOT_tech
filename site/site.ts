@@ -4,6 +4,11 @@
 
 import type { Founder } from "@aihot/contracts/site-config";
 
+/** 수집 후 기사 보관기간. 만료 기사는 일일 정리 작업에서 연결 데이터와 함께 삭제됩니다. */
+export const ARTICLE_RETENTION_DAYS = 7;
+/** 완료된 작업 실행 기록의 보관기간. 실행 중인 기록은 유지합니다. */
+export const JOB_RUN_RETENTION_DAYS = 7;
+
 /**
  * 일간·주간·월간 리포트 발행 시각(한국시간 Asia/Seoul, HH:mm)입니다. 일간은 발행 시각까지의 24시간을 다루고,
  * 주간은 각 자연 주가 끝난 뒤 월요일에, 월간은 매월 1일에 발행합니다. 일정과 관련 문구가 이 값을 사용합니다.
@@ -162,7 +167,7 @@ export const ABOUT = {
     collect: "공식 블로그, 언론사와 개인의 피드를 살펴봅니다. 새 글이 자주 올라오는 정보원은 더 자주 확인하며, 가장 빠르면 15분마다 확인합니다.",
     store: "수집한 내용을 저장하고 같은 사건을 다룬 보도를 묶습니다. 핫 뉴스 순위도 이 자료를 바탕으로 계산합니다.",
     select: `업계와 관련이 있는지, 새로운 정보가 담겨 있는지 살펴본 뒤 한국어 제목·요약과 ${ITEM_COPY.reasonLabel}를 작성합니다. 홍보성 글과 중복 전재는 제외합니다.`,
-    publish: `${EDITION_WHEN.daily} 일간, ${EDITION_WHEN.weekly} 주간, ${EDITION_WHEN.monthly} 월간 리포트를 발행합니다.`,
+    publish: `${EDITION_WHEN.daily} 일간 리포트를 발행합니다.`,
   },
   /**
    * 작성자 영역(선택 사항). null이면 표시하지 않습니다.
@@ -200,6 +205,8 @@ export const AGENT = {
 
 /** 일간·주간·월간 리포트에 표시할 문구. */
 export const REPORTS = {
+  /** 자동·수동 리포트 생성 대상. 이미 발행된 리포트는 유지합니다. */
+  enabled: { daily: true, weekly: false, monthly: false },
   /** 제호 아래에 표시할 발행자 한 줄. */
   imprint: "AIHOT TECH KOREA",
   /** 제호 옆에 표시할 단어. */

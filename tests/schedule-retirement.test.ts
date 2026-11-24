@@ -9,6 +9,8 @@ import { getBoss, stopBoss } from "@aihot/backend/jobs/queue";
 import { installModules } from "@aihot/backend/modules";
 import { runsOverview } from "@aihot/backend/admin/runs";
 import { registerSchedules } from "../apps/worker/src/schedules.ts";
+import { PgBoss } from "pg-boss";
+import { config } from "@aihot/backend/config";
 
 after(async () => { await stopBoss(); await closeDb(); });
 
@@ -60,4 +62,72 @@ test("retired schedules leave the current overview and execution queues while li
     assert.equal((await sql`SELECT id FROM job_runs WHERE job = ${job}`).length, 1);
     assert.ok(overview.timeline.some((r) => r.job === job && r.status === "failed"));
   }
+});
+
+test("sweep coalesces pending ticks while keeping one follow-up during an active run", async () => {
+  const boss = await getBoss();
+  const queue = "cron.content.sweep";
+  await boss.offWork(queue);
+  await boss.deleteQueue(queue);
+  await boss.createQueue(queue, { policy: "singleton", retryLimit: 1 });
+  const old = [];
+  for (let i = 0; i < 6; i++) old.push(await boss.send(queue, {}, { startAfter: "2099-01-01" }));
+  const [history] = await sql`INSERT INTO job_runs (job, status, finished_at) VALUES ('content.sweep', 'ok', now()) RETURNING id`;
+
+  await registerSchedules(boss);
+  await boss.offWork(queue);
+  assert.equal((await boss.getQueue(queue))!.policy, "stately");
+  assert.equal((await sql`SELECT id FROM pgboss.job WHERE name = ${queue} AND id = ANY(${old}::uuid[])`).length, 0);
+  assert.equal((await sql`SELECT id FROM job_runs WHERE id = ${history!.id}`).length, 1, "run history survives queue replacement");
+  assert.ok((await boss.findJobs(queue)).length <= 1, "old ticks collapse into at most one sweep");
+  await boss.deleteQueuedJobs(queue);
+
+  const first = await boss.send(queue, {});
+  assert.ok(first);
+  for (let i = 0; i < 6; i++) assert.equal(await boss.send(queue, {}), null);
+  const [active] = await boss.fetch(queue);
+  assert.equal(active!.id, first);
+  const next = await boss.send(queue, {});
+  assert.ok(next, "one follow-up can wait while the sweep is active");
+  for (let i = 0; i < 6; i++) assert.equal(await boss.send(queue, {}), null);
+  assert.equal((await boss.fetch(queue)).length, 0, "a second sweep cannot execute concurrently");
+
+  const restarted = new PgBoss({ connectionString: config.databaseUrl, max: 1, schedule: false, supervise: false });
+  try {
+    await restarted.start();
+    assert.equal((await restarted.getQueue(queue))!.policy, "stately");
+    assert.equal(await restarted.send(queue, {}), null, "another client cannot add a duplicate tick");
+  } finally { await restarted.stop(); }
+
+  await boss.complete(queue, active!.id);
+  const [followUp] = await boss.fetch(queue);
+  assert.equal(followUp!.id, next);
+  await boss.fail(queue, followUp!.id, { message: "fixture failure" });
+  const [failed] = await boss.findJobs(queue, { id: followUp!.id });
+  assert.equal(failed!.state, "failed", "periodic sweeps do not leave a separate retry slot");
+  assert.ok(await boss.send(queue, {}), "a failed sweep does not prevent the next periodic tick");
+  const [last] = await boss.fetch(queue);
+  await boss.complete(queue, last!.id);
+});
+
+test("sweep policy transition refuses to remove an active legacy sweep", async () => {
+  const boss = await getBoss();
+  const queue = "cron.content.sweep";
+  await boss.offWork(queue);
+  await boss.deleteQueue(queue);
+  await boss.createQueue(queue, { policy: "singleton", retryLimit: 1 });
+  const id = await boss.send(queue, {});
+  const [active] = await boss.fetch(queue);
+  assert.equal(active!.id, id);
+  await boss.send(queue, {}, { startAfter: "2099-01-01" });
+  await assert.rejects(registerSchedules(boss), /active.*sweep|sweep.*active/i);
+  assert.equal((await boss.getQueue(queue))!.policy, "singleton");
+  assert.equal((await boss.findJobs(queue)).length, 2, "the active run and its pending tick remain intact");
+  await sql`UPDATE pgboss.job SET started_on = now() - interval '2 hours' WHERE name = ${queue} AND id = ${active!.id}`;
+  await sql`UPDATE pgboss.queue SET monitor_claim_on = now() - interval '2 hours', monitor_on = now() - interval '2 hours',
+    maintain_on = now() - interval '2 hours' WHERE name = ${queue}`;
+  await registerSchedules(boss);
+  await boss.offWork(queue);
+  assert.equal((await boss.getQueue(queue))!.policy, "stately", "an expired run left by a stopped worker can be recovered before transition");
+  assert.equal((await boss.findJobs(queue, { id: active!.id })).length, 0);
 });
